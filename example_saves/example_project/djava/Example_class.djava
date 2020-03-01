@@ -1,0 +1,17 @@
+einschleusen djavax.schaukel.*;
+
+öffentliche Klasse Example_class erweitert JRahmen {
+	öffentliche statische leere Wichtigste(Faden[] argumente) {
+		JRahmen r = neue Example_class();
+		r.setzeStandardSchließenVerfahren(BEENDEN_BEI_SCHLIESSEN);
+		r.setzeGröße(300, 300);
+		r.setzeSichtbar(wahr);
+		versuche {
+			Ablaufstrang.schlaf(1000);
+		} fange (UnterbrochenAusnahme a) {
+			System.raus.druck("Fehler\n");
+		}
+		System.raus.druckz("raus");
+		System.ichMussRaus(0);
+	}
+}

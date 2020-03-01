@@ -1,0 +1,8 @@
+# build directory
+/out/**
+
+# testing directory
+/testsavedir/**
+
+# custom files
+errorlog.txt
