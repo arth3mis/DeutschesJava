@@ -18,6 +18,7 @@ privat-;private
 abstrakt-;abstract
 
 statisch-;static
+endgültig-;final
 
 ^klasse;class
 ^aufzählung;enum
