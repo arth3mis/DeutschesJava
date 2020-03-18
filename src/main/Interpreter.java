@@ -32,8 +32,6 @@ public class Interpreter {
 
         makeJavaFile();
 
-        File file1 = new File(projectDir + SRC_2_DIR + fileName + J_FILE_EXTENSION);
-
         /*
             Iterator i = translation.entrySet().iterator();
             while (i.hasNext()) {
@@ -41,24 +39,34 @@ public class Interpreter {
                 System.out.println(he.getKey() + " = " + he.getValue());
             }
         */
-        //System.out.println(translation.get("neu"));
 
         /*
             Graphics2D g2 = (Graphics2D) g;
             g2.drawString("this is something I want people to <p color=\"#00FF00\">NOTICE</p>", x, y);
         */
+    }
 
-        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
+    static boolean compile() {
+        try {
+            File file1 = new File(projectDir + SRC_2_DIR + fileName + J_FILE_EXTENSION);
 
-        ArrayList<File> af = new ArrayList<>();
-        af.addAll(Arrays.asList(new File(projectDir + OUT_DIR)));
-        fileManager.setLocation(StandardLocation.CLASS_OUTPUT, af);
+            JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+            StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
 
-        Iterable<? extends JavaFileObject> compilationUnits1 =
-                fileManager.getJavaFileObjects(file1);
-        compiler.getTask(null, fileManager, null, null, null, compilationUnits1).call();
+            ArrayList<File> af = new ArrayList<>();
+            af.addAll(Arrays.asList(new File(projectDir + OUT_DIR)));
+            fileManager.setLocation(StandardLocation.CLASS_OUTPUT, af);
 
+            Iterable<? extends JavaFileObject> compilationUnits1 =
+                    fileManager.getJavaFileObjects(file1);
+            compiler.getTask(null, fileManager, null, null, null, compilationUnits1).call();
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
+    }
+
+    static boolean run() {
         try {
             String absolutePath = new File(projectDir + OUT_DIR).getAbsolutePath();
             String command = "java -cp \"" + absolutePath + "\" " + fileName;
@@ -67,7 +75,9 @@ public class Interpreter {
             Process prc = Runtime.getRuntime().exec(command);
         } catch (IOException e) {
             System.out.println("run error");
+            return false;
         }
+        return true;
     }
 
     static void read() {
