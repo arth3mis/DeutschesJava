@@ -1,8 +1,11 @@
 # build directory
-/out/**
+/out/production/**
 
 # testing directory
 /testsavedir/**
+
+# manifest
+/src/META-INF/**
 
 # custom files
 errorlog.txt

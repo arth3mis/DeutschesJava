@@ -1,64 +1,42 @@
 package main;
 
 import javax.tools.*;
-import java.awt.*;
 import java.io.*;
 import java.util.*;
+import cfr.Runner;
 
 public class Interpreter {
 
-    public static final String STD_FILE_EXTENSION = ".djava";
-    public static final String J_FILE_EXTENSION = ".java";
+    private static final String translationDir = "translation/";
 
-    public static final String translationDir = "translation/";
-
-    public static final String SRC_1_DIR = "djava/";
-    public static final String SRC_2_DIR = "java/";
-    public static final String OUT_DIR = "out/";
-
-    static String projectDir = "example_saves/example_project/";
-    static String fileName = "Example_class";
+    private static final String[] trFiles = {
+            "0_main_translation.txt",
+            "1_java_lang.txt",
+            "2_javax_swing.txt"
+    };
 
     static StringBuilder fileIn;
     static StringBuilder fileOut;
 
     static HashMap<String, String> translation;
 
-    public static void main(String[] args) throws IOException {
-        loadTranslation();
-
-        read();
-        replace();
-
-        makeJavaFile();
-
-        /*
-            Iterator i = translation.entrySet().iterator();
-            while (i.hasNext()) {
-                HashMap.Entry he = (HashMap.Entry) i.next();
-                System.out.println(he.getKey() + " = " + he.getValue());
-            }
-        */
-
-        /*
-            Graphics2D g2 = (Graphics2D) g;
-            g2.drawString("this is something I want people to <p color=\"#00FF00\">NOTICE</p>", x, y);
-        */
-    }
-
-    static boolean compile() {
+    static boolean compile(String... filePaths) {
         try {
-            File file1 = new File(projectDir + SRC_2_DIR + fileName + J_FILE_EXTENSION);
+            File[] files = new File[filePaths.length];
+            for (int i = 0; i < files.length; i++) {
+                String fn = new File(filePaths[i]).getName();
+                files[i] = new File(new File(filePaths[i]).getParentFile().getAbsoluteFile(), fn.substring(0, fn.length()-5) + "java");
+            }
 
             JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
             StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
 
             ArrayList<File> af = new ArrayList<>();
-            af.addAll(Arrays.asList(new File(projectDir + OUT_DIR)));
+            af.addAll(Arrays.asList(files[0].getParentFile()));
             fileManager.setLocation(StandardLocation.CLASS_OUTPUT, af);
 
             Iterable<? extends JavaFileObject> compilationUnits1 =
-                    fileManager.getJavaFileObjects(file1);
+                    fileManager.getJavaFileObjects(files);
             compiler.getTask(null, fileManager, null, null, null, compilationUnits1).call();
         } catch (IOException e) {
             return false;
@@ -66,22 +44,12 @@ public class Interpreter {
         return true;
     }
 
-    static boolean run() {
-        try {
-            String absolutePath = new File(projectDir + OUT_DIR).getAbsolutePath();
-            String command = "java -cp \"" + absolutePath + "\" " + fileName;
-            System.out.println(command);
-
-            Process prc = Runtime.getRuntime().exec(command);
-        } catch (IOException e) {
-            System.out.println("run error");
-            return false;
-        }
-        return true;
+    static void run(String mainFilePath) {
+        Runner.main(new String[]{mainFilePath.substring(0, mainFilePath.length()-5)+"class"});
     }
 
-    static void read() {
-        try (BufferedReader br = new BufferedReader(new FileReader(projectDir + SRC_1_DIR + fileName + STD_FILE_EXTENSION))) {
+    private static void read(String filePath) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             fileIn = new StringBuilder();
             Iterator i = br.lines().iterator();
             while (i.hasNext())
@@ -91,7 +59,7 @@ public class Interpreter {
         }
     }
 
-    static void replace() {
+    private static void replace() {
         fileOut = new StringBuilder(fileIn.toString());
         Iterator i = translation.entrySet().iterator();
         while (i.hasNext()) {
@@ -101,44 +69,45 @@ public class Interpreter {
                 fileOut.replace(ind, ind+((String) keyword.getKey()).length(), (String) keyword.getValue());
             }
         }
-        //System.out.println(fileOut.toString());
     }
 
-    static void makeJavaFile() {
-        File f = new File(projectDir + SRC_2_DIR + fileName + J_FILE_EXTENSION);
-        try {
-            if (f.exists())
-                if (!f.delete())
+    static void makeJavaFile(String... filePaths) {
+        for (int i = 0; i < filePaths.length; i++) {
+            String fn = new File(filePaths[i]).getName();
+            File f = new File(new File(filePaths[i]).getParentFile().getAbsoluteFile(), fn.substring(0, fn.length()-5) + "java");
+            try {
+                if (f.exists())
+                    if (!f.delete())
+                        throw new IOException();
+                if (!f.createNewFile())
                     throw new IOException();
-            if (!f.createNewFile())
-                throw new IOException();
-            BufferedWriter bw = new BufferedWriter(new FileWriter(f));
-            bw.write(fileOut.toString());
-            bw.close();
-        } catch (IOException e) {
-            System.out.println("ERROR on java file creation!");
+
+                read(filePaths[0]);
+                replace();
+
+                BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+                bw.write(fileOut.toString());
+                bw.close();
+            } catch (IOException e) {
+                System.out.println("ERROR on java file creation!");
+            }
+        }
+    }
+
+    static void deleteJavaFile(String... filePaths) {
+        for (int i = 0; i < filePaths.length; i++) {
+            String fn = new File(filePaths[i]).getName();
+            File f = new File(new File(filePaths[i]).getParentFile().getAbsoluteFile(), fn.substring(0, fn.length()-5) + "java");
+            f.delete();
         }
     }
 
     static void loadTranslation() {         //TODO: String content needs to be excluded!
         translation = new HashMap<>();
 
-        File f = new File(translationDir);
-        if (!f.exists()) {
-            System.out.println("CRITICAL ERROR: Translation directory \""+f.toString()+"\" does not exist!");
-            return;
-        }
-        String[] subFNames = f.list();
-        if (subFNames == null) {
-            System.out.println("CRITICAL WARNING: subFNames is NULL, no translations will be loaded!");
-            return;
-        }
-        for (String s : subFNames) {
-            System.out.println(s);
-        }
-
-        for (String subFName : subFNames) {
-            try (BufferedReader br = new BufferedReader(new FileReader(translationDir + subFName))) {
+        for (String file : trFiles) {
+            InputStream is = Main.class.getResourceAsStream(translationDir + file);
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
                 String s;
                 while ((s = br.readLine()) != null) {
                     s = s.replaceAll(" ", "");
@@ -154,7 +123,6 @@ public class Interpreter {
 
                                 for (int i = 0; i < 3; i++) {
                                     if (s2[0].startsWith("^")) {
-                                        System.out.println("here");
                                         s3.add(s2[0].substring(1, s2[0].length() - 1) + sAdd[i]);
                                         s3.add(s2[0].substring(1, 2).toUpperCase() + s2[0].substring(2, s2[0].length() - 1) + sAdd[i]);
                                     } else
@@ -175,9 +143,8 @@ public class Interpreter {
                     }
                 }
             } catch (IOException e) {
-                System.out.println("ERROR while reading translation file: " + subFName);
+                System.out.println("ERROR while reading translation file: " + file);
             }
         }
-        System.out.println();
     }
 }

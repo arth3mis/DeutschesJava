@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="ClassFileRunner_w_package">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/ClassFileRunner_w_package.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
