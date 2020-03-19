@@ -20,7 +20,7 @@ public class Interpreter {
 
     static HashMap<String, String> translation;
 
-    static boolean compile(String... filePaths) {
+    static String compile(String... filePaths) {
         try {
             File[] files = new File[filePaths.length];
             for (int i = 0; i < files.length; i++) {
@@ -28,24 +28,50 @@ public class Interpreter {
                 files[i] = new File(new File(filePaths[i]).getParentFile().getAbsoluteFile(), fn.substring(0, fn.length()-5) + "java");
             }
 
-            JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-            StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
+            if (ToolProvider.getSystemJavaCompiler() != null) {
+                JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+                Main.log("system compiler found");
+                //Main.log("compiler: " + compiler.toString());
+                StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
+                //Main.log("fileManager: " + fileManager.toString());
 
-            ArrayList<File> af = new ArrayList<>();
-            af.addAll(Arrays.asList(files[0].getParentFile()));
-            fileManager.setLocation(StandardLocation.CLASS_OUTPUT, af);
+                ArrayList<File> af = new ArrayList<>();
+                af.addAll(Arrays.asList(files[0].getParentFile()));
+                fileManager.setLocation(StandardLocation.CLASS_OUTPUT, af);
 
-            Iterable<? extends JavaFileObject> compilationUnits1 =
-                    fileManager.getJavaFileObjects(files);
-            compiler.getTask(null, fileManager, null, null, null, compilationUnits1).call();
+                Iterable<? extends JavaFileObject> compilationUnits1 = fileManager.getJavaFileObjects(files);
+
+                if (compiler.getTask(null, fileManager, null, null, null, compilationUnits1).call())
+                    return "compilation successful";
+                else
+                    return "compilation failed";
+            } else {
+                Main.log("no system compiler found, trying manual compilation with command");
+                // compile by command
+                try {
+                    StringBuilder s = new StringBuilder();
+                    for (int i = 0; i < files.length; i++) {
+                        s.append(" \"").append(files[i].toString()).append("\"");
+                    }
+                    //Main.log(s.toString());
+                    Process p = Runtime.getRuntime().exec("javac"+s.toString(), null, new File(System.getProperty("user.dir")));
+                    while (p.isAlive());
+                    return "command compilation ended with value: " + p.exitValue();
+                } catch (IOException e) {
+                    return "command compilation failed: " + e.getMessage();
+                }
+            }
         } catch (IOException e) {
-            return false;
+            return "compilation failed: " + e.getMessage();
+        } catch (NullPointerException e) {
+            return "null value during compilation";
         }
-        return true;
     }
 
-    static void run(String mainFilePath) {
-        Runner.main(new String[]{mainFilePath.substring(0, mainFilePath.length()-5)+"class"});
+    static String run(String mainFilePath) {
+        String s = mainFilePath.substring(0, mainFilePath.length() - 5) + "class";
+        String l = "running Runner.start with args: \"" + s + "\"\n";
+        return (l + "runner returned: " + Runner.start(new String[]{s}));
     }
 
     private static void read(String filePath) {
@@ -55,7 +81,7 @@ public class Interpreter {
             while (i.hasNext())
                 fileIn.append(i.next()).append("\n");
         } catch (IOException e) {
-            System.out.println("ERROR while reading djava file!");
+            System.out.println("djava file could not be read: " + e.getMessage());
         }
     }
 
@@ -71,7 +97,7 @@ public class Interpreter {
         }
     }
 
-    static void makeJavaFile(String... filePaths) {
+    static String makeJavaFile(String... filePaths) {
         for (int i = 0; i < filePaths.length; i++) {
             String fn = new File(filePaths[i]).getName();
             File f = new File(new File(filePaths[i]).getParentFile().getAbsoluteFile(), fn.substring(0, fn.length()-5) + "java");
@@ -82,27 +108,31 @@ public class Interpreter {
                 if (!f.createNewFile())
                     throw new IOException();
 
-                read(filePaths[0]);
+                read(filePaths[i]);
                 replace();
 
                 BufferedWriter bw = new BufferedWriter(new FileWriter(f));
                 bw.write(fileOut.toString());
                 bw.close();
             } catch (IOException e) {
-                System.out.println("ERROR on java file creation!");
+                return "java file could not be created: " + e.getMessage();
             }
         }
+        return "created java file";
     }
 
-    static void deleteJavaFile(String... filePaths) {
+    static String deleteJavaFile(String... filePaths) {
+        String s = "java files deleted, except: ";
         for (int i = 0; i < filePaths.length; i++) {
             String fn = new File(filePaths[i]).getName();
             File f = new File(new File(filePaths[i]).getParentFile().getAbsoluteFile(), fn.substring(0, fn.length()-5) + "java");
-            f.delete();
+            if (!f.delete())
+                s += ""+i;
         }
+        return s;
     }
 
-    static void loadTranslation() {         //TODO: String content needs to be excluded!
+    static String loadTranslation() {         //TODO: String content needs to be excluded!
         translation = new HashMap<>();
 
         for (String file : trFiles) {
@@ -143,8 +173,9 @@ public class Interpreter {
                     }
                 }
             } catch (IOException e) {
-                System.out.println("ERROR while reading translation file: " + file);
+                return "ERROR while reading translation file: " + file;
             }
         }
+        return "translations loaded";
     }
 }
