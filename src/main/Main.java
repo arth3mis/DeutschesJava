@@ -49,15 +49,15 @@ public class Main {
                     case "-?":
                         hlog("",
                                 "Verwendung: java -jar DeutschesJava.jar [-Optionen] Djava_Datei [Djava_Dateien...]",
-                                "\t\t(DeutschesJava.jar kann auch anders heissen)",
+                                "           (DeutschesJava.jar kann auch anders heissen)",
                                 "wobei Optionen Folgendes umfasst:",
-                                "\t-v\t\t\t\tAktiviert den \"Viel-Text-Modus\" = Log-Ausgabe (muss an erster Stelle stehen!)",
-                                "\t-konvertieren\tWandelt Djava-Dateien in Java-Dateien um",
-                                "\t-kompilieren\tWandelt um und Kompiliert, Java-Dateien werden gelöscht",
-                                "\t-rennen\t\t\tWandelt um, kompiliert und führt aus, Java-Dateien werden gelöscht",
-                                "\t-komplett\t\tWandelt um, kompiliert und führt aus, Java-Dateien bleiben erhalten",
-                                "\t-nurkompilieren\tKompiliert bereits umgewandelte Dateien (Es muss trotzdem die .djava-Datei angegeben werden)",
-                                "\t-nurrennen\t\tFührt Java-Klasse aus (Es muss trotzdem die .djava-Datei angegeben werden)");
+                                "    -v                Aktiviert den \"Viel-Text-Modus\" = Log-Ausgabe (muss an erster Stelle stehen!)",
+                                "    -konvertieren     Wandelt Djava-Dateien in Java-Dateien um",
+                                "    -kompilieren      Wandelt um und Kompiliert, Java-Dateien werden gelöscht",
+                                "    -rennen           Wandelt um, kompiliert und führt aus, Java-Dateien werden gelöscht",
+                                "    -komplett         Wandelt um, kompiliert und führt aus, Java-Dateien bleiben erhalten",
+                                "    -nurkompilieren   Kompiliert bereits umgewandelte Dateien (Es muss trotzdem die .djava-Datei angegeben werden)",
+                                "    -nurrennen        Führt Java-Klasse aus (Es muss trotzdem die .djava-Datei angegeben werden)");
                         if (helppane)
                             showHelpPane();
                         break;
