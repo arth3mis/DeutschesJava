@@ -30,7 +30,7 @@ public class Interpreter {
 
             if (ToolProvider.getSystemJavaCompiler() != null) {
                 JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-                Main.log("system compiler found");
+                Main.log("System-Kompilierer gefunden");
                 //Main.log("compiler: " + compiler.toString());
                 StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
                 //Main.log("fileManager: " + fileManager.toString());
@@ -42,11 +42,11 @@ public class Interpreter {
                 Iterable<? extends JavaFileObject> compilationUnits1 = fileManager.getJavaFileObjects(files);
 
                 if (compiler.getTask(null, fileManager, null, null, null, compilationUnits1).call())
-                    return "compilation successful";
+                    return "Kompilierung erfolgreich";
                 else
-                    return "compilation failed";
+                    return "Kompilierung fehlgeschlagen";
             } else {
-                Main.log("no system compiler found, trying manual compilation with command");
+                Main.log("Kein System-Kompilierer gefunden, versuche manuelles Kompilieren mit Befehlen");
                 // compile by command
                 try {
                     StringBuilder s = new StringBuilder();
@@ -56,22 +56,22 @@ public class Interpreter {
                     //Main.log(s.toString());
                     Process p = Runtime.getRuntime().exec("javac"+s.toString(), null, new File(System.getProperty("user.dir")));
                     while (p.isAlive());
-                    return "command compilation ended with value: " + p.exitValue();
+                    return "Kompilierung durch Befehle beendet mit Rückgabewert: " + p.exitValue();
                 } catch (IOException e) {
-                    return "command compilation failed: " + e.getMessage();
+                    return "Kompilierung durch Befehle fehlgeschlagen: " + e.getMessage();
                 }
             }
         } catch (IOException e) {
-            return "compilation failed: " + e.getMessage();
+            return "Kompilierung fehlgeschlagen: " + e.getMessage();
         } catch (NullPointerException e) {
-            return "null value during compilation";
+            return "Während der Kompilierung ist eine NULL aufgetreten";
         }
     }
 
     static String run(String mainFilePath) {
         String s = mainFilePath.substring(0, mainFilePath.length() - 5) + "class";
-        String l = "running Runner.start with args: \"" + s + "\"\n";
-        return (l + "runner returned: " + Runner.start(new String[]{s}));
+        String l = "Starte Ausführung mit Argumenten: \"" + s + "\"\n";
+        return (l + "Rückgabe der Ausführung: " + Runner.start(new String[]{s}));
     }
 
     private static void read(String filePath) {
@@ -81,7 +81,7 @@ public class Interpreter {
             while (i.hasNext())
                 fileIn.append(i.next()).append("\n");
         } catch (IOException e) {
-            System.out.println("djava file could not be read: " + e.getMessage());
+            System.out.println("Djava-Datei konnte nicht gelesen werden: " + e.getMessage());
         }
     }
 
@@ -115,14 +115,14 @@ public class Interpreter {
                 bw.write(fileOut.toString());
                 bw.close();
             } catch (IOException e) {
-                return "java file could not be created: " + e.getMessage();
+                return "Java-Datei konnte nicht erstellt werden: " + e.getMessage();
             }
         }
-        return "created java file";
+        return "Java-Datei erstellt";
     }
 
     static String deleteJavaFile(String... filePaths) {
-        String s = "java files deleted, except: ";
+        String s = "Java-Dateien gelöscht, bis auf: ";
         for (int i = 0; i < filePaths.length; i++) {
             String fn = new File(filePaths[i]).getName();
             File f = new File(new File(filePaths[i]).getParentFile().getAbsoluteFile(), fn.substring(0, fn.length()-5) + "java");
@@ -173,9 +173,9 @@ public class Interpreter {
                     }
                 }
             } catch (IOException e) {
-                return "ERROR while reading translation file: " + file;
+                return "Fehler beim Lesen der Übersetzungs-Datei: " + file;
             }
         }
-        return "translations loaded";
+        return "Übersetzungen geladen";
     }
 }
