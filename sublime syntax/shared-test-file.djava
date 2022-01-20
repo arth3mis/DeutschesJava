@@ -1,0 +1,32 @@
+offen klasse test {
+	offen statisch leer haupt(Faden[] argumente) {
+		System.raus.druckz("moin");
+		versuch {
+		} fang (Ausnahme ignored) {
+			wenn (Mathe.qwrz(4) == 2) {
+				zurück;
+			}
+		}
+	}
+}
+
+/*
+
+main;      haupt
+
+Math.pow;  Mathe.hoch
+Math.sqrt; Mathe.qwrz
+
+
+
+
+
+
+Konventionen:
+
+interface-name: ____bitte (z.B. Zeichnenbitte)
+
+
+
+
+*/

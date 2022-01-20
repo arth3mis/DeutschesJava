@@ -1,7 +1,8 @@
 öffentliche Klasse x {
 	
 	öffentliche statische leere wichtigste(Faden[] argumente) {
-		System.raus.druck("Hallo Deutschland.");
+		System.raus.druckz(argumente[0]);
+		System.raus.druckz(argumente[1]);
 	}
 	
 }

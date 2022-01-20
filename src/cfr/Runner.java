@@ -24,7 +24,7 @@ public class Runner {
         // WINDOWS
         else if (os.contains("win")) {
             try {
-                String s = "start cmd.exe @cmd /k \"\"C:\\Program Files\\Java\\jre1.8.0_241\\bin\\java.exe\" -cp \""+f.getParent()+"\" \""+f.getName().substring(0, f.getName().indexOf("."))+"\"&echo.&echo.&pause&exit\"";
+                String s = "start cmd.exe @cmd /k \"\"C:\\Program Files\\Java\\jdk-17\\bin\\java.exe\" -cp \""+f.getParent()+"\" \""+f.getName().substring(0, f.getName().indexOf("."))+"\"&echo.&echo.&pause&exit\"";
                 File x = new File(f.getParent(), "crf_bat_tmp.bat");
                 x.delete();
                 if (!x.createNewFile())

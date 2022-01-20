@@ -6,6 +6,8 @@
 # Verbotene Kombinationen:
 #  + mit -/--/^
 
+#idee: links original, [leerzeichen möglich] rechts übersetzung(en; mehrere mit | trennen)
+
 djava;java
 
 ^programmpaket;package

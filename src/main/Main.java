@@ -1,12 +1,15 @@
 package main;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.util.Arrays;
 
 public class Main {
 
     // -v -complete "D:\Benutzer\Arthur\Arthurs medien\Documents\Intellij\DeutschesJava\out\artifacts\DeutschesJava_jar\x.djava"
+    // new template:
+    // -v -a "D:\Users\Art\Coding\Intellij\DeutschesJava\out\artifacts\DeutschesJava_jar\x.djava"
 
     static boolean log = false;
     static boolean help = false;
@@ -51,38 +54,45 @@ public class Main {
                                 "Verwendung: java -jar DeutschesJava.jar [-Optionen] Djava_Datei [Djava_Dateien...]",
                                 "           (DeutschesJava.jar kann auch anders heissen)",
                                 "wobei Optionen Folgendes umfasst:",
-                                "    -v                Aktiviert den \"Viel-Text-Modus\" = Log-Ausgabe (muss an erster Stelle stehen!)",
-                                "    -konvertieren     Wandelt Djava-Dateien in Java-Dateien um",
-                                "    -kompilieren      Wandelt um und Kompiliert, Java-Dateien werden gelöscht",
-                                "    -rennen           Wandelt um, kompiliert und führt aus, Java-Dateien werden gelöscht",
-                                "    -komplett         Wandelt um, kompiliert und führt aus, Java-Dateien bleiben erhalten",
-                                "    -nurkompilieren   Kompiliert bereits umgewandelte Dateien (Es muss trotzdem die .djava-Datei angegeben werden)",
-                                "    -nurrennen        Führt Java-Klasse aus (Es muss trotzdem die .djava-Datei angegeben werden)");
+                                "    -?                    Zeigt Hilfe in der Konsole an (muss an erster Stelle stehen!)",
+                                "    -v                    Aktiviert den \"Viel-Text-Modus\" = Log-Ausgabe (muss an erster Stelle stehen!)",
+                                "    -u  -konvertieren     Wandelt Djava-Dateien in Java-Dateien um",
+                                "    -k  -kompilieren      Wandelt um und Kompiliert, Java-Dateien werden gelöscht",
+                                "    -r  -rennen           (STANDARD) Wandelt um, kompiliert und führt aus, Java-Dateien werden gelöscht",
+                                "    -a  -komplett         Wandelt um, kompiliert und führt aus, Java-Dateien bleiben erhalten",
+                                "    -K  -nurkompilieren   Kompiliert bereits umgewandelte Dateien (Es muss trotzdem die .djava-Datei angegeben werden)",
+                                "    -R  -nurrennen        Führt Java-Klasse aus (Es muss trotzdem die .djava-Datei angegeben werden)");
                         if (helppane)
                             showHelpPane();
                         break;
+                    case "-u":
                     case "-konvertieren":
                         log(Interpreter.makeJavaFile(args2));
                         break;
+                    case "-k":
                     case "-kompilieren":
                         log(Interpreter.makeJavaFile(args2));
                         log(Interpreter.compile(args2));
                         log(Interpreter.deleteJavaFile(args2));
                         break;
+                    case "-r":
                     case "-rennen":
                         log(Interpreter.makeJavaFile(args2));
                         log(Interpreter.compile(args2));
                         log(Interpreter.deleteJavaFile(args2));
                         log(Interpreter.run(args2[0]));
                         break;
+                    case "-a":
                     case "-komplett":
                         log(Interpreter.makeJavaFile(args2));
                         log(Interpreter.compile(args2));
                         log(Interpreter.run(args2[0]));
                         break;
+                    case "-K":
                     case "-nurkompilieren":
                         log(Interpreter.compile(args2));
                         break;
+                    case "-R":
                     case "-nurrennen":
                         log(Interpreter.run(args2[0]));
                         break;
@@ -110,7 +120,7 @@ public class Main {
             File f = new File(paths[i]);
             if (!f.exists() || !f.isAbsolute()) {
                 ap[i] = new File(currentLocation, paths[i]).toString();
-                log("created abs path: " + ap[i]);
+                log("Pfad erstellt: " + ap[i]);
             } else {
                 ap[i] = paths[i];
             }
@@ -136,10 +146,13 @@ public class Main {
     }
 
     static void showHelpPane() {
-        while (hpText.startsWith("\n"))
-            hpText = hpText.substring(1);
-        hpText = hpText.replaceAll("\\t", "            ");
-        JOptionPane.showMessageDialog(null, hpText, "Usage help", JOptionPane.INFORMATION_MESSAGE);
+        String out = hpText;
+        while (out.startsWith("\n"))
+            out = out.substring(1);
+        out = "<html>" + out.replaceAll("\\n", "<br>").replaceAll(" ", "&nbsp;");
+        JLabel l = new JLabel(out);
+        l.setFont(new Font("Monospaced", Font.BOLD, 12));
+        JOptionPane.showMessageDialog(null, l, "Hilfe", JOptionPane.INFORMATION_MESSAGE);
     }
 
 }
