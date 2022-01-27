@@ -3,7 +3,6 @@ package main;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.util.Arrays;
 
 public class Main {
 
@@ -60,8 +59,8 @@ public class Main {
                                 "    -k  -kompilieren      Wandelt um und Kompiliert, Java-Dateien werden gelöscht",
                                 "    -r  -rennen           (STANDARD) Wandelt um, kompiliert und führt aus, Java-Dateien werden gelöscht",
                                 "    -a  -komplett         Wandelt um, kompiliert und führt aus, Java-Dateien bleiben erhalten",
-                                "    -K  -nurkompilieren   Kompiliert bereits umgewandelte Dateien (Es muss trotzdem die .djava-Datei angegeben werden)",
-                                "    -R  -nurrennen        Führt Java-Klasse aus (Es muss trotzdem die .djava-Datei angegeben werden)");
+                                "    -K  -nurkompilieren   Kompiliert bereits umgewandelte Dateien (Es muss trotzdem die .djava-Endung angegeben werden)",
+                                "    -R  -nurrennen        Führt Java-Klasse aus (Es muss trotzdem die .djava-Endung angegeben werden)");
                         if (helppane)
                             showHelpPane();
                         break;

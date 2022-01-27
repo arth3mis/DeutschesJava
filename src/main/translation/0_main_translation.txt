@@ -61,7 +61,7 @@ buchstabe;char
 
 
 # Bedingungen
-falls;if
+wenn;if
 sonst;else
 schalte+;switch
 ^fall;case

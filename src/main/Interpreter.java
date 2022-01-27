@@ -35,8 +35,7 @@ public class Interpreter {
                 StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
                 //Main.log("fileManager: " + fileManager.toString());
 
-                ArrayList<File> af = new ArrayList<>();
-                af.addAll(Arrays.asList(files[0].getParentFile()));
+                ArrayList<File> af = new ArrayList<>(List.of(files[0].getParentFile()));
                 fileManager.setLocation(StandardLocation.CLASS_OUTPUT, af);
 
                 Iterable<? extends JavaFileObject> compilationUnits1 = fileManager.getJavaFileObjects(files);
@@ -46,16 +45,20 @@ public class Interpreter {
                 else
                     return "Kompilierung fehlgeschlagen";
             } else {
-                Main.log("Kein System-Kompilierer gefunden, versuche manuelles Kompilieren mit Befehlen");
+                Main.log("Kein System-Kompilierer gefunden, versuche manuelles Kompilieren mit Befehlen " +
+                        "(funktioniert nur, wenn ein Kompilierer im PFAD steht)");
                 // compile by command
                 try {
                     StringBuilder s = new StringBuilder();
-                    for (int i = 0; i < files.length; i++) {
-                        s.append(" \"").append(files[i].toString()).append("\"");
+                    for (File file : files) {
+                        s.append(" \"").append(file.toString()).append("\"");
                     }
                     //Main.log(s.toString());
-                    Process p = Runtime.getRuntime().exec("javac"+s.toString(), null, new File(System.getProperty("user.dir")));
-                    while (p.isAlive());
+                    Process p = Runtime.getRuntime().exec("javac" + s, null, new File(System.getProperty("user.dir")));
+                    try {
+                    while (p.isAlive())
+                        Thread.sleep(10);
+                    } catch (InterruptedException ignored) {}
                     return "Kompilierung durch Befehle beendet mit Rückgabewert: " + p.exitValue();
                 } catch (IOException e) {
                     return "Kompilierung durch Befehle fehlgeschlagen: " + e.getMessage();
@@ -77,7 +80,7 @@ public class Interpreter {
     private static void read(String filePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             fileIn = new StringBuilder();
-            Iterator i = br.lines().iterator();
+            Iterator<String> i = br.lines().iterator();
             while (i.hasNext())
                 fileIn.append(i.next()).append("\n");
         } catch (IOException e) {
@@ -87,20 +90,18 @@ public class Interpreter {
 
     private static void replace() {
         fileOut = new StringBuilder(fileIn.toString());
-        Iterator i = translation.entrySet().iterator();
-        while (i.hasNext()) {
-            HashMap.Entry keyword = (HashMap.Entry) i.next();
-            int ind = fileOut.indexOf((String) keyword.getKey());
-            for (; ind != -1; ind = fileOut.indexOf((String) keyword.getKey(), ind+1)) {
-                fileOut.replace(ind, ind+((String) keyword.getKey()).length(), (String) keyword.getValue());
+        for (Map.Entry<String, String> entry : translation.entrySet()) {
+            int ind = fileOut.indexOf(entry.getKey());
+            for (; ind != -1; ind = fileOut.indexOf(entry.getKey(), ind + 1)) {
+                fileOut.replace(ind, ind + entry.getKey().length(), entry.getValue());
             }
         }
     }
 
     static String makeJavaFile(String... filePaths) {
-        for (int i = 0; i < filePaths.length; i++) {
-            String fn = new File(filePaths[i]).getName();
-            File f = new File(new File(filePaths[i]).getParentFile().getAbsoluteFile(), fn.substring(0, fn.length()-5) + "java");
+        for (String filePath : filePaths) {
+            String fn = new File(filePath).getName();
+            File f = new File(new File(filePath).getParentFile().getAbsoluteFile(), fn.substring(0, fn.length() - 5) + "java");
             try {
                 if (f.exists())
                     if (!f.delete())
@@ -108,7 +109,7 @@ public class Interpreter {
                 if (!f.createNewFile())
                     throw new IOException();
 
-                read(filePaths[i]);
+                read(filePath);
                 replace();
 
                 BufferedWriter bw = new BufferedWriter(new FileWriter(f));
@@ -122,14 +123,14 @@ public class Interpreter {
     }
 
     static String deleteJavaFile(String... filePaths) {
-        String s = "Java-Dateien gelöscht, bis auf: ";
+        StringBuilder s = new StringBuilder("Java-Dateien gelöscht, bis auf: ");
         for (int i = 0; i < filePaths.length; i++) {
             String fn = new File(filePaths[i]).getName();
             File f = new File(new File(filePaths[i]).getParentFile().getAbsoluteFile(), fn.substring(0, fn.length()-5) + "java");
             if (!f.delete())
-                s += ""+i;
+                s.append(i);
         }
-        return s;
+        return s.toString();
     }
 
     static String loadTranslation() {         //TODO: String content needs to be excluded!
@@ -137,10 +138,11 @@ public class Interpreter {
 
         for (String file : trFiles) {
             InputStream is = Main.class.getResourceAsStream(translationDir + file);
+            if (is == null) continue;
             try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
                 String s;
                 while ((s = br.readLine()) != null) {
-                    s = s.replaceAll(" ", "");
+                    s = s.replaceAll("( )", "");
                     if (!s.isEmpty() && !s.startsWith("#")) {
                         String[] s2 = s.split(";");
 
