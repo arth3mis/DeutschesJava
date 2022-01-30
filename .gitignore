@@ -1,12 +1,10 @@
 # build directory
 /out/production/**
+/out/artifacts/DeutschesJava_jar/old versions/
 
-# testing directory
-/testsavedir/**
-
-# manifest
-/src/META-INF/**
+# test files
+/sublime syntax/test*
+/testing/test*
 
 # custom files
 errorlog.txt
-/sublime syntax/test*

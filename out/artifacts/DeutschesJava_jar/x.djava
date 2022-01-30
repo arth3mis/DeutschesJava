@@ -1,8 +1,40 @@
-öffentliche Klasse x {
-	
-	öffentliche statische leere wichtigste(Faden[] argumente) {
-		System.raus.druckz(argumente[0]);
-		System.raus.druckz(argumente[1]);
+// linienkommentar
+/*
+ * guten tag
+ */
+
+zufuhr java.werkz.Abtaster;
+
+klasse x {
+	öffentlich statisch leer haupt(Faden[] argumente) {
+		ganz g = 1;
+		kurz k = -1;
+		lang l = 2;
+		fließ f = 3.0f;
+		doppel d = 4.0;
+		boolesch b = ja;
+		System.raus.druckz("\"Hallo Deutschland.\"");
 	}
-	
+
+	leer rennen(ganz i) {
+		ganz i2 = 42;
+
+		wenn (i > i2+2 || i <= i2)
+			zurück;
+		sonst {
+			i2 += i+1-2*3/4%5 + (i>5 ? 1:0);
+			zurück;
+		}
+	}
+
+	doppel a, b;
+
+	öffentlich x(doppel a, doppel y) {
+		dies.a = a;
+        dies.y = y;
+    }
+
+    öffentlich doppel länge() {
+        zurück Mathe.qwrz(a*a+y*y);
+    }
 }

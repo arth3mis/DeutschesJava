@@ -1,0 +1,84 @@
+# DOKUMENTATION
+# "-"  = -er, -e, -es
+# "--" = -, -er, -e, -es
+# "^"  = a-, A-
+# "+"  = -, -en / -n (wenn -e)
+# Verbotene Kombinationen:
+#  + mit -/--/^
+
+#idee: Original; [leerzeichen möglich] Übersetzung(en; mehrere mit | trennen)
+
+java;djava
+
+package;^programmpaket
+import;einschleusen
+
+# Oberbegriffe
+public;offen--
+public;öffentlich--
+protected;beschützt--
+private;privat--
+private;privatisiert--
+abstract;abstrakt--
+
+static;statisch--
+final;endgültig--
+
+class;klasse
+enum;aufzählung
+interface;ganzzahlgesicht
+interface;zwischengesicht
+
+extends;erweitert
+implements;implementiert
+
+main;^wichtigste
+
+
+# Schlüsselworte
+true;wahr
+false;falsch
+
+new;neu--
+return;zurück
+
+# Datentypen
+void;^leere
+
+int;ganz--
+long;lang--
+short;kurz--
+
+float;fließ
+float;fließend--
+double;doppel
+double;doppelt-
+
+boolean;aussagenlogisch--
+byte;binärfolge
+
+char;zeichen
+char;buchstabe
+String;^faden
+
+
+# Bedingungen
+if;wenn
+else;sonst
+switch;schalte+
+case;^fall
+default;^standard
+
+try;versuche+
+catch;fange+
+
+
+# Schleifen
+for;für
+do;mach+
+while;solange
+break;zerbreche+
+
+
+# Memes (können später noch umsortiert werden)
+#ichmussraus;return

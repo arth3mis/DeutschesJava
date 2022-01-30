@@ -1,0 +1,23 @@
+# Übersetzung für das "java.lang" Programmpaket
+
+java;djava
+    lang;sprach
+        System
+            out;raus
+                print;druck+
+                println;druckz
+                printf;druckf
+            in;rein
+            currentTimeMillis;aktuelleZeitMillis
+            exit;ichMussRaus
+
+
+        #(Thread)
+        Thread;Ablaufstrang
+            sleep;schlaf+
+
+
+        # Exceptions
+        InterruptedException;UnterbrochenAusnahme
+        NullPointerException;NullZeigerAusnahme
+        NumberFormatException;ZahlFormatAusnahme

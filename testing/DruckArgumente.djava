@@ -1,0 +1,8 @@
+öffentliche Klasse DruckArgumente {
+	
+	öffentliche statische leere wichtigste(Faden[] argumente) {
+		System.raus.druckz(argumente[0]);
+		System.raus.druckz(argumente[1]);
+	}
+	
+}
