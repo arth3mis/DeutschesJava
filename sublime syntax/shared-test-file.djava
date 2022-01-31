@@ -1,11 +1,15 @@
+//package b;
+import java.util.*;
+
 offen klasse test {
 	offen statisch leer haupt(Faden[] argumente) {
 		System.raus.druckz("moin");
-		versuch {
+		versuch {} fang (Ausnahme a) {}
+		teste {
 			wenn (Mathe.qwrz(4) == 2) {
 				zurück;
 			}
-		} fang (Ausnahme ignored) {
+		} fang (Ausnahme a) {
 		}
 	}
 }
@@ -20,7 +24,16 @@ Math.sqrt; Mathe.qwrz
 öffentlich / offen ???
 privatisiert
 
+zu includen in txt:
+-sealed
+-strictfp
+-native
+-synchronized
+-transient
+-volatile
 
+zu recherchieren:
+- module
 
 
 Konventionen:

@@ -1,4 +1,4 @@
-%YAML 1.2
+%[[YAML]]1.2
 ---
 # https://www.sublimetext.com/docs/syntax.html
 # https://docs.oracle.com/javase/specs/jls/se13/html/index.html
@@ -18,7 +18,7 @@ first_line_match: |-
 ###############################################################################
 
 variables:
-  # Reserved keywords
+  # [[Reserved]]keywords
   # https://docs.oracle.com/javase/specs/jls/se13/html/jls-3.html#jls-3.9
   reserved_words: |-
     (?x:
@@ -36,16 +36,16 @@ variables:
     | {{illegal_keywords}}
     )
   declaration_keywords: |-
-    (?x: class | enum | @?interface | record | var | void | extends | implements | import | package )
+    (?x: [[class]]| [[enum]]| @?[[interface]]| [[record]]| [[var]]| [[void]] | [[extends]]| [[implements]]| [[import]] | [[package]])
   control_keywords: |-
-    (?x: assert | break | case | catch | continue | do | else | finally | for
-    | if | return | switch | throw | throws | try | while )
+    (?x: [[assert]]| [[break]]| [[case]]| [[catch]]| [[continue]]| do | [[else]]| [[finally]]| for
+    | if | [[return]]| [[switch]]| [[throw]]| [[throws]]| [[try]]| [[while]])
   operator_keywords: |-
-    (?x: new | instanceof )
+    (?x: [[new]]| [[instanceof]])
   illegal_keywords: |-
-    (?x: const | goto )
+    (?x: [[const]]| [[goto]])
 
-  # Storage Modifiers
+  # [[Storage]]Modifiers
   storage_modifiers: |-
     (?x:
       {{class_modifier}}
@@ -53,40 +53,40 @@ variables:
     )
   # https://docs.oracle.com/javase/specs/jls/se13/html/jls-8.html#jls-8.1.1
   class_modifier: |-
-    (?x: public | protected | private | abstract | final | sealed | static | strictfp )
+    (?x: [[public]]| [[protected]]| [[private]]| [[abstract]]| [[final]]| [[sealed]]| [[static]]| [[strictfp]])
   class_no_modifier: |-
-    (?x: default | native | synchronized | transient | volatile )
+    (?x: [[default]]| [[native]]| [[synchronized]]| [[transient]]| [[volatile]])
   # https://docs.oracle.com/javase/specs/jls/se13/html/jls-8.html#jls-8.8
   constructor_modifier: |-
-    (?x: public | protected | private )
+    (?x: [[public]]| [[protected]]| [[private]])
   constructor_no_modifier: |-
-    (?x: abstract | default | final | native | sealed | static | strictfp | synchronized | transient | volatile )
+    (?x: [[abstract]]| [[default]]| [[final]]| [[native]]| [[sealed]]| [[static]]| [[strictfp]]| [[synchronized]]| [[transient]]| [[volatile]])
   # https://docs.oracle.com/javase/specs/jls/se13/html/jls-8.html#jls-8.3.1
   field_modifier: |-
-    (?x: public | protected | private | final | static | transient | volatile )
+    (?x: [[public]]| [[protected]]| [[private]]| [[final]]| [[static]]| [[transient]]| [[volatile]])
   field_no_modifier: |-
-    (?x: abstract | default | native | sealed | strictfp | synchronized )
+    (?x: [[abstract]]| [[default]]| [[native]]| [[sealed]]| [[strictfp]]| [[synchronized]])
   # https://docs.oracle.com/javase/specs/jls/se13/html/jls-8.html#jls-9.1.1
   interface_modifier: |-
-    (?x: public | protected | private | abstract | sealed | static | strictfp )
+    (?x: [[public]]| [[protected]]| [[private]]| [[abstract]]| [[sealed]]| [[static]]| [[strictfp]])
   interface_no_modifier: |-
-    (?x: default | final | native | synchronized | transient | volatile )
+    (?x: [[default]]| [[final]]| [[native]]| [[synchronized]]| [[transient]]| [[volatile]])
   # https://docs.oracle.com/javase/specs/jls/se13/html/jls-8.html#jls-8.4.3
   # https://docs.oracle.com/javase/specs/jls/se13/html/jls-9.html#jls-9.4
   method_modifier: |-
-    (?x: public | protected | private | abstract | default | final | native | static | strictfp | synchronized )
+    (?x: [[public]]| [[protected]]| [[private]]| [[abstract]]| [[default]]| [[final]]| [[native]]| [[static]]| [[strictfp]]| [[synchronized]])
   method_no_modifier: |-
-    (?x: sealed | transient | volatile )
+    (?x: [[sealed]]| [[transient]]| [[volatile]])
 
-  # Storage Types
+  # [[Storage]]Types
   storage_types: |-
-    (?x: boolean | byte | char | short | int | float | long | double )
+    (?x: [[boolean]] | [[byte]] | [[char]] | [[short]] | [[int]] | [[float]] | [[long]] | [[double]] )
 
   # Literals
   constants: |-
-    (?x: false | null | true )
+    (?x: [[false]]| [[null]]| [[true]])
   variables: |-
-    (?x: _ | super | this )
+    (?x: _ | [[super]]| [[this]])
 
   # Identifiers
   break: (?!{{id_char}})
@@ -115,7 +115,7 @@ variables:
   escape_other: \\[btnfr"'\\]
   escape_unicode: \\u+\h{4}
 
-  # accessor but no variadic operator
+  # [[accessor]][[but]]no [[variadic]]operator
   single_dot: \.(?!\.)
 
 ###############################################################################
@@ -164,17 +164,17 @@ contexts:
     - include: object-types
     - include: variables
 
-###[ COMMENTS ]################################################################
+###[ [[COMMENTS]]]################################################################
 
   comments:
     - include: line-comments
     - include: block-comments
 
   block-comments:
-    # empty block comments
+    # [[empty]][[block]]comments
     - match: /\*\*+/
-      scope: comment.block.empty.java punctuation.definition.comment.java
-    # documentation block comments
+      scope: comment.block.empty.[[java]]punctuation.definition.comment.java
+    # [[documentation]][[block]]comments
     - match: /\*\*+
       scope:
         comment.block.documentation.java
@@ -185,7 +185,7 @@ contexts:
       escape_captures:
         0: comment.block.documentation.java
            punctuation.definition.comment.end.java
-    # normal block comments
+    # [[normal]][[block]]comments
     - match: /\*
       scope: punctuation.definition.comment.begin.java
       push: block-comment-body
@@ -217,19 +217,19 @@ contexts:
     - match: ^\#!
       scope: punctuation.definition.comment.java
       set: shebang-body
-    - match: ^|(?=\S)  # Note: Ensure to highlight shebang if Erlang is embedded.
+    - match: ^|(?=\S)  # Note: [[Ensure]]to [[highlight]][[shebang]]if [[Erlang]]is embedded.
       pop: 1
 
   shebang-body:
     - meta_include_prototype: false
     - meta_scope: comment.line.shebang.java
-    # Note: Keep sync with first_line_match!
+    # Note: [[Keep]][[sync]][[with]]first_line_match!
     - match: \b(bsh|java)\b
       scope: constant.language.shebang.java
     - match: \n
       pop: 1
 
-###[ ANNOTATIONS ]#############################################################
+###[ [[ANNOTATIONS]]]#############################################################
 
   annotations:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-9.html#jls-9.7
@@ -255,16 +255,16 @@ contexts:
       scope: punctuation.section.group.begin.java
       pop: 2
       push: annotation-parameters-body
-    # fail: looks like a qualified annotation
+    # fail: [[looks]][[like]]a [[qualified]]annotation
     - match: (?={{single_dot}})
       fail: annotation-identifier
-    # fail: truncate meta scope immediatelly
+    # fail: [[truncate]][[meta]][[scope]]immediatelly
     - match: (?=\S)
       fail: annotation-unqualified-parameters
 
   annotation-qualified-identifier:
     - meta_include_prototype: false
-    - meta_scope: meta.annotation.identifier.java meta.path.java
+    - meta_scope: meta.annotation.identifier.[[java]]meta.path.java
     - match: ''
       branch_point: annotation-qualified-identifier
       branch:
@@ -285,7 +285,7 @@ contexts:
   annotation-qualified-identifier-name:
     - match: '{{identifier}}'
       scope:
-        meta.annotation.identifier.java meta.path.java
+        meta.annotation.identifier.[[java]]meta.path.java
         variable.annotation.java
       pop: 2
       branch_point: annotation-qualified-parameters
@@ -303,7 +303,7 @@ contexts:
       fail: annotation-qualified-parameters
 
   annotation-parameters-body:
-    - meta_scope: meta.annotation.parameters.java meta.group.java
+    - meta_scope: meta.annotation.parameters.[[java]]meta.group.java
     - include: group-end
     - match: (?={{id_first_char}})
       branch_point: annotation-parameter
@@ -326,22 +326,22 @@ contexts:
     - match: (?=\S)
       fail: annotation-parameter
 
-###[ DECLARATIONS ]############################################################
+###[ [[DECLARATIONS]]]############################################################
 
   declarations:
-    # As per specification separate declarations for globals, members, and
-    # locals are needed, as each of them supports only a subset of declaration
+    # As [[per]][[specification]][[separate]][[declarations]][[for]]globals, members, and
+    # [[locals]][[are]]needed, as [[each]]of [[them]][[supports]][[only]]a [[subset]]of declaration
     # statements:
     #   - globals: class, enum, interface
     #   - members: class, enum, interface, constructor, field, method
     #   - locals:  class, variables
     #   - try/for: variables
     #
-    # Member declarations need to be handled differently as constructurs look
-    # exactly like function calls. The other two scopes (global, local) are
-    # merged here to maintain syntax highlighting whenever possible. That's
-    # needed for `incomplete code` scenarios or if contexts are lost due to
-    # embedding Java into JSP.
+    # [[Member]][[declarations]][[need]]to be [[handled]][[differently]]as [[constructurs]]look
+    # [[exactly]][[like]][[function]]calls. [[The]][[other]][[two]][[scopes]](global, local) are
+    # [[merged]][[here]]to [[maintain]][[syntax]][[highlighting]][[whenever]]possible. That's
+    # [[needed]][[for]]`[[incomplete]]code` [[scenarios]]or if [[contexts]][[are]][[lost]][[due]]to
+    # [[embedding]][[Java]][[into]]JSP.
     - match: (?=[{{id_first_char}}@<])
       branch_point: declarations
       branch:
@@ -365,8 +365,8 @@ contexts:
 
   declaration-maybe-enum:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-8.html#jls-8.9
-    # Note: Local enum declarations are not valid,
-    #       but may help maintaining highlighting in incomplete code.
+    # Note: [[Local]][[enum]][[declarations]][[are]][[not]]valid,
+    #       [[but]][[may]][[help]][[maintaining]][[highlighting]]in [[incomplete]]code.
     - meta_scope: meta.enum.java
     - include: enum-keyword
     - include: class-modifiers
@@ -374,8 +374,8 @@ contexts:
 
   declaration-maybe-interface:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-9.html#jls-9.1
-    # Note: Local interface declarations are not valid,
-    #       but may help maintaining highlighting in incomplete code.
+    # Note: [[Local]][[interface]][[declarations]][[are]][[not]]valid,
+    #       [[but]][[may]][[help]][[maintaining]][[highlighting]]in [[incomplete]]code.
     - meta_scope: meta.interface.java
     - include: interface-keyword
     - include: interface-modifiers
@@ -421,7 +421,7 @@ contexts:
         - variable-declaration-type-modifier
         - variable-declaration-type
 
-###[ PACKAGE DECLARATIONS ]####################################################
+###[ [[PACKAGE]][[DECLARATIONS]]]####################################################
 
   package:
     - match: package{{break}}
@@ -437,7 +437,7 @@ contexts:
     - include: entity-package
     - include: immediately-pop
 
-###[ MODULE DECLARATIONS ]#####################################################
+###[ [[MODULE]][[DECLARATIONS]]]#####################################################
 
   module:
     - match: (?:(open)\s+)?(module){{break}}
@@ -464,7 +464,7 @@ contexts:
     - include: else-pop
 
   module-block-body:
-    - meta_scope: meta.namespace.module.java meta.block.java
+    - meta_scope: meta.namespace.module.[[java]]meta.block.java
     - include: block-end
     - include: punctuation-terminator-semicolon
     - match: exports{{break}}
@@ -542,7 +542,7 @@ contexts:
     - match: (?=[;}]|(?:exports|opens|requires|provides|uses|{{reserved_words}}){{break}})
       pop: 1
 
-###[ IMPORT DECLARATIONS ]#####################################################
+###[ [[IMPORT]][[DECLARATIONS]]]#####################################################
 
   import:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-7.html#jls-7.5
@@ -580,7 +580,7 @@ contexts:
     - match: \S
       scope: invalid.illegal.expect-semicolon.java
 
-###[ CLASS DECLARATIONS ]######################################################
+###[ [[CLASS]][[DECLARATIONS]]]######################################################
 
   class-keyword:
     - match: class{{break}}
@@ -650,13 +650,13 @@ contexts:
 
   class-block-body:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-8.html#jls-8.1.6
-    - meta_scope: meta.class.java meta.block.java
+    - meta_scope: meta.class.[[java]]meta.block.java
     - include: block-end
     - include: member-statements
     - include: member-declarations
     - include: else-expressions
 
-###[ ENUM DECLARATIONS ]#######################################################
+###[ [[ENUM]][[DECLARATIONS]]]#######################################################
 
   enum-keyword:
     - match: enum{{break}}
@@ -721,13 +721,13 @@ contexts:
     - include: else-pop
 
   enum-block-body:
-    - meta_scope: meta.enum.java meta.block.java
+    - meta_scope: meta.enum.[[java]]meta.block.java
     - include: class-block-body
 
   enum-constants-list:
     - meta_content_scope: meta.sequence.constants.java
     - match: '{{identifier}}'
-      scope: meta.constant.identifier.java entity.name.constant.java
+      scope: meta.constant.identifier.[[java]]entity.name.constant.java
       push: enum-constant-arguments
     - include: punctuation-separator-comma
     - include: else-pop
@@ -743,7 +743,7 @@ contexts:
 
   enum-constant-arguments-body:
     - clear_scopes: 1
-    - meta_scope: meta.constant.arguments.java meta.group.java
+    - meta_scope: meta.constant.arguments.[[java]]meta.group.java
     - include: group-body
 
   enum-constant-block:
@@ -754,10 +754,10 @@ contexts:
     - include: else-pop
 
   enum-constant-block-body:
-    - meta_scope: meta.constant.java meta.block.java
+    - meta_scope: meta.constant.[[java]]meta.block.java
     - include: class-block-body
 
-###[ INTERFACE DECLARATIONS ]##################################################
+###[ [[INTERFACE]][[DECLARATIONS]]]##################################################
 
   interface-keyword:
     - match: (@?)interface{{break}}
@@ -826,10 +826,10 @@ contexts:
     - include: else-pop
 
   interface-block-body:
-    - meta_scope: meta.interface.java meta.block.java
+    - meta_scope: meta.interface.[[java]]meta.block.java
     - include: class-block-body
 
-###[ RECORD DECLARATIONS ]#####################################################
+###[ [[RECORD]][[DECLARATIONS]]]#####################################################
 
   record-keyword:
     # https://docs.oracle.com/javase/specs/jls/se16/html/jls-8.html#jls-8.10
@@ -855,7 +855,7 @@ contexts:
     - include: else-pop
 
   record-parameter-body:
-    - meta_scope: meta.class.parameters.java meta.group.java
+    - meta_scope: meta.class.parameters.[[java]]meta.group.java
     - match: \)
       scope: punctuation.section.group.end.java
       set:
@@ -881,7 +881,7 @@ contexts:
         - inherited-object-type
     - include: else-pop
 
-###[ MEMBER DECLARATIONS ]#####################################################
+###[ [[MEMBER]][[DECLARATIONS]]]#####################################################
 
   member-declarations:
     - match: (?=[{{id_first_char}}@<])
@@ -959,7 +959,7 @@ contexts:
         - method-signature
         - method-modifier
 
-###[ FIELD DECLARATIONS ]######################################################
+###[ [[FIELD]][[DECLARATIONS]]]######################################################
 
   field-modifier:
     - clear_scopes: 1
@@ -1022,7 +1022,7 @@ contexts:
     - meta_content_scope: meta.field.value.java
     - include: variable-initializer
 
-###[ METHOD DECLARATIONS ]#####################################################
+###[ [[METHOD]][[DECLARATIONS]]]#####################################################
 
   constructor-name:
     - include: member-reserved-fail
@@ -1045,8 +1045,8 @@ contexts:
     - include: method-result-signature
 
   method-void-signature:
-    # void indicates a method for sure
-    - match: (?=void{{break}})
+    # [[void]][[indicates]]a [[method]][[for]]sure
+    - match: (?=[[void]]{{break}})
       set:
         - method-maybe-parameters
         - method-maybe-identifier
@@ -1054,12 +1054,12 @@ contexts:
         - method-void-type
 
   method-void-type:
-    - match: void
+    - match: [[void]]
       scope: storage.type.void.java
       pop: 1
 
   method-result-signature:
-    # a method only if parameter list found
+    # a [[method]][[only]]if [[parameter]][[list]]found
     - match: (?=\S)
       set:
         - method-expect-parameters
@@ -1111,7 +1111,7 @@ contexts:
         - receiver-or-parameter
 
   method-parameters-body:
-    - meta_scope: meta.function.parameters.java meta.group.java
+    - meta_scope: meta.function.parameters.[[java]]meta.group.java
     - include: group-end
     - match: ','
       scope: punctuation.separator.comma.java
@@ -1165,10 +1165,10 @@ contexts:
     - include: else-pop
 
   method-block-body:
-    - meta_scope: meta.function.java meta.block.java
+    - meta_scope: meta.function.[[java]]meta.block.java
     - include: block-body
 
-###[ VARIABLE DECLARATIONS ]###################################################
+###[ [[VARIABLE]][[DECLARATIONS]]]###################################################
 
   variable-declaration-type:
     - include: primitive-type
@@ -1217,7 +1217,7 @@ contexts:
         meta.declaration.java
         keyword.operator.assignment.java
       set: variable-declaration-value-initializer
-    # found parentheses after identifier, appears to be a method declaration
+    # [[found]][[parentheses]][[after]]identifier, [[appears]]to be a [[method]]declaration
     - match: (?=\()
       fail: declarations
     - include: maybe-only-array-modifiers
@@ -1226,11 +1226,11 @@ contexts:
     - meta_content_scope: meta.declaration.value.java
     - include: variable-initializer
 
-###[ VARIABLE DECLARATIONS OR ASSIGNMENTS ]####################################
+###[ [[VARIABLE]][[DECLARATIONS]]OR [[ASSIGNMENTS]]]####################################
 
   variable-declarations-or-assignments:
-    # A subset of `declarations` to optimize performance in contexts which need
-    # to distinguish between variable declaration and variable assignment only.
+    # A [[subset]]of `declarations` to [[optimize]][[performance]]in [[contexts]][[which]]need
+    # to [[distinguish]][[between]][[variable]][[declaration]][[and]][[variable]][[assignment]]only.
     - match: (?=[{{id_first_char}}@<])
       branch_point: variable-declarations-or-assignments
       branch:
@@ -1263,7 +1263,7 @@ contexts:
     - match: (?=\S)
       fail: variable-declarations-or-assignments
 
-###[ IF ELSE STATEMENTS ]######################################################
+###[ IF [[ELSE]][[STATEMENTS]]]######################################################
 
   if-else-statements:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-14.html#jls-14.9
@@ -1289,7 +1289,7 @@ contexts:
     - meta_scope: meta.statement.conditional.else.java
     - include: immediately-pop
 
-###[ SWITCH CASE STATEMENTS ]##################################################
+###[ [[SWITCH]][[CASE]][[STATEMENTS]]]##################################################
 
   switch-case-statements:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-14.html#jls-14.11
@@ -1353,14 +1353,14 @@ contexts:
 
   case-label-end:
     - match: ':|->'
-      scope: meta.statement.conditional.case.java punctuation.separator.expressions.java
+      scope: meta.statement.conditional.case.[[java]]punctuation.separator.expressions.java
       pop: 1
 
   case-label-fail:
     - match: (?=\S)
       fail: case-label
 
-###[ DO WHILE STATEMENTS ]#####################################################
+###[ DO [[WHILE]][[STATEMENTS]]]#####################################################
 
   do-while-statements:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-14.html#jls-14.12
@@ -1387,7 +1387,7 @@ contexts:
     - meta_scope: meta.statement.loop.while.java
     - include: immediately-pop
 
-###[ FOR LOOP STATEMENTS ]#####################################################
+###[ [[FOR]][[LOOP]][[STATEMENTS]]]#####################################################
 
   for-statements:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-14.html#jls-14.14
@@ -1412,11 +1412,11 @@ contexts:
     - include: else-pop
 
   for-parameters-init:
-    # enhanced for statement
+    # [[enhanced]][[for]]statement
     - match: ':'
       scope: keyword.operator.assignment.java
       pop: 1
-    # basic for statement
+    # [[basic]][[for]]statement
     - match: ';'
       scope: punctuation.terminator.java
       set: for-parameters-condition
@@ -1437,7 +1437,7 @@ contexts:
       scope: invalid.illegal.stray.java
     - include: expression-terminator
 
-###[ FLOW CONTROL STATEMENTS ]#################################################
+###[ [[FLOW]][[CONTROL]][[STATEMENTS]]]#################################################
 
   labeled-statements:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-14.html#jls-14.7
@@ -1508,7 +1508,7 @@ contexts:
       pop: 1
     - include: else-pop
 
-###[ SYNCHRONIZED STATEMENTS ]#################################################
+###[ [[SYNCHRONIZED]][[STATEMENTS]]]#################################################
 
   synchronized-statements:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-14.html#jls-14.19
@@ -1524,7 +1524,7 @@ contexts:
     - meta_scope: meta.statement.flow.synchronized.java
     - include: immediately-pop
 
-###[ TRY CATCH STATEMENTS ]####################################################
+###[ [[TRY]][[CATCH]][[STATEMENTS]]]####################################################
 
   try-catch-statements:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-14.html#jls-14.20
@@ -1611,7 +1611,7 @@ contexts:
     - include: expressions
     - include: expression-terminator
 
-###[ EXPRESSIONS ]#############################################################
+###[ [[EXPRESSIONS]]]#############################################################
 
   else-expressions:
     - match: (?=\S)
@@ -1642,7 +1642,7 @@ contexts:
     - match: \S
       scope: invalid.illegal.expect-terminator.java
 
-###[ INSTANTIATION EXPRESSIONS ]###############################################
+###[ [[INSTANTIATION]][[EXPRESSIONS]]]###############################################
 
   instantiations:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-15.html#jls-15.9
@@ -1695,7 +1695,7 @@ contexts:
     - include: expressions
     - include: expression-terminator
 
-###[ INITIALIZATION EXPRESSIONS ]##############################################
+###[ [[INITIALIZATION]][[EXPRESSIONS]]]##############################################
 
   variable-initializers:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-8.html#jls-8.3
@@ -1737,7 +1737,7 @@ contexts:
     - include: operator-ternary-colon
     - include: variable-initializer
 
-###[ BLOCKS ]##################################################################
+###[ [[BLOCKS]]]##################################################################
 
   block-or-expression:
     - include: block
@@ -1767,7 +1767,7 @@ contexts:
     - include: declarations
     - include: else-expressions
 
-###[ GROUPS ]##################################################################
+###[ [[GROUPS]]]##################################################################
 
   groups:
     - match: \(
@@ -1799,11 +1799,11 @@ contexts:
       scope: punctuation.section.group.end.java
       pop: 1
 
-###[ CAST EXPRESSION GROUPS ]##################################################
+###[ [[CAST]][[EXPRESSION]][[GROUPS]]]##################################################
 
   cast-expression-group:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-15.html#jls-15.16
-    - meta_scope: meta.cast.java meta.group.java
+    - meta_scope: meta.cast.[[java]]meta.group.java
     - meta_include_prototype: false
     - match: ''
       set:
@@ -1812,7 +1812,7 @@ contexts:
         - cast-expression-type
 
   cast-expression-group-body:
-    - meta_scope: meta.cast.java meta.group.java
+    - meta_scope: meta.cast.[[java]]meta.group.java
     - match: \)
       scope: punctuation.section.group.end.java
       set: cast-expression-group-end
@@ -1820,11 +1820,11 @@ contexts:
     - include: group-else-fail
 
   cast-expression-group-end:
-    # cast expressions may be followed by:
-    # - `!`     : unary operator
-    # - `~`     : unary operator
-    # - `(`     : cast, lambda or group expression
-    # - literal : variable, type or method
+    # [[cast]][[expressions]][[may]]be [[followed]]by:
+    # - `!`     : [[unary]]operator
+    # - `~`     : [[unary]]operator
+    # - `(`     : cast, [[lambda]]or [[group]]expression
+    # - [[literal]]: variable, [[type]]or method
     - match: (?=[{{id_first_char}}!~(])
       pop: 1
     - include: group-else-fail
@@ -1836,7 +1836,7 @@ contexts:
     - include: annotations
     - include: maybe-type-argument
 
-###[ EXPRESSION GROUPS ]#######################################################
+###[ [[EXPRESSION]][[GROUPS]]]#######################################################
 
   expression-group:
     - meta_scope: meta.group.java
@@ -1847,16 +1847,16 @@ contexts:
     - include: expression-terminator
 
   expression-group-end:
-    # looks like a lambda
+    # [[looks]][[like]]a lambda
     - match: (?=->)
       fail: groups
     - include: else-pop
 
-###[ LAMBDA PARAMETER GROUPS ]#################################################
+###[ [[LAMBDA]][[PARAMETER]][[GROUPS]]]#################################################
 
   lambda-parameter-group:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-15.html#jls-15.27
-    - meta_scope: meta.function.anonymous.parameters.java meta.group.java
+    - meta_scope: meta.function.anonymous.parameters.[[java]]meta.group.java
     - match: \)
       scope: punctuation.section.group.end.java
       set: lambda-meta
@@ -1895,12 +1895,12 @@ contexts:
     - meta_content_scope: meta.function.anonymous.java
     - include: else-pop
 
-###[ RECEIVER OR FORMAL PARAMETERS ]###########################################
+###[ [[RECEIVER]]OR [[FORMAL]][[PARAMETERS]]]###########################################
 
   receiver-or-parameter:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-8.html#jls-8.4
-    # The first parameter of a method or constructor declaration may be a
-    # receiver parameter which represents the object to invoke the method for.
+    # [[The]][[first]][[parameter]]of a [[method]]or [[constructor]][[declaration]][[may]]be a
+    # [[receiver]][[parameter]][[which]][[represents]][[the]][[object]]to [[invoke]][[the]][[method]]for.
     - match: (?=[{{id_first_char}}<])
       branch_point: receiver-or-parameter
       branch:
@@ -1917,9 +1917,9 @@ contexts:
         - receiver-type
 
   receiver-type:
-    # A 'receiver-type' is basically an 'object-type' whose 'namespace' part
-    # is skipped as it is expected to be declared in the same source file due
-    # to receiver args being valid only for nested class' methods.
+    # A 'receiver-type' is [[basically]]an 'object-type' [[whose]]'namespace' part
+    # is [[skipped]]as it is [[expected]]to be [[declared]]in [[the]][[same]][[source]][[file]]due
+    # to [[receiver]][[args]][[being]][[valid]][[only]][[for]][[nested]]class' methods.
     - match: (?={{reserved_words}}{{break}})
       fail: receiver-or-parameter
     - match: (?=\S)
@@ -1959,9 +1959,9 @@ contexts:
       captures:
         1: punctuation.accessor.dot.java
       pop: 1
-    # consume comments
+    # [[consume]]comments
     - match: \s*(?=/[/*])
-    # Maintain meta.path boundaries at the end of the type.
+    # [[Maintain]]meta.[[path]][[boundaries]]at [[the]][[end]]of [[the]]type.
     - match: (?=\s*\S)
       pop: 3
 
@@ -2059,15 +2059,15 @@ contexts:
       scope: invalid.illegal.identifier.java
       set: maybe-only-array-modifiers
 
-###[ VARIABLES ]###############################################################
+###[ [[VARIABLES]]]###############################################################
 
   variables:
     # Note:
-    # 1) `variable-other` must be the first branch to scope the very last
-    #    identifier before eof or end of embedded section as ordinary variable.
-    # 2) `variable-qualifier` scopes identifiers not followed by ClassCaseIds
-    #    as ordinary variables. Found no easy enough solution by only using
-    #    `variable-other` and `variable-namespace`.
+    # 1) `variable-other` [[must]]be [[the]][[first]][[branch]]to [[scope]][[the]][[very]]last
+    #    [[identifier]][[before]][[eof]]or [[end]]of [[embedded]][[section]]as [[ordinary]]variable.
+    # 2) `variable-qualifier` [[scopes]][[identifiers]][[not]][[followed]]by ClassCaseIds
+    #    as [[ordinary]]variables. [[Found]]no [[easy]][[enough]][[solution]]by [[only]]using
+    #    `variable-other` [[and]]`variable-namespace`.
     - match: (?={{id_first_char}})
       branch_point: variables
       branch:
@@ -2096,7 +2096,7 @@ contexts:
       fail: variables
 
   method-call-arguments-body:
-    - meta_scope: meta.function-call.arguments.java meta.group.java
+    - meta_scope: meta.function-call.arguments.[[java]]meta.group.java
     - include: group-body
 
   lambda-parameter:
@@ -2176,7 +2176,7 @@ contexts:
       push: variable-item-access-body
 
   variable-item-access-body:
-    - meta_scope: meta.variable.item-access.java meta.brackets.java
+    - meta_scope: meta.variable.item-access.[[java]]meta.brackets.java
     - match: \]
       scope: punctuation.section.brackets.end.java
       set: variable-item-access-end
@@ -2203,7 +2203,7 @@ contexts:
       pop: 1
     - include: else-pop
 
-###[ LITERALS ]################################################################
+###[ [[LITERALS]]]################################################################
 
   literals:
     - include: literal-chars
@@ -2241,10 +2241,10 @@ contexts:
 
   literal-numbers:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-3.html#jls-3.10
-    # hexadecimal floats
+    # [[hexadecimal]]floats
     - match: |-
         (?x)
-        # 0x1., 0x1.1, 0x1.1p1, 0x1.1p-1, 0x1.p1, 0x1.p-1 | 0x1p1 | 0x.1, 0x.1p1, 0x.1p-1
+        # 0x1., 0x1.1, 0x1.1p1, 0x1.1p-1, 0x1.p1, 0x1.p-1 | [[0x1p1]]| 0x.1, 0x.1p1, 0x.1p-1
         (0[xX]) ( {{hex_digit}}* (?: ({{single_dot}}) {{hex_digit}}* (?:{{hex_exponent}})? | {{hex_exponent}} ) ) ({{float_suffix}})?
       scope: meta.number.float.hexadecimal.java
       captures:
@@ -2252,14 +2252,14 @@ contexts:
         2: constant.numeric.value.java
         3: punctuation.separator.decimal.java
         4: constant.numeric.suffix.java
-    # decimal floats
+    # [[decimal]]floats
     - match: |-
         (?x)
         ([0-9]{{dec_digit}}*)
         (?:
           # 1., 1.1, 1.1e1, 1.1e-1, 1.e1, 1.e-1, 1.d, 1.1d, 1.1e1d, 1.1e-1d, 1.e1d, 1.e-1d
           ( ({{single_dot}}) {{dec_digit}}* (?:{{dec_exponent}})? ) ({{float_suffix}})?
-          # 1e1 1e1d
+          # [[1e1]]1e1d
           | ({{dec_exponent}}) ({{float_suffix}})?
           # 1d
           | ({{float_suffix}})
@@ -2277,28 +2277,28 @@ contexts:
         8: constant.numeric.value.java
         9: punctuation.separator.decimal.java
         10: constant.numeric.suffix.java
-    # binary integers
+    # [[binary]]integers
     - match: (0[bB])({{bin_digit}}*)({{int_suffix}})?
       scope: meta.number.integer.binary.java
       captures:
         1: constant.numeric.base.java
         2: constant.numeric.value.java
         3: constant.numeric.suffix.java
-    # hexadecimal integers
+    # [[hexadecimal]]integers
     - match: (0[xX])({{hex_digit}}*)({{int_suffix}})?
       scope: meta.number.integer.hexadecimal.java
       captures:
         1: constant.numeric.base.java
         2: constant.numeric.value.java
         3: constant.numeric.suffix.java
-    # octal integers
+    # [[octal]]integers
     - match: (0)({{oct_digit}}+)({{int_suffix}}|(?![\d_]))
       scope: meta.number.integer.octal.java
       captures:
         1: constant.numeric.base.java
         2: constant.numeric.value.java
         3: constant.numeric.suffix.java
-    # decimal integers
+    # [[decimal]]integers
     - match: ((0_*)?[1-9]{{dec_digit}}*|0(?![\d_]))({{int_suffix}})?
       scope: meta.number.integer.decimal.java
       captures:
@@ -2309,7 +2309,7 @@ contexts:
   literal-chars:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-3.html#jls-3.10.4
     - match: (')(?:({{escape_unicode}})|({{escape_octal}})|({{escape_other}})|([^']))(')
-      scope: meta.string.java string.quoted.single.java
+      scope: meta.string.[[java]]string.quoted.single.java
       captures:
         1: punctuation.definition.string.begin.java
         2: constant.character.escape.unicode.java
@@ -2324,7 +2324,7 @@ contexts:
     - include: literal-single-quoted-strings
 
   literal-single-quoted-strings:
-    # Java doesn't support single quoted strings, but Groovy does.
+    # [[Java]]doesn't [[support]][[single]][[quoted]]strings, [[but]][[Groovy]]does.
     - match: (')[^']+(')
       scope: invalid.illegal.not-a-char.java
 
@@ -2336,7 +2336,7 @@ contexts:
 
   literal-double-quoted-string-body:
     - meta_include_prototype: false
-    - meta_scope: meta.string.java string.quoted.double.java
+    - meta_scope: meta.string.[[java]]string.quoted.double.java
     - match: \"
       scope: punctuation.definition.string.end.java
       pop: 1
@@ -2353,7 +2353,7 @@ contexts:
 
   literal-double-quoted-textblock-body:
     - meta_include_prototype: false
-    - meta_scope: meta.string.java string.quoted.triple.java
+    - meta_scope: meta.string.[[java]]string.quoted.triple.java
     - match: \"{3}
       scope: punctuation.definition.string.end.java
       pop: 1
@@ -2371,7 +2371,7 @@ contexts:
     - match: \\.
       scope: invalid.illegal.escape.java
 
-###[ OPERATORS ]###############################################################
+###[ [[OPERATORS]]]###############################################################
 
   operators:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-3.html#jls-3.12
@@ -2409,7 +2409,7 @@ contexts:
     - include: operator-ternary-colon
     - include: expression
 
-###[ PUNCTUATIONS ]############################################################
+###[ [[PUNCTUATIONS]]]############################################################
 
   punctuations:
     - match: '::'
@@ -2451,7 +2451,7 @@ contexts:
       scope: punctuation.terminator.java
       pop: 1
 
-###[ CONSTANT ]################################################################
+###[ [[CONSTANT]]]################################################################
 
   constant:
     - match: (?={{identifier}})
@@ -2522,7 +2522,7 @@ contexts:
       pop: 3
     - include: annotation-else-pop3
 
-###[ STATIC IMPORT ]###########################################################
+###[ [[STATIC]][[IMPORT]]]###########################################################
 
   static-import:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-7.html#jls-7.5.3
@@ -2580,7 +2580,7 @@ contexts:
       pop: 2
     - include: annotation-else-pop2
 
-###[ TYPE IMPORT ]#############################################################
+###[ [[TYPE]][[IMPORT]]]#############################################################
 
   type-import:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-7.html#jls-7.5.1
@@ -2635,7 +2635,7 @@ contexts:
       pop: 2
     - include: annotation-else-pop2
 
-###[ ENTITY CLASS ]############################################################
+###[ [[ENTITY]][[CLASS]]]############################################################
 
   entity-class:
     - match: (?={{identifier}})
@@ -2688,7 +2688,7 @@ contexts:
       scope: entity.name.class.java
       set: maybe-type-argument
 
-###[ ENTITY MODULE ]###########################################################
+###[ [[ENTITY]][[MODULE]]]###########################################################
 
   entity-module:
     - match: (?={{identifier}})
@@ -2737,7 +2737,7 @@ contexts:
       scope: entity.name.namespace.module.java
       pop: 1
 
-###[ ENTITY PACKAGE ]##########################################################
+###[ [[ENTITY]][[PACKAGE]]]##########################################################
 
   entity-package:
     - match: (?={{identifier}})
@@ -2786,17 +2786,17 @@ contexts:
       scope: entity.name.namespace.package.java
       pop: 1
 
-###[ OBJECT TYPES ]############################################################
+###[ [[OBJECT]][[TYPES]]]############################################################
 
   object-types:
-    # Popular JDK classes, generic type variable
+    # [[Popular]][[JDK]]classes, [[generic]][[type]]variable
     - match: (?:UUID|UR[LI]|\p{Lu}){{break}}
       scope: storage.type.class.java
       push:
         - maybe-object-type-child
         - maybe-array-modifiers
         - maybe-type-argument
-    # Uppercase constants
+    # [[Uppercase]]constants
     - match: '{{uppercase_id}}'
       scope: constant.other.java
     # Classes
@@ -2826,7 +2826,7 @@ contexts:
         - maybe-type-argument
     - include: annotation-else-pop
 
-###[ OBJECT TYPE ]#############################################################
+###[ [[OBJECT]][[TYPE]]]#############################################################
 
   expect-object-type:
     - include: object-type
@@ -2902,7 +2902,7 @@ contexts:
     - match: (?=\s*\S)
       pop: 4
 
-###[ REFERENCE TYPE ]##########################################################
+###[ [[REFERENCE]][[TYPE]]]##########################################################
 
   maybe-additional-bounds:
     - include: additional-bounds
@@ -2930,7 +2930,7 @@ contexts:
         - maybe-object-type
 
   reference-type-array:
-    # note: simplified pattern as primitive types consist of ascii chars only
+    # note: [[simplified]][[pattern]]as [[primitive]][[types]][[consist]]of [[ascii]][[chars]]only
     - match: '[A-Za-z]+'
       scope: storage.type.primitive.java
       set: reference-type-array-item-access
@@ -2944,14 +2944,14 @@ contexts:
       fail: primitive-array-type
 
   reference-type-illegal:
-    # note: simplified pattern as primitive types consist of ascii chars only
+    # note: [[simplified]][[pattern]]as [[primitive]][[types]][[consist]]of [[ascii]][[chars]]only
     - match: '[A-Za-z]+'
       scope: invalid.illegal.unexpected-keyword.java
       pop: 2
 
-###[ INHERRITED TYPE REFERENCES ]##############################################
+###[ [[INHERRITED]][[TYPE]][[REFERENCES]]]##############################################
 
-  # Used in class-level 'extends' and 'implements'
+  # [[Used]]in class-[[level]]'extends' [[and]]'implements'
   inherited-object-type-list:
     # https://docs.oracle.com/javase/specs/jls/se13/html/jls-8.html#jls-8.1.4
     - match: ','
@@ -3009,7 +3009,7 @@ contexts:
         - qualified-object-type-arguments
     - include: annotation-else-pop3
 
-###[ TYPE ARGUMENTS ]##########################################################
+###[ [[TYPE]][[ARGUMENTS]]]##########################################################
 
   maybe-type-argument:
     - include: type-argument
@@ -3052,7 +3052,7 @@ contexts:
       set: maybe-reference-type
     - include: else-pop
 
-###[ TYPE PARAMETERS ]#########################################################
+###[ [[TYPE]][[PARAMETERS]]]#########################################################
 
   maybe-type-parameter:
     - include: type-parameter
@@ -3120,7 +3120,7 @@ contexts:
       push: maybe-reference-type
     - include: annotation-else-pop
 
-###[ PRIMITIVE TYPES ]#########################################################
+###[ [[PRIMITIVE]][[TYPES]]]#########################################################
 
   primitive-types:
     - match: '{{storage_types}}{{break}}'
@@ -3164,7 +3164,7 @@ contexts:
     - match: '{{storage_modifiers}}{{break}}'
       scope: storage.modifier.java
 
-###[ PROTOTYPES ]##############################################################
+###[ [[PROTOTYPES]]]##############################################################
 
   prototype:
     - include: comments
@@ -3206,7 +3206,7 @@ contexts:
     - match: ''
       pop: 3
 
-###[ ILLEGALS ]################################################################
+###[ [[ILLEGALS]]]################################################################
 
   maybe-illegal-array-modifiers:
     - include: illegal-array-modifiers

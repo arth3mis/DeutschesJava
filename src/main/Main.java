@@ -20,6 +20,8 @@ public class Main {
     public static final String LANGUAGE_NAME = "DJava";
     public static final String EXTENSION_NAME = "djava";
 
+    public static final String SOURCE_PATH = "src";
+
     // program flags
     public enum Flag {
         HELP("?", "hilfe"),
@@ -61,8 +63,17 @@ public class Main {
         if (evaluateArgs(args) != null) {
             // String[0][0] -> help log (+ dialog)
             // String[1][0] -> settings
-            System.out.println("true flags: "+ Flag.countSet());
+
+
+
+            //System.out.println("true flags: "+ Flag.countSet());
+
+
+
             new Interpreter().loadTranslation();
+
+
+
             return;
         }
 

@@ -1,0 +1,14 @@
+# Übersetzung für das "javax" Paket
+
+tools;werkzeuge
+swing;schaukel
+accessibility
+crypto
+imageio
+management
+naming
+net
+print
+script
+sql
+xml

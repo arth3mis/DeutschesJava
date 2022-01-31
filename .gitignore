@@ -5,6 +5,7 @@
 # test files
 /sublime syntax/test*
 /testing/test*
+/test_*
 
 # custom files
 errorlog.txt

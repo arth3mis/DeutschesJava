@@ -1,0 +1,20 @@
+# Übersetzung für das "java.lang" Paket
+
+System
+    out;raus
+        print;druck
+        println;druckz
+        printf;druckf
+    in;rein
+    currentTimeMillis;aktuelleZeitMillis
+    exit;ichMussRaus
+
+
+Thread;Ablaufstrang
+    sleep;schlaf
+
+
+Exception;Ausnahme
+InterruptedException;UnterbrochenAusnahme
+NullPointerException;NullZeigerAusnahme
+NumberFormatException;ZahlFormatAusnahme

@@ -7,43 +7,54 @@
 #  + mit -/--/^
 
 #idee: Original; [leerzeichen möglich] Übersetzung(en; mehrere mit | trennen)
+#idee: an sublime-syntax-datei orientieren = keywords danach sortieren (Deklaration, Kontrolle, Operartor, Illegal, ...)
 
 java;djava
 
-package;^programmpaket
-import;einschleusen
+package;paket
+package;päckchen
+import;zufuhr
+import;einbau
 
-# Oberbegriffe
+# Modifikatoren
 public;offen--
 public;öffentlich--
+default;standard
 protected;beschützt--
 private;privat--
+# Meme
 private;privatisiert--
+#/ Meme
 abstract;abstrakt--
 
 static;statisch--
 final;endgültig--
 
 class;klasse
+enum;numm
 enum;aufzählung
 interface;ganzzahlgesicht
 interface;zwischengesicht
 
 extends;erweitert
 implements;implementiert
+implements;benutzt
 
-main;^wichtigste
+main;haupt
 
 
 # Schlüsselworte
-true;wahr
-false;falsch
+true;ja
+false;nein
 
 new;neu--
 return;zurück
+# Meme
+return;ichmussraus
+#/ Meme
 
 # Datentypen
-void;^leere
+void;leer
 
 int;ganz--
 long;lang--
@@ -59,15 +70,19 @@ byte;binärfolge
 
 char;zeichen
 char;buchstabe
+# muss zu java.lang
 String;^faden
+
+# Array.length
+# .länge;.length
 
 
 # Bedingungen
 if;wenn
 else;sonst
-switch;schalte+
-case;^fall
-default;^standard
+switch;schalt
+case;fall
+# default: siehe Modifikatoren
 
 try;versuche+
 catch;fange+
@@ -75,10 +90,6 @@ catch;fange+
 
 # Schleifen
 for;für
-do;mach+
+do;tu
 while;solange
-break;zerbreche+
-
-
-# Memes (können später noch umsortiert werden)
-#ichmussraus;return
+break;bruch

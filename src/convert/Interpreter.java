@@ -6,15 +6,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import main.Logger;
+import main.Main;
 
 public class Interpreter {
 
-    private final String TRANSLATION_DIR = "translation/";
-    private final String[] trFiles = {
-            "0_main_translation.txt",
-            "1_java_lang.txt",
-            "2_javax_swing.txt"
-    };
+    private final String TRANSLATION_DIR = "translation";
     private HashMap<String, String> translation;
 
 
@@ -79,6 +75,13 @@ public class Interpreter {
         //      idea: class that has direct translations of this "level" and keys that lead to another namespace
         //      e.g. "class Translation { HashMap<String, String> tr; HashMap<String, Translation> sub; }
         // find a way to translate "main" only for main method
+
+        File f = new File(Main.SOURCE_PATH, getClass().getPackageName() + File.separator + TRANSLATION_DIR);
+        System.out.println(f.getAbsolutePath() + "--- is dir: " + f.isDirectory());
+
+        // TODO: go through directory of f and get all files (sort later which ones to load)
+        String[] trFiles = null;
+        if (trFiles == null) return false;
 
         for (String file : trFiles) {
             InputStream is = getClass().getResourceAsStream(TRANSLATION_DIR + file);  // uses this package (convert) as root folder

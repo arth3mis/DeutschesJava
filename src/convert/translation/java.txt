@@ -1,0 +1,16 @@
+# Übersetzung für das "java" Paket
+
+io;rr
+util;werkz
+# awt;
+# applet;
+nio;nrr
+beans;bohne
+lang;sprach
+math;mathe
+net;netz
+# rmi;
+security;sicherheit
+# sql;
+text
+time;zeit
