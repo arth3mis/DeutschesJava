@@ -1,6 +1,5 @@
 # build directory
 /out/production/**
-/out/artifacts/DeutschesJava_jar/old versions/**
 
 # test files
 /sublime syntax/test*

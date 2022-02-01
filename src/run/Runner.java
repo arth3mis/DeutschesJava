@@ -12,7 +12,7 @@ public abstract class Runner {
     /**
      * @return new instance of subclass based on OS, null if OS is not supported
      */
-    public static Runner newRunner() {
+    public static Runner newInstance() {
         if (OS.isWindows())
             return new RunnerWindows();
         else

@@ -287,7 +287,7 @@ public class Main {
     public static String run(String mainFilePath) {
         String s = mainFilePath.substring(0, mainFilePath.length() - 5) + "class";
         String l = "Starte Ausführung mit Argumenten: \"" + s + "\"\n";
-        Runner runner = Runner.newRunner();
+        Runner runner = Runner.newInstance();
         if (runner == null)
             return l + "Ausführung nicht möglich, Betriebssystem nicht unterstützt (" + OS.getOsName() + ")";
         return (l + "Rückgabe der Ausführung: " + runner.start(new String[]{s}));

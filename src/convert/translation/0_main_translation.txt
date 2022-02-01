@@ -47,7 +47,7 @@ main;haupt
 true;ja
 false;nein
 
-new;neu--
+new;neu
 return;zurück
 # Meme
 return;ichmussraus
@@ -65,13 +65,13 @@ float;fließend--
 double;doppel
 double;doppelt-
 
-boolean;aussagenlogisch--
+boolean;boolesch
 byte;binärfolge
 
 char;zeichen
 char;buchstabe
 # muss zu java.lang
-String;^faden
+String;Faden
 
 # Array.length
 # .länge;.length

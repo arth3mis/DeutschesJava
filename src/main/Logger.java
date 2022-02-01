@@ -30,7 +30,7 @@ public class Logger {
                 "    -k  --kompilieren      Wandelt um und kompiliert",
                 "    -r  --rennen           Wandelt um, kompiliert und führt aus (STANDARD)",
                 "    -j  --behaltejava      Erstellte Java-Dateien werden nicht gelöscht",
-                "    -K  --nurkompilieren   Kompiliert bereits umgewandelte Dateien (Es muss trotzdem die .djava-Endung angegeben werden)",// TODO make it not necessary to add .djava?
+                "    -K  --nurkompilieren   Kompiliert bereits umgewandelte Dateien (Es muss trotzdem die .djava-Endung angegeben werden)",
                 "    -R  --nurrennen        Führt Java-Klasse aus (Es muss trotzdem die .djava-Endung angegeben werden)",
         };
         StringBuilder b = new StringBuilder();

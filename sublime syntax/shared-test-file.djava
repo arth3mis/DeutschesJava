@@ -25,15 +25,43 @@ Math.sqrt; Mathe.qwrz
 privatisiert
 
 zu includen in txt:
+-instanceof
+-yield
+-continue
+-assert
+-throw
+-throws
+-record
+-final
 -sealed
 -strictfp
 -native
 -synchronized
 -transient
 -volatile
+-native
+-null
+-finally
+
+-permits
+
+-super
+-this
+
+-const
+-goto
 
 zu recherchieren:
-- module
+-var			???????
+-module
+	-exports
+	-opens
+	-requires
+	-uses
+	-provides
+	-to
+	-transitive
+	-with
 
 
 Konventionen:
