@@ -2,20 +2,33 @@ package main;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
+
 import main.Main.Flag;
 
 public class Logger {
 
-    static boolean logToSystemOut = true;
+    static boolean logToSystemOut = false;
+    static boolean suppressWarnings = false;  // no user setting yet
 
-    public static void log(String s) {
+    public static void log(String s, Object... args) {
         if (logToSystemOut) {
-            System.out.println(s);
+            System.out.printf(s+"\n", args);
         }
     }
 
+    public static void warning(String s, Object... args) {
+        if (!suppressWarnings) {
+            System.out.printf(s+"\n", args);
+        }
+    }
+
+    public static void error(String s, Object... args) {
+        System.err.printf(s+"\n", args);
+    }
+
     static void logHelp(boolean helpDialog) {
-        String[] helpText = {
+        String[] helpTextBuild = {
                 "",
                 "Verwendung: java -jar /*L_NAME*/.jar [/*.S*/Optionen...] /*L_NAME*/_Datei [/*L_NAME*/_Dateien...] [/*ARGS;|)*/ Argumente...]",
                 "            java -jar /*L_NAME*/.jar /*SETTINGS;|)*/",
@@ -33,12 +46,7 @@ public class Logger {
                 "    -K  --nurkompilieren   Kompiliert bereits umgewandelte Dateien (Es muss trotzdem die .djava-Endung angegeben werden)",
                 "    -R  --nurrennen        Führt Java-Klasse aus (Es muss trotzdem die .djava-Endung angegeben werden)",
         };
-        StringBuilder b = new StringBuilder();
-        for (String s : helpText) {
-            System.out.println(s);
-            b.append(s).append("\n");
-        }
-        String t = b.toString();
+        String helpText = String.join("\n", helpTextBuild);
 
         // replace placeholders
         // translation
@@ -47,11 +55,11 @@ public class Logger {
         //  /*HELP;  */   -->   "-s  --longflag"
         //  /*HELP;  )*/  -->   "(-s  --longflag)"
 
-        String replace = Flag.valueOf("HELP").S;
+        String replace = Flag.valueOf("HELP").S;  // method for replacing
 
-        log(t);
+        System.out.println(helpText);
         if (helpDialog)
-            showHelpDialog(t);
+            showHelpDialog(helpText);
     }
 
     private static void showHelpDialog(String out) {

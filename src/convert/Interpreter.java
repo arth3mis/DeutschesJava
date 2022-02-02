@@ -16,9 +16,9 @@ public class Interpreter {
 
     private String read(File file) {
         try {
-            return Files.lines(file.toPath()).collect(Collectors.joining("\n"));
+            return Files.readString(file.toPath());
         } catch (IOException e) {
-            Logger.log("Djava-Datei konnte nicht gelesen werden: " + e.getMessage());
+            Logger.error("Djava-Datei konnte nicht gelesen werden: " + e.getMessage());
             return null;
         }
     }
@@ -40,30 +40,34 @@ public class Interpreter {
         return code.toString();
     }
 
-    public boolean makeJavaFiles(File ... files) {
+    public boolean makeJavaFiles(File... djavaFiles) {
         boolean allSuccess = true;
-        for (File f : files) {
-            String fName = f.getName();
-            f = new File(f.getParentFile().getAbsoluteFile(), fName.substring(0, fName.length() - 5) + "java");  // replace "djava" with "java"; todo better way?
+        for (File djavaFile : djavaFiles) {
+            // make java file name
+            String name = djavaFile.getName();
+            String javaName = name.substring(0, name.lastIndexOf('.') + 1) + "java";
+            File javaFile = new File(djavaFile.getParentFile(), javaName);  // parent == null is handled automatically
+            // create and fill java file with translated code
             try {
-                if (f.exists())
-                    if (!f.delete())
+                if (javaFile.exists())
+                    if (!javaFile.delete())
                         throw new IOException();
-                if (!f.createNewFile())
+                if (!javaFile.createNewFile())
                     throw new IOException();
 
-                String djavaCode = read(f);
+                String djavaCode = read(djavaFile);
                 String javaCode = replace(djavaCode);
 
-                BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+                BufferedWriter bw = new BufferedWriter(new FileWriter(javaFile));
                 bw.write(javaCode);
                 bw.close();
             } catch (IOException e) {
-                Logger.log("Java-Datei konnte nicht erstellt werden: " + e.getMessage());
+                Logger.error("Java-Datei " + javaFile + " konnte nicht erstellt werden: " + e.getMessage());
                 allSuccess = false;
             }
         }
-        Logger.log("Java-Datei erstellt");
+        if (allSuccess)
+            Logger.log("Java-Dateien erfolgreich erstellt");
         return allSuccess;
     }
 
@@ -77,10 +81,11 @@ public class Interpreter {
         // find a way to translate "main" only for main method
 
         File f = new File(Main.SOURCE_PATH, getClass().getPackageName() + File.separator + TRANSLATION_DIR);
-        System.out.println(f.getAbsolutePath() + "--- is dir: " + f.isDirectory());
+        System.out.println(f.getAbsolutePath() + " --- is dir: " + f.isDirectory());
 
         // TODO: go through directory of f and get all files (sort later which ones to load)
         String[] trFiles = null;
+        Logger.warning("Implementierung temporär ausgesetzt");
         if (trFiles == null) return false;
 
         for (String file : trFiles) {
@@ -124,7 +129,7 @@ public class Interpreter {
                     }
                 }
             } catch (IOException e) {
-                Logger.log("Fehler beim Lesen der Übersetzungs-Datei: " + file);
+                Logger.error("Fehler beim Lesen der Übersetzungs-Datei: " + file);
                 return false;
             }
         }

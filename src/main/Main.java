@@ -5,9 +5,11 @@ import run.Runner;
 
 import javax.tools.*;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class Main {
@@ -21,6 +23,8 @@ public class Main {
     public static final String EXTENSION_NAME = "djava";
 
     public static final String SOURCE_PATH = "src";
+
+    public static final String WILDCARD = "*";
 
     // program flags
     public enum Flag {
@@ -56,31 +60,72 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        boolean helpDialog = false;
+        String[][] eval = evaluateArgs(args);
 
-        // THIS IS TESTING AREA
-        //
-        if (evaluateArgs(args) != null) {
-            // String[0][0] -> help log (+ dialog)
-            // String[1][0] -> settings
+        // verbose mode?
+        if (Flag.VERBOSE.set)
+            Logger.logToSystemOut = true;
 
-
-
-            //System.out.println("true flags: "+ Flag.countSet());
-
-
-
-            new Interpreter().loadTranslation();
-
-
-
-            return;
+        // display help dialog?
+        if (eval.length == 0) {
+            Logger.logHelp(true);
         }
+        // settings?
+        else if (eval.length == 1) {
+            startSettings();
+        }
+        // standard call?
+        else if (eval.length == 2) {
+            // help?
+            if (Flag.HELP.set)
+                Logger.logHelp(false);
+
+            // replace wildcard with all djava files in working directory
+            if (Arrays.asList(eval[0]).contains(WILDCARD)) {
+                // copy file names (without the wildcard)
+                List<String> fileNames = new ArrayList<>(Arrays.stream(eval[0]).filter(name -> !name.equals(WILDCARD)).toList());
+
+                // find all djava files present in current folder
+                File workingDir = new File(System.getProperty("user.dir"));
+                String[] newDjavaFiles = workingDir.list(
+                        (dir, name) -> name.substring(name.lastIndexOf('.') + 1).equalsIgnoreCase(EXTENSION_NAME));
+                // add all file names that are not already in the list
+                if (newDjavaFiles != null)
+                    fileNames.addAll(Arrays.stream(newDjavaFiles).filter(name -> !fileNames.contains(name)).toList());
+
+                // overwrite old file name list
+                eval[0] = fileNames.toArray(new String[0]);
+            }
+
+            // turn djava file names into files
+            // check if they exist and have an extension (important for Interpreter.makeJavaFiles())
+            File[] djavaFiles = Arrays.stream(eval[0])
+                    .map(File::new)
+                    .filter(File::exists)
+                    .filter(file -> file.getName().contains("."))
+                    .toList().toArray(new File[0]);
+
+            if (djavaFiles.length < 1) {
+                Logger.error("Keine validen %s-Dateien gefunden", LANGUAGE_NAME);
+                return;
+            }
+
+            // TODO TEST SYSTEM COMPILER VERSION BY RUNNING compiled java file manually with old jre/jdk
+            //makeAbsolutePaths(new String[]{});
+            //File f = new File("x.djava").getAbsoluteFile();
+            //System.out.println("File: " + f + " - exists: " + f.exists());
+
+            Interpreter in = new Interpreter();
+            in.loadTranslation();
+            in.makeJavaFiles(djavaFiles);
+        }
+        if (eval != null)
+            return;
 
         try {
             if (args == null || args.length == 0) {
                 args = new String[]{"-?"};
-                helpDialog = true;
+                //helpDialog = true;
             }
             if (args.length > 1) {
                 for (int i = 1; i < args.length; i++) {
@@ -93,7 +138,7 @@ public class Main {
             if (args[0].equalsIgnoreCase("-v")) {
                 if (args.length == 1)
                     System.exit(1);
-                Logger.logToSystemOut = true;
+                //Logger.logToSystemOut = true;
                 String[] a = new String[args.length-1];
                 System.arraycopy(args, 1, a, 0, a.length);
                 args = a;
@@ -159,8 +204,11 @@ public class Main {
         }
     }
 
+    /**
+     * @param args program launch arguments
+     * @return new String[0][0] for help dialog; String[2] with {{DJava files}, {run arguments}}
+     */
     private static String[][] evaluateArgs(String[] args) {
-        // return array: dimension 0 are DJava files, dimension 1 are run arguments
         String[][] ret = new String[2][];
         List<String> files = new ArrayList<>();
 
@@ -192,7 +240,7 @@ public class Main {
 
         // settings? return String[1][0] to trigger settings menu
         if (Flag.SETTINGS.set)
-            return new String[1][0];
+            return new String[1][];
 
         // put all non-flags (DJava files) in ret[0]
         ret[0] = files.toArray(new String[0]);
@@ -205,9 +253,14 @@ public class Main {
         return ret;
     }
 
+    private static void startSettings() {
+        Logger.warning("Nicht implementiert");
+    }
+
     static String[] makeAbsolutePaths(String[] paths) {
         String[] ap = new String[paths.length];
         String currentLocation = System.getProperty("user.dir");  // this is the current location of the calling process (cmd, terminal, IDE, ...)
+        // ABOVE method is obsolete, since new File().getAbsoluteFile() works the same (uses calling process wd as root)
         System.out.println("CURRENT LOCATION: "+currentLocation);
         for (int i = 0; i < ap.length; i++) {
             if (paths[i].startsWith("-"))
@@ -247,16 +300,16 @@ public class Main {
                 else
                     return "Kompilierung fehlgeschlagen";
             } else {
-                Logger.log("Kein System-Kompilierer gefunden, versuche manuelles Kompilieren mit Befehlen " +
+                Logger.warning("Kein System-Kompilierer gefunden, versuche manuelles Kompilieren mit Befehlen " +
                         "(funktioniert nur, wenn ein Kompilierer im PFAD steht)");
                 // compile by command
                 try {
                     StringBuilder s = new StringBuilder();
                     for (File file : files) {
-                        s.append(" \"").append(file.toString()).append("\"");
+                        s.append("\"").append(file.toString()).append("\"");
                     }
                     //Main.log(s.toString());
-                    Process p = Runtime.getRuntime().exec("javac" + s, null, new File(System.getProperty("user.dir")));
+                    Process p = Runtime.getRuntime().exec("javac " + s, null/*, new File(System.getProperty("user.dir"))*/);  // user.dir will already be standard
                     try {
                         while (p.isAlive())
                             Thread.sleep(10);
