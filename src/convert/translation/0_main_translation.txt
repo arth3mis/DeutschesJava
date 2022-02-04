@@ -49,9 +49,6 @@ false;nein
 
 new;neu
 return;zurück
-# Meme
-return;ichmussraus
-#/ Meme
 
 # Datentypen
 void;leer

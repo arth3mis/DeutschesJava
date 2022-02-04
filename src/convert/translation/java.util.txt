@@ -1,2 +1,4 @@
 # Übersetzung für das "java.util" Paket
 
+Scanner;Abtaster
+    next;nächste

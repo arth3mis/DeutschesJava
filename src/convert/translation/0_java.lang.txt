@@ -9,6 +9,9 @@ System
     currentTimeMillis;aktuelleZeitMillis
     exit;ichMussRaus
 
+Math;Mathe
+    pow;hoch
+    random;zufall
 
 Thread;Ablaufstrang
     sleep;schlaf

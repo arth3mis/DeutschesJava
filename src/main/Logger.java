@@ -2,7 +2,6 @@ package main;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
 
 import main.Main.Flag;
 
@@ -30,36 +29,43 @@ public class Logger {
     static void logHelp(boolean helpDialog) {
         String[] helpTextBuild = {
                 "",
-                "Verwendung: java -jar /*L_NAME*/.jar [/*.S*/Optionen...] /*L_NAME*/_Datei [/*L_NAME*/_Dateien...] [/*ARGS;|)*/ Argumente...]",
-                "            java -jar /*L_NAME*/.jar /*SETTINGS;|)*/",
-                "           (/*L_NAME*/.jar kann auch anders heißen)",
-                "Die 'Argumente...' werden an das DJava-Programm weitergeleitet, wenn es ausgeführt wird.",
-                "Wird '/*S_FLAG_9*/' verwendet, sind Einstellungen einsehbar und änderbar.",
+                String.format("Verwendung: java -jar %s.jar [Optionen...] %s_Hauptdatei [%s_Dateien...] [%s Argumente...]", Main.LANGUAGE_NAME, Main.LANGUAGE_NAME, Main.LANGUAGE_NAME, fFlag(Flag.ARGS, "|")),
+                String.format("            java -jar %s.jar %s", Main.LANGUAGE_NAME, fFlag(Flag.SETTINGS, "|")),
+                String.format("           (%s.jar kann auch anders heißen)", Main.LANGUAGE_NAME),
+                String.format("Die 'Argumente...' werden an das %s-Programm weitergeleitet, wenn es ausgeführt wird.", Main.LANGUAGE_NAME),
+                String.format("Wird '%s' verwendet, sind Einstellungen einsehbar und änderbar.", fFlag(Flag.SETTINGS, "|")),
                 "",
-                "Die Optionen umfassen Folgendes:",
-                "    /*HELP*/   Zeigt Hilfe in der Konsole an",
-                "    /*VERBOSE*/   Aktiviert den 'Viel-Text-Modus' = Log-Ausgabe",
-                "    -u  --umwandeln        Wandelt DJava-Dateien in Java-Dateien um",
-                "    -k  --kompilieren      Wandelt um und kompiliert",
-                "    -r  --rennen           Wandelt um, kompiliert und führt aus (STANDARD)",
-                "    -j  --behaltejava      Erstellte Java-Dateien werden nicht gelöscht",
-                "    -K  --nurkompilieren   Kompiliert bereits umgewandelte Dateien (Es muss trotzdem die .djava-Endung angegeben werden)",
-                "    -R  --nurrennen        Führt Java-Klasse aus (Es muss trotzdem die .djava-Endung angegeben werden)",
+                String.format("Die Optionen umfassen Folgendes:"),
+                String.format("    %s   Zeigt Hilfe in der Konsole an", fFlag(Flag.HELP, "  ", true)),
+                String.format("    %s   Aktiviert den 'Viel-Text-Modus' = Log-Ausgabe", fFlag(Flag.VERBOSE, "  ", true)),
+                String.format("    %s   Wandelt %s-Dateien in Java-Dateien um", fFlag(Flag.CONVERT, "  ", true), Main.LANGUAGE_NAME),
+                String.format("    %s   Wandelt um und kompiliert", fFlag(Flag.COMPILE, "  ", true)),
+                String.format("    %s   Wandelt um, kompiliert und führt aus (STANDARD)", fFlag(Flag.RUN, "  ", true)),
+                String.format("    %s   Erstellte Java-Dateien werden nicht gelöscht", fFlag(Flag.KEEP_JAVA, "  ", true)),
+                String.format("    %s   Kompiliert bereits umgewandelte Dateien", fFlag(Flag.JUST_COMPILE, "  ", true)),
+                String.format("    %s   Führt Java-Klassen aus", fFlag(Flag.JUST_RUN, "  ", true)),
+                "",
         };
         String helpText = String.join("\n", helpTextBuild);
-
-        // replace placeholders
-        // translation
-        //  /*HELP;|)*/   -->   "(-s|--longflag)"
-        //  /*HELP; | */  -->   "-s | --longflag"
-        //  /*HELP;  */   -->   "-s  --longflag"
-        //  /*HELP;  )*/  -->   "(-s  --longflag)"
-
-        String replace = Flag.valueOf("HELP").S;  // method for replacing
 
         System.out.println(helpText);
         if (helpDialog)
             showHelpDialog(helpText);
+    }
+
+    private static String fFlag(Flag f, String sep) {
+        return fFlag(f, sep, false);
+    }
+    private static String fFlag(Flag f, String sep, boolean fillArgLength) {
+        String s = f.S.isEmpty() ? "" : Flag.shortFlag + f.S;
+        String l = f.L.isEmpty() ? "" : Flag.longFlag + f.L;
+        String ret = s + (s.isEmpty() || l.isEmpty() ? "" : sep) + l;
+        if (fillArgLength) {
+            ret = " ".repeat(s.isEmpty() ? (Flag.shortFlag.length() + Flag.shortArgLength + sep.length()) : 0)
+                    + ret
+                    + " ".repeat((l.isEmpty() ? (sep.length() + Flag.longFlag.length()) : 0) + Flag.longArgMaxLength - f.L.length());
+        }
+        return ret;
     }
 
     private static void showHelpDialog(String out) {

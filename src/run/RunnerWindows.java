@@ -15,7 +15,7 @@ class RunnerWindows extends Runner {
 
         try {
             // TODO: make option to set path which is then saved in appdata; could also search PATH for java.../bin
-            String s = "start cmd.exe @cmd /k \"\"C:\\Program Files\\Java\\jdk-17\\bin\\java.exe\" -cp \""+f.getParent()+"\" \""+f.getName().substring(0, f.getName().indexOf("."))+"\"&echo.&echo.&pause&exit\"";
+            String s = "start cmd.exe @cmd /k \"\"C:\\Program Files\\Java\\jdk-17\\bin\\java.exe\" -cp \""+f.getParent()+"\" \""+f.getName().substring(0, f.getName().lastIndexOf('.'))+"\"&echo.&echo.&pause&exit\"";
             File x = new File(f.getParent(), "cfr_bat_tmp.bat");
             x.delete();
             if (!x.createNewFile())

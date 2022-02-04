@@ -1,15 +1,16 @@
 package main;
 
-import convert.Interpreter;
+import compile.Compiler;
+import convert.Converter;
+import filesystem.Filer;
 import run.Runner;
 
 import javax.tools.*;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Comparator;
 import java.util.List;
 
 public class Main {
@@ -21,6 +22,7 @@ public class Main {
 
     public static final String LANGUAGE_NAME = "DJava";
     public static final String EXTENSION_NAME = "djava";
+    public static final String JAVA_EXTENSION = "java";
 
     public static final String SOURCE_PATH = "src";
 
@@ -37,11 +39,14 @@ public class Main {
         JUST_COMPILE("K", "nurkompilieren"),
         JUST_RUN("R", "nurrennen"),
         ARGS("a", ""),
-        SETTINGS("s", ""),
+        SETTINGS("e", ""),
         ;
 
         public static final String shortFlag = "-";
         public static final String longFlag = "--";
+
+        public static final int shortArgLength = 1;
+        public static final int longArgMaxLength = Arrays.stream(Flag.values()).map(f -> f.L).max(Comparator.comparingInt(String::length)).get().length();
 
         public final String S;
         public final String L;
@@ -80,25 +85,9 @@ public class Main {
             if (Flag.HELP.set)
                 Logger.logHelp(false);
 
-            // replace wildcard with all djava files in working directory
-            if (Arrays.asList(eval[0]).contains(WILDCARD)) {
-                // copy file names (without the wildcard)
-                List<String> fileNames = new ArrayList<>(Arrays.stream(eval[0]).filter(name -> !name.equals(WILDCARD)).toList());
-
-                // find all djava files present in current folder
-                File workingDir = new File(System.getProperty("user.dir"));
-                String[] newDjavaFiles = workingDir.list(
-                        (dir, name) -> name.substring(name.lastIndexOf('.') + 1).equalsIgnoreCase(EXTENSION_NAME));
-                // add all file names that are not already in the list
-                if (newDjavaFiles != null)
-                    fileNames.addAll(Arrays.stream(newDjavaFiles).filter(name -> !fileNames.contains(name)).toList());
-
-                // overwrite old file name list
-                eval[0] = fileNames.toArray(new String[0]);
-            }
-
             // turn djava file names into files
             // check if they exist and have an extension (important for Interpreter.makeJavaFiles())
+            // todo put in own function (File[] djavaFiles = parseFiles()?) to make main() clear and simple
             File[] djavaFiles = Arrays.stream(eval[0])
                     .map(File::new)
                     .filter(File::exists)
@@ -106,8 +95,10 @@ public class Main {
                     .toList().toArray(new File[0]);
 
             if (djavaFiles.length < 1) {
-                Logger.error("Keine validen %s-Dateien gefunden", LANGUAGE_NAME);
+                Logger.error("Keine validen %s-Dateien gefunden.", LANGUAGE_NAME);
                 return;
+            } else {
+                Logger.log("%d/%d %s-Dateien gefunden.", djavaFiles.length, eval[0].length, LANGUAGE_NAME);
             }
 
             // TODO TEST SYSTEM COMPILER VERSION BY RUNNING compiled java file manually with old jre/jdk
@@ -115,9 +106,56 @@ public class Main {
             //File f = new File("x.djava").getAbsoluteFile();
             //System.out.println("File: " + f + " - exists: " + f.exists());
 
-            Interpreter in = new Interpreter();
-            in.loadTranslation();
-            in.makeJavaFiles(djavaFiles);
+            File[] javaFiles = null;
+            File[] classFiles = null;
+            // todo maybe obsolete declaration?
+            Compiler compiler = null;
+            Runner runner = null;
+
+            // standard operation (run)?
+            boolean standard = !(Flag.CONVERT.set || Flag.COMPILE.set || Flag.RUN.set || Flag.JUST_COMPILE.set || Flag.JUST_RUN.set);
+            // resolve flags to actions
+            boolean interpret = standard || Flag.RUN.set || Flag.COMPILE.set || Flag.CONVERT.set;
+            boolean compile   = standard || Flag.RUN.set || Flag.COMPILE.set || Flag.JUST_COMPILE.set;
+            boolean run       = standard || Flag.RUN.set || Flag.JUST_RUN.set;
+
+            // actions
+            //
+            // convert djava to java
+            if (interpret) {
+                // todo put in own function to make main() clear and simple
+                Converter c = new Converter(null);
+                c.loadTranslation();
+                javaFiles = c.makeJavaFiles(djavaFiles);
+            }
+            // compile java with set javac binary/exe, alternatively try system compiler
+            if (compile) {
+                compiler = Compiler.newInstance();
+                if (javaFiles == null)
+                    javaFiles = Filer.refactorExtension(djavaFiles, JAVA_EXTENSION);
+                // don't compile if previous action failed
+                if (javaFiles.length == 0)
+                    Logger.warning("Kompilierung wird übersprungen.");
+                else if (compiler == null) {
+                    Logger.error("Kompilieren ist auf diesem Betriebssystem nicht unterstützt.");
+                    classFiles = new File[0];
+                } else
+                    classFiles = compile(javaFiles);  // todo maybe make compile boolean and if true make classfiles (same purpose and cost)
+            }
+            // run class with set java binary/exe, alternatively try global java command
+            if (run) {
+                runner = Runner.newInstance();
+                if (classFiles == null)
+                    classFiles = Filer.refactorExtension(javaFiles != null ? javaFiles : djavaFiles, "");
+                // don't run if previous action failed or run is not supported
+                if (classFiles.length == 0)
+                    Logger.warning("Ausführung wird übersprungen.");
+                else if (runner == null)
+                    Logger.error("Rennen ist auf diesem Betriebssystem nicht unterstützt.");
+                else
+                    run("");
+            }
+
         }
         if (eval != null)
             return;
@@ -148,7 +186,7 @@ public class Main {
             else*/ if (args.length == 1 && args[0].startsWith("-"))
                 System.exit(1);
             Logger.log("\n");
-            if (new Interpreter().loadTranslation())
+            //if (new Interpreter().loadTranslation())
                 ;
             /*if (args[0].startsWith("-")) {
                 String[] args2 = new String[args.length - 1];
@@ -210,7 +248,7 @@ public class Main {
      */
     private static String[][] evaluateArgs(String[] args) {
         String[][] ret = new String[2][];
-        List<String> files = new ArrayList<>();
+        List<String> fileNames = new ArrayList<>();
 
         // empty args? return String[0][0] to trigger help dialog
         if (args.length == 0)
@@ -230,7 +268,7 @@ public class Main {
             } else if (flagListL.contains(s)) {
                 (f = Flag.values()[flagListL.indexOf(s)]).set = true;
             } else if (runArgsPos == -1) {  // don't add run arguments
-                files.add(s);
+                fileNames.add(s);
             }
             // save position of '-a' for run argument extraction
             if (f == Flag.ARGS)
@@ -242,8 +280,22 @@ public class Main {
         if (Flag.SETTINGS.set)
             return new String[1][];
 
+        // replace wildcard with all djava files in working directory
+        if (fileNames.contains(WILDCARD)) {
+            // remove wildcard from list
+            while (fileNames.remove(WILDCARD));
+
+            // find all djava files present in current folder
+            File workingDir = new File(System.getProperty("user.dir"));
+            String[] newDjavaFiles = workingDir.list(
+                    (dir, name) -> name.substring(name.lastIndexOf('.') + 1).equalsIgnoreCase(EXTENSION_NAME));
+            // add all file names that are not already in the list
+            if (newDjavaFiles != null)
+                fileNames.addAll(Arrays.stream(newDjavaFiles).filter(name -> !fileNames.contains(name)).toList());
+        }
+
         // put all non-flags (DJava files) in ret[0]
-        ret[0] = files.toArray(new String[0]);
+        ret[0] = fileNames.toArray(new String[0]);
 
         //  put run arguments in ret[1]; they must come after -a
         if (Flag.ARGS.set && runArgsPos > -1) {
@@ -254,7 +306,7 @@ public class Main {
     }
 
     private static void startSettings() {
-        Logger.warning("Nicht implementiert");
+        Logger.warning("Einstellungen - Noch nicht implementiert");
     }
 
     static String[] makeAbsolutePaths(String[] paths) {
@@ -275,37 +327,36 @@ public class Main {
         }
         return ap;
     }
-    public static String compile(String... filePaths) {
+    public static File[] compile(File[] javaFiles) {
+        if (javaFiles == null || javaFiles.length == 0)
+            return new File[0];
         try {
-            File[] files = new File[filePaths.length];
-            for (int i = 0; i < files.length; i++) {
-                String fn = new File(filePaths[i]).getName();
-                files[i] = new File(new File(filePaths[i]).getParentFile().getAbsoluteFile(), fn.substring(0, fn.length()-5) + "java");
-            }
-
-            if (ToolProvider.getSystemJavaCompiler() != null) {
-                JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-                Logger.log("System-Kompilierer gefunden");
+            JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+            if (compiler != null) {
+                Logger.log("System-Kompilierer gefunden.");
                 //Main.log("compiler: " + compiler.toString());
                 StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
                 //Main.log("fileManager: " + fileManager.toString());
 
-                ArrayList<File> af = new ArrayList<>(List.of(files[0].getParentFile()));
-                fileManager.setLocation(StandardLocation.CLASS_OUTPUT, af);
+                File pathRef = javaFiles[0].getAbsoluteFile().getParentFile();
+                fileManager.setLocation(StandardLocation.CLASS_OUTPUT, List.of(pathRef));
 
-                Iterable<? extends JavaFileObject> compilationUnits1 = fileManager.getJavaFileObjects(files);
+                Iterable<? extends JavaFileObject> compilationUnits1 = fileManager.getJavaFileObjects(javaFiles);
 
-                if (compiler.getTask(null, fileManager, null, null, null, compilationUnits1).call())
-                    return "Kompilierung erfolgreich";
-                else
-                    return "Kompilierung fehlgeschlagen";
+                if (compiler.getTask(null, fileManager, null, null, null, compilationUnits1).call()) {
+                    Logger.log("Kompilieren erfolgreich.");
+                    return Filer.refactorExtension(javaFiles, "");
+                } else {
+                    Logger.error("\n------------------------------------------\nKompilieren fehlgeschlagen.");
+                    return new File[0];
+                }
             } else {
                 Logger.warning("Kein System-Kompilierer gefunden, versuche manuelles Kompilieren mit Befehlen " +
                         "(funktioniert nur, wenn ein Kompilierer im PFAD steht)");
                 // compile by command
                 try {
                     StringBuilder s = new StringBuilder();
-                    for (File file : files) {
+                    for (File file : javaFiles) {
                         s.append("\"").append(file.toString()).append("\"");
                     }
                     //Main.log(s.toString());
@@ -314,23 +365,27 @@ public class Main {
                         while (p.isAlive())
                             Thread.sleep(10);
                     } catch (InterruptedException ignored) {}
-                    return "Kompilierung durch Befehle beendet mit Rückgabewert: " + p.exitValue();
+                    Logger.log("Kompilierung durch Befehle beendet mit Rückgabewert: ", p.exitValue());
+                    // success?
+                    if (p.exitValue() == 0)
+                        return Filer.refactorExtension(javaFiles, "");
                 } catch (IOException e) {
-                    return "Kompilierung durch Befehle fehlgeschlagen: " + e.getMessage();
+                    Logger.error("Kompilierung durch Befehle fehlgeschlagen: " + e.getMessage());
                 }
             }
         } catch (IOException e) {
-            return "Kompilierung fehlgeschlagen: " + e.getMessage();
+            Logger.error("Kompilierung fehlgeschlagen: " + e.getMessage());
         } catch (NullPointerException e) {
-            return "Während der Kompilierung ist eine NULL aufgetreten";
+            Logger.error("Während der Kompilierung ist eine NULL aufgetreten");
         }
+        return new File[0];
     }
 
     public static String deleteJavaFile(String... filePaths) {
         StringBuilder s = new StringBuilder("Java-Dateien gelöscht, bis auf: ");
         for (int i = 0; i < filePaths.length; i++) {
             String fn = new File(filePaths[i]).getName();
-            File f = new File(new File(filePaths[i]).getParentFile().getAbsoluteFile(), fn.substring(0, fn.length()-5) + "java");
+            File f = new File(new File(filePaths[i]).getParentFile().getAbsoluteFile(), fn.substring(0, fn.length()-5) + JAVA_EXTENSION);
             if (!f.delete())
                 s.append(i);
         }

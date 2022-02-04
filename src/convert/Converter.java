@@ -3,16 +3,43 @@ package convert;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
-import java.util.stream.Collectors;
 
+import filesystem.Filer;
 import main.Logger;
 import main.Main;
 
-public class Interpreter {
+public class Converter {
 
-    private final String TRANSLATION_DIR = "translation";
+    /*
+
+    NOTIZ für JANNIS: Commits haben Versionen, die werden stumpf durchnummeriert, siehe bisherige commits und jar-Dateien
+
+     */
+
+    private static final String TRANSLATION_DIR = "translation";
+    private static Translation baseTranslation;
+
+    private final File djavaFile;
+    // old version
     private HashMap<String, String> translation;
 
+
+    public Converter(File djavaFile) {
+        this.djavaFile = djavaFile;
+        // copy static base translation
+        // read file
+        // check which translation files are needed
+        // load translation
+    }
+
+    /**
+     * called by Main class to retrieve java file
+     * @return translated java file, null for unsuccessful translation
+     */
+    public File translateToJava() {
+        return Filer.refactorExtension(djavaFile, Main.JAVA_EXTENSION);
+        //return null;
+    }
 
     private String read(File file) {
         try {
@@ -40,13 +67,15 @@ public class Interpreter {
         return code.toString();
     }
 
-    public boolean makeJavaFiles(File... djavaFiles) {
-        boolean allSuccess = true;
+    /**
+     * @param djavaFiles existing djava files
+     * @return successfully converted java files
+     */
+    public File[] makeJavaFiles(File[] djavaFiles) {
+        List<File> successFiles = new ArrayList<>();
         for (File djavaFile : djavaFiles) {
-            // make java file name
-            String name = djavaFile.getName();
-            String javaName = name.substring(0, name.lastIndexOf('.') + 1) + "java";
-            File javaFile = new File(djavaFile.getParentFile(), javaName);  // parent == null is handled automatically
+            // get java file (change extension)
+            File javaFile = Filer.refactorExtension(djavaFile, Main.JAVA_EXTENSION);
             // create and fill java file with translated code
             try {
                 if (javaFile.exists())
@@ -55,23 +84,27 @@ public class Interpreter {
                 if (!javaFile.createNewFile())
                     throw new IOException();
 
+                // read and translate
                 String djavaCode = read(djavaFile);
                 String javaCode = replace(djavaCode);
 
                 BufferedWriter bw = new BufferedWriter(new FileWriter(javaFile));
                 bw.write(javaCode);
                 bw.close();
+                successFiles.add(javaFile);
             } catch (IOException e) {
                 Logger.error("Java-Datei " + javaFile + " konnte nicht erstellt werden: " + e.getMessage());
-                allSuccess = false;
             }
         }
-        if (allSuccess)
-            Logger.log("Java-Dateien erfolgreich erstellt");
-        return allSuccess;
+        if (successFiles.size() == djavaFiles.length)
+            Logger.log("Java-Dateien erfolgreich erstellt.");
+        else
+            Logger.warning("Java-Dateien erstellt, %d/%d nicht erfolgreich.",
+                    djavaFiles.length - successFiles.size(), djavaFiles.length);
+        return successFiles.toArray(new File[0]);
     }
 
-    public boolean loadTranslation() {
+    public void loadTranslation() {
         translation = new HashMap<>();
 
         //todo:
@@ -81,12 +114,12 @@ public class Interpreter {
         // find a way to translate "main" only for main method
 
         File f = new File(Main.SOURCE_PATH, getClass().getPackageName() + File.separator + TRANSLATION_DIR);
-        System.out.println(f.getAbsolutePath() + " --- is dir: " + f.isDirectory());
+        //System.out.println(f.getAbsolutePath() + " --- is dir: " + f.isDirectory());
 
         // TODO: go through directory of f and get all files (sort later which ones to load)
         String[] trFiles = null;
-        Logger.warning("Implementierung temporär ausgesetzt");
-        if (trFiles == null) return false;
+        Logger.warning("Übersetzungsdateien laden - Implementierung temporär ausgesetzt");
+        if (trFiles == null) return;
 
         for (String file : trFiles) {
             InputStream is = getClass().getResourceAsStream(TRANSLATION_DIR + file);  // uses this package (convert) as root folder
@@ -130,10 +163,8 @@ public class Interpreter {
                 }
             } catch (IOException e) {
                 Logger.error("Fehler beim Lesen der Übersetzungs-Datei: " + file);
-                return false;
             }
         }
-        Logger.log("Übersetzungen geladen");
-        return true;
+        Logger.log("Übersetzungen geladen.");
     }
 }
