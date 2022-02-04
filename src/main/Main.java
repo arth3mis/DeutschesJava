@@ -91,7 +91,6 @@ public class Main {
             File[] djavaFiles = Arrays.stream(eval[0])
                     .map(File::new)
                     .filter(File::exists)
-                    .filter(file -> file.getName().contains("."))
                     .toList().toArray(new File[0]);
 
             if (djavaFiles.length < 1) {

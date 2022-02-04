@@ -1,23 +1,40 @@
 # Übersetzung für das "java.lang" Paket
 
+Math;                               Mathe
+{
+    acos
+    asin
+    atan
+    atan2
+    cos
+    pow;                                hoch
+    random;                             zufall
+    sin
+    tan
+}
+
+Object;                             Objekt
+    # Methoden: siehe main tr.
+
+String;                             Strippe
+
 System
-    out;raus
-        print;druck
-        println;druckz
-        printf;druckf
-    in;rein
-    currentTimeMillis;aktuelleZeitMillis
-    exit;ichMussRaus
+{
+    out;                            raus
+        print;                          druck
+        println;                        druckz
+        printf;                         druckf
+    in;                             rein
+    currentTimeMillis;              aktuelleZeitMillis
+    exit;                           ichmussraus
+}
 
-Math;Mathe
-    pow;hoch
-    random;zufall
+Thread;                             Faden
+{
+    sleep;                              schlaf
+}
 
-Thread;Ablaufstrang
-    sleep;schlaf
-
-
-Exception;Ausnahme
-InterruptedException;UnterbrochenAusnahme
-NullPointerException;NullZeigerAusnahme
-NumberFormatException;ZahlFormatAusnahme
+Exception;                          Ausnahme
+InterruptedException;               UnterbrochenAusnahme
+NullPointerException;               NullZeigerAusnahme
+NumberFormatException;              ZahlFormatAusnahme

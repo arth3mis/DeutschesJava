@@ -2,17 +2,17 @@
 ---
 # https://www.sublimetext.com/docs/syntax.html
 # https://docs.oracle.com/javase/specs/jls/se13/html/index.html
-name: DJava
-scope: source.djava
+name: [[LANGUAGE_NAME]]
+scope: source.[[EXTENSION_NAME]]
 version: 2
 
 file_extensions:
-  - djava
+  - [[EXTENSION_NAME]]
 
 first_line_match: |-
   (?x:
-    ^ \#! .* \b(djava)\b                      # shebang
-  | ^ \s* // .*? -\*- .*? \bdjava\b .*? -\*-  # editorconfig
+    ^ \#! .* \b([[EXTENSION_NAME]])\b                      # shebang
+  | ^ \s* // .*? -\*- .*? \b[[EXTENSION_NAME]]\b .*? -\*-  # editorconfig
   )
 
 ###############################################################################
@@ -440,7 +440,7 @@ contexts:
 ###[ MODULE DECLARATIONS ]#####################################################
 
   module:
-    - match: (?:(open)\s+)?(module){{break}}
+    - match: (?:([[open]])\s+)?([[module]]){{break}}
       captures:
         1: storage.modifier.java
         2: keyword.declaration.namespace.module.java
@@ -539,7 +539,7 @@ contexts:
     - include: entity-class
 
   module-statement-terminator:
-    - match: (?=[;}]|(?:exports|opens|requires|provides|uses|{{reserved_words}}){{break}})
+    - match: (?=[;}]|(?:[[exports]]|[[opens]]|[[requires]]|[[provides]]|[[uses]]|{{reserved_words}}){{break}})
       pop: 1
 
 ###[ IMPORT DECLARATIONS ]#####################################################

@@ -5,88 +5,150 @@
 # "+"  = -, -en / -n (wenn -e)
 # Verbotene Kombinationen:
 #  + mit -/--/^
+# Namensräume:
+# "{}" = Umschließung eines Namensraumes, der den darüberliegenden Begriff als "Elternteil" hat
+# "*"  = Verweis auf denselben Sub-Raum wie Begriff, der nach * steht
+# Begriffe ohne ";" sind auf Deutsch und Englisch gleich
 
-#idee: Original; [leerzeichen möglich] Übersetzung(en; mehrere mit | trennen)
-#idee: an sublime-syntax-datei orientieren = keywords danach sortieren (Deklaration, Kontrolle, Operartor, Illegal, ...)
 
-java;djava
+# Auch Anker für Pakete
+java;           djava
 
-package;paket
-package;päckchen
-import;zufuhr
-import;einbau
+main;           haupt
+
+
+# Deklarationen
+class;          klasse
+enum;           numm | aufzählung
+interface;      schnittstelle
+# Meme
+interface;      ganzzahlgesicht | zwischengesicht
+#/ Meme
+record;         rekord
+var
+void;           leer
+extends;        erweitert
+implements;     benutzt
+import;         zufuhr | einbau
+package;        paket | päckchen
+
+# Module
+module;         modul
+{
+    exports;        exportiert
+    opens;          öffnet
+    provides;       liefert
+    requires;       benötigt
+    to;             zu
+    transitive;     übergehend
+    uses;           nutzt
+    with;           mit
+}
+open;           offenes
+
+
+# Kontrollbegriffe
+assert;         versicher
+break;          brich
+case;           fall
+catch;          fang
+continue;       weiter
+do;             tu
+else;           sonst
+finally;        endlich
+for;            für
+if;             wenn
+return;         zurück
+switch;         schalt
+throw;          wirf
+throws;         wirft
+try;            versuch
+while;          solange | während
+yield;          ernte
+
+
+# Operator-Begriffe
+new;            neu
+instanceof;     instanzvon
+
+
+# Illegale Begriffe
+const;          konst
+goto;           gehzu
+
+
+# Speichertypen
+boolean;        boolesch
+byte;           binärfolge
+char;           zeichen | buchstabe
+# Meme
+char;           kerl
+#/ Meme
+short;          kurz
+int;            ganz
+float;          fließ
+long;           lang
+double;         doppel
+
+
+# Literale
+false;          nein
+null
+true;           ja
+super;          über
+this;           dies
+
 
 # Modifikatoren
-public;offen--
-public;öffentlich--
-default;standard
-protected;beschützt--
-private;privat--
+public;         offen | öffentlich
+protected;      geschützt
+private;        privat
 # Meme
-private;privatisiert--
+private;        privatisiert
 #/ Meme
-abstract;abstrakt--
-
-static;statisch--
-final;endgültig--
-
-class;klasse
-enum;numm
-enum;aufzählung
-interface;ganzzahlgesicht
-interface;zwischengesicht
-
-extends;erweitert
-implements;implementiert
-implements;benutzt
-
-main;haupt
+abstract;       abstrakt
+final;          endgültig
+sealed;         versiegelt
+static;         statisch
+# fp=fließpunkt
+strictfp;       strengfp
+default;        standard
+native;         gebürtig
+synchronized;   synchronisiert
+transient;      kurzlebig
+volatile;       sprunghaft
 
 
-# Schlüsselworte
-true;ja
-false;nein
-
-new;neu
-return;zurück
-
-# Datentypen
-void;leer
-
-int;ganz--
-long;lang--
-short;kurz--
-
-float;fließ
-float;fließend--
-double;doppel
-double;doppelt-
-
-boolean;boolesch
-byte;binärfolge
-
-char;zeichen
-char;buchstabe
-# muss zu java.lang
-String;Faden
-
-# Array.length
-# .länge;.length
 
 
-# Bedingungen
-if;wenn
-else;sonst
-switch;schalt
-case;fall
-# default: siehe Modifikatoren
 
-try;versuche+
-catch;fange+
+# Häufige Begriffe nach Zugriffsoperator
+# v.a. Arrays/Strings
+length;        länge
+# v.a. Enums
+values;        werte
+valueOf;       wertVon
 
 
-# Schleifen
-for;für
-do;tu
-while;solange
-break;bruch
+
+
+# Häufig/generell auftretende Begriffe
+#
+
+# Object-Methoden
+equals;         gleich
+hashCode;       haschZahl
+notify;         benachrichtige
+notifyAll;      benachrichtigeAlle
+toString;       zuStrippe
+wait;           warte
+
+# Klassen-Instanz
+getClass;       gibKlasse
+{
+    getName;                gibName
+    getResourceAsStream;    gibResourceAlsStrom
+}
+.class
+    *getClass
+    # (= erhält denselben Namensraum wie vorheriger Begriff)
