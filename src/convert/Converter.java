@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
 
+import convert.translation.TextChain;
 import filesystem.Filer;
 import main.Logger;
 import main.Main;
@@ -17,28 +18,163 @@ public class Converter {
      */
 
     private static final String TRANSLATION_DIR = "translation";
-    private static Translation baseTranslation;
+    private static final char[] SPLITTERS = new char[] {' ', '.' ,',' ,':' ,';' ,'=' ,'+' ,'+' ,'-' ,'*' ,'%' ,'<' ,'>' ,'&' ,'|' ,'!' ,'?' ,'^' ,'~' ,'(' ,')' ,'{' ,'}' ,'[' ,']'};
 
-    private final File djavaFile;
+    private Translation rootTranslation;
+    private final File[] files;
+    private HashMap<File, TextChain> fileChains = new HashMap<>();
+
     // old version
-    private HashMap<String, String> translation;
+    private HashMap<String, String> oldTranslationHashMap;
 
 
-    public Converter(File djavaFile) {
-        this.djavaFile = djavaFile;
-        // copy static base translation
-        // read file
-        // check which translation files are needed
-        // load translation
+    public Converter(File[] djavaFiles) {
+        files = djavaFiles;
+
+        HashSet<String> neededPackages = new HashSet<>();
+
+        // Loop through every dJava File and create the chains
+        for (File dJavaFile : djavaFiles) {
+            try {
+                TextChain textChainStart = new TextChain("");
+                TextChain textChainLast = textChainStart;
+                ArrayList<String> elements = new ArrayList<>();
+                BufferedReader br = new BufferedReader(new FileReader(dJavaFile));
+                String line;
+                boolean inBlockComment = false;
+
+                // Communicate Debugging
+                System.out.println("\n\nStarte Lesen...\n");
+
+
+                //TODO Create a recursive "int createChain(int i, BufferedReader bf, TextChain textChain)" returning the current index and using "String analyseLine"
+                while ((line = br.readLine()) != null) {
+                    // Filter comments
+                    if (inBlockComment) {
+                        if (line.contains("*/")) {
+                            line = line.substring(line.indexOf("*/") + 2);
+                            inBlockComment = false;
+                        } else {
+                            continue;
+                        }
+
+                    // Recognize new Comments
+                    } else {
+                        if (line.contains("//")) {
+                            line = line.substring(0, line.indexOf("//"));
+                        } else if (line.contains("/*")) {
+                            int indexOfBegin = line.indexOf("/*");
+                            String beginLine = line.substring(0, indexOfBegin);
+                            String endLine = line.substring(indexOfBegin + 2);
+
+                            // If BlockComment ends in same line
+                            if (endLine.contains("*/")) {
+                                line = beginLine + endLine.substring(endLine.indexOf("*/") + 2);
+
+                            // If BlockComment goes beyond this line
+                            } else {
+                                line = beginLine;
+                                inBlockComment = true;
+                            }
+                        }
+                    }
+
+                    // Split elements in String
+                    StringBuilder stringBuilder = new StringBuilder();
+
+                    for (int i = 0; i < line.length(); i++) {
+                        char c = line.charAt(i);
+
+                        if (isSplitter(c)) {
+                            if (!stringBuilder.isEmpty()) {
+                                elements.add(stringBuilder.toString());
+                                stringBuilder = new StringBuilder();
+                            }
+                            elements.add(String.valueOf(c));
+                        } else {
+                            stringBuilder.append(c);
+                        }
+
+                    }
+
+
+
+
+
+                    System.out.println(Arrays.toString(elements.toArray()));
+                }
+
+                textChainStart.print();
+                System.out.println("\n");
+
+            } catch (IOException e) {
+                Logger.error("Fehler beim Lesen der Djava-Datei: " + dJavaFile.getAbsolutePath());
+            }
+        }
+
+
+
+
+        HashMap<String, File> translationFiles = new HashMap<>();
+        File translationFolder = new File(Main.SOURCE_PATH, getClass().getPackageName() + File.separator + TRANSLATION_DIR);
+        //System.out.println(translationFolder.getAbsolutePath() + " --- is dir: " + translationFolder.isDirectory());
+
+        for (File translationFile : translationFolder.listFiles()) {
+
+        }
+
+
+
+
+
+        // setup imports in all translations
+            // check which translation files are needed
+            // store in "rootTranslation" object
+    }
+
+    //TODO: see above
+    int createChain(int i, BufferedReader bf, TextChain textChain) {
+        return 0;
+    }
+
+
+
+    private static boolean isSplitter(char c) {
+        for (int i = 0; i < SPLITTERS.length; i++) {
+            if (SPLITTERS[i] == c) return true;
+        }
+        return false;
+    }
+
+
+
+    /**
+     * called by Main class to start the translation
+     * @return nothing hehe
+     */
+    public void translateToJavaFiles() {
+        for (int i = 0; i < files.length; i++) {
+            //files[i] = Filer.refactorExtension(translateToJavaFile(files[i]), Main.JAVA_EXTENSION);;
+        }
+    }
+
+    private File translateToJavaFile(File djavaFile) {
+
+        // Setup text chain
+            // setup sub chains on every ()
+
+        // Translate Text chains and put it into StringBuilder
+
+        return null;
     }
 
     /**
      * called by Main class to retrieve java file
      * @return translated java file, null for unsuccessful translation
      */
-    public File translateToJava() {
-        return Filer.refactorExtension(djavaFile, Main.JAVA_EXTENSION);
-        //return null;
+    public File[] getFiles() {
+
+        return files;
     }
 
     private String read(File file) {
@@ -57,7 +193,7 @@ public class Converter {
         // use String instead of StringBuilder? Or some array (or make a class like 'ReplaceCode') that splits code into parts that need replacing and parts that don't (to keep order)
         // String content needs to be excluded
 
-        for (Map.Entry<String, String> entry : translation.entrySet()) {
+        for (Map.Entry<String, String> entry : oldTranslationHashMap.entrySet()) {
             int ind = code.indexOf(entry.getKey());
             for (; ind != -1; ind = code.indexOf(entry.getKey(), ind + 1)) {
                 code.replace(ind, ind + entry.getKey().length(), entry.getValue());
@@ -105,7 +241,7 @@ public class Converter {
     }
 
     public void loadTranslation() {
-        translation = new HashMap<>();
+        oldTranslationHashMap = new HashMap<>();
 
         //todo:
         // make "sub-translations" for namespaces (marked by 4 space indent in txt files), so that no conflicts happen
@@ -155,9 +291,9 @@ public class Converter {
                                 s3.add(s2[1].substring(0, s2[1].length() - 1) + (s2[1].endsWith("e+") ? "n" : "en"));
                             }
                             for (String s4 : s3)
-                                translation.put(s4, s2[0]);
+                                oldTranslationHashMap.put(s4, s2[0]);
                         } else {
-                            translation.put(s2[1], s2[0]);
+                            oldTranslationHashMap.put(s2[1], s2[0]);
                         }
                     }
                 }

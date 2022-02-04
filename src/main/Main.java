@@ -123,9 +123,9 @@ public class Main {
             // convert djava to java
             if (interpret) {
                 // todo put in own function to make main() clear and simple
-                Converter c = new Converter(null);
-                c.loadTranslation();
-                javaFiles = c.makeJavaFiles(djavaFiles);
+                Converter c = new Converter(djavaFiles);
+                c.translateToJavaFiles();
+                javaFiles = c.getFiles();
             }
             // compile java with set javac binary/exe, alternatively try system compiler
             if (compile) {
