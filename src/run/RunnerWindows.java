@@ -1,34 +1,60 @@
 package run;
 
+import main.Logger;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
 class RunnerWindows extends Runner {
 
-    public String start(String[] args) {
-        if (args == null || args.length == 0)
-            return "Keine Argumente gegeben (interner Fehler)";
-        File f = new File(args[0]);
-        if (!f.exists() || !f.isFile())
-            return "Argument ist keine Datei";
+    public RunnerWindows(String customRunner) {
+        this.customRunner = customRunner;
+    }
 
+    public boolean start(File file, String fileParentDir) {
         try {
-            // TODO: make option to set path which is then saved in appdata; could also search PATH for java.../bin
-            String s = "start cmd.exe @cmd /k \"\"C:\\Program Files\\Java\\jdk-17\\bin\\java.exe\" -cp \""+f.getParent()+"\" \""+f.getName().substring(0, f.getName().lastIndexOf('.'))+"\"&echo.&echo.&pause&exit\"";
-            File x = new File(f.getParent(), "cfr_bat_tmp.bat");
+            // custom runner set?
+            String runnerPath = customRunner == null || customRunner.isEmpty() ? "java" : customRunner;
+            // build command
+            String s = String.format(
+                    "start cmd.exe @cmd /k " +
+                    "\"" +
+                            "\"%s\" " +
+                            "-cp \"%s\" " +  // parentDir
+                            "\"%s\"" +       // file
+                            "&echo.&echo.&pause&exit" +
+                    "\"",
+                    runnerPath,
+                    fileParentDir,
+                    file.getPath());
+
+            // make batch file to execute command and delete itself afterwards todo direct execution possible?
+            File x = new File(batchName);
             x.delete();
-            if (!x.createNewFile())
-                return "Fehler beim Erstellen der Stapel-Datei";
+            if (!x.createNewFile()) {
+                Logger.error("Fehler beim Erstellen der Stapel-Datei");
+                return false;
+            }
             FileWriter w = new FileWriter(x);
             w.write(s);
             w.write("\ndel \"%~f0\"");
             w.close();
-            Process p = Runtime.getRuntime().exec("\""+x.toString()+"\"");
-            while (p.isAlive());
-            return "Erledigt (Endwert: " + p.exitValue() + ")";
+
+            // execute batch file and wait for result
+            Process p = Runtime.getRuntime().exec("\"" + x + "\"");
+            try {
+                while (p.isAlive())
+                    Thread.sleep(10);
+            } catch (InterruptedException ignored) {}
+
+            // evaluate process return
+            Logger.log("Ausführung erledigt (Endwert: " + p.exitValue() + ")");
+            if (p.exitValue() == 0)
+                return true;
         } catch (IOException e) {
-            return "Prozess-Fehler: " + e.getMessage();
+            Logger.error("Prozess-Fehler beim Ausführen: " + e.getMessage());
         }
+        return false;
     }
 }

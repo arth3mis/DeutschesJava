@@ -3,25 +3,23 @@ package run;
 import main.OS;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Locale;
-import java.util.*;
 
 public abstract class Runner {
+
+    protected String customRunner;
+    protected String batchName = "Pausen-Akro.bat";
 
     /**
      * @return new instance of subclass based on OS, null if OS is not supported
      */
-    public static Runner newInstance() {
-        Scanner sc = new Scanner(System.in); sc.next();
+    public static Runner newInstance(String customRunner) {
         if (OS.isWindows())
-            return new RunnerWindows();
+            return new RunnerWindows(customRunner);
         else
             return null;
     }
 
-    public String start(String[] args) {
+    public String start(File file) {  // todo change signature
         return null;
     }
 

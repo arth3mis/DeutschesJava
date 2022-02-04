@@ -94,6 +94,9 @@ public class Converter {
                 successFiles.add(javaFile);
             } catch (IOException e) {
                 Logger.error("Java-Datei " + javaFile + " konnte nicht erstellt werden: " + e.getMessage());
+                // main file lost?
+                if (successFiles.isEmpty())
+                    Main.mainFileIntact = false;
             }
         }
         if (successFiles.size() == djavaFiles.length)
