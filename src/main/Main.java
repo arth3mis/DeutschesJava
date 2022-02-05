@@ -87,7 +87,6 @@ public class Main {
 
             // turn djava file names into files
             // check if they exist and have an extension (important for Interpreter.makeJavaFiles())
-            // todo put in own function (File[] djavaFiles = parseFiles()?) to make main() clear and simple
             File[] djavaFiles = Arrays.stream(eval[0])
                     .map(File::new)
                     .filter(File::exists)
@@ -257,9 +256,10 @@ public class Main {
     }
 
     private static File[] interpret(File[] djavaFiles) {
-        Converter c = new Converter(null);
-        c.loadTranslation();
-        return c.makeJavaFiles(djavaFiles);
+        //Converter c = new Converter(djavaFiles);
+        //c.translateToJavaFiles();
+        //return c.getFiles();
+        return Filer.refactorExtension(djavaFiles, JAVA_EXTENSION);
     }
 
     private static boolean compile(File[] javaFiles) {

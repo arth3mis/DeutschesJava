@@ -1,11 +1,11 @@
 //package b;
-import java.util.*;
+zufuhr djava.util.*;
 
 offen klasse test {
-	offen statisch leer haupt(Faden[] argumente) {
+	offen statisch leer haupt(Strippe[] argumente) {
 		System.raus.druckz("moin");
 		versuch {} fang (Ausnahme a) {}
-		teste {
+		versuch {
 			wenn (Mathe.qwrz(4) == 2) {
 				zurück;
 			}

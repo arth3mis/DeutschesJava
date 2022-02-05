@@ -11,11 +11,21 @@ import main.Main;
 
 public class Converter {
 
-    /*
-
-    NOTIZ für JANNIS: Commits haben Versionen, die werden stumpf durchnummeriert, siehe bisherige commits und jar-Dateien
-
+    /**
+     * TEST METHOD for Converter
      */
+    public static void main(String[] args) {
+        File[] djavaFiles = Arrays.stream(args)
+                .map(File::new)
+                .filter(File::exists)
+                .toList().toArray(new File[0]);
+
+        Converter c = new Converter(djavaFiles);
+        c.translateToJavaFiles();
+        File[] javaFiles = c.getFiles();
+
+        System.out.println(Arrays.toString(javaFiles));
+    }
 
     private static final String TRANSLATION_DIR = "translation";
     private static final char[] SPLITTERS = new char[] {' ', '.' ,',' ,':' ,';' ,'=' ,'+' ,'+' ,'-' ,'*' ,'%' ,'<' ,'>' ,'&' ,'|' ,'!' ,'?' ,'^' ,'~' ,'(' ,')' ,'{' ,'}' ,'[' ,']'};
@@ -154,6 +164,7 @@ public class Converter {
      */
     public void translateToJavaFiles() {
         for (int i = 0; i < files.length; i++) {
+            // TODO if first file (=main class) fails, set flag: Main.mainFileIntact = false;
             //files[i] = Filer.refactorExtension(translateToJavaFile(files[i]), Main.JAVA_EXTENSION);;
         }
     }

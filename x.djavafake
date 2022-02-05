@@ -1,0 +1,46 @@
+// linienkommentar
+/*
+ * guten tag
+ */
+
+import java.util.Scanner;
+
+public class x {
+	public static void main(String[] argumente) {
+		int g = 1;
+		short k = -1;
+		long l = 2;
+		float f = 3.0f;
+		double d = 4.0;
+		boolean b = true;
+		System.out.println("\"Hallo Deutschland.\"");
+
+		x instanz = new x(42.0, 20.7);
+		instanz.rennen(99);
+		instanz.length();
+
+		Scanner ab = new Scanner(System.in);
+	}
+
+	void rennen(int i) {
+		int i2 = 42;
+
+		if (i > i2+2 || i <= i2)
+			return;
+		else {
+			i2 += i + 1 - 2*3/4%5 + (i > 5 ? 1 : 0);
+			return;
+		}
+	}
+
+	double a, b;
+
+	public x(double a, double b) {
+		this.a = a;
+        this.b = b;
+    }
+
+    public double length() {
+        return Math.sqrt(a*a+b*b);
+    }
+}
