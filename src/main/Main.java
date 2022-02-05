@@ -279,7 +279,7 @@ public class Main {
         if (runner == null) {
             Logger.error("Ausführen wird auf diesem Betriebssystem nicht unterstützt.");
         } else {
-            // try to get parent directory
+            // try to get parent directory  // TODO ARTHUR: first, settings. then, this vvvvvvvvvvvvvvvv
             //String parentDir = Filer.getParent(mainClassFile);  // todo create method and let it try f.getParent(), then f.getAbs&&f.getParent
             //if (parentDir == null) error
             //else
