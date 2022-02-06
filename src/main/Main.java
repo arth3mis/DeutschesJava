@@ -7,7 +7,9 @@ import run.Runner;
 
 import javax.tools.*;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -98,7 +100,10 @@ public class Main {
             } else {
                 if (!djavaFiles[0].getPath().equals(eval[0][0]))
                     mainFileIntact = false;
-                Logger.log("%d/%d %s-Dateien gefunden.", djavaFiles.length, eval[0].length, LANGUAGE_NAME);
+                if (djavaFiles.length != eval[0].length)
+                    Logger.warning("%d/%d %s-Dateien gefunden.", djavaFiles.length, eval[0].length, LANGUAGE_NAME);
+                else
+                    Logger.log("%d/%d %s-Dateien gefunden.", djavaFiles.length, eval[0].length, LANGUAGE_NAME);
             }
 
             // File array that are used to pass data to subsequent actions (or signal errors)
@@ -108,7 +113,7 @@ public class Main {
             // standard operation (run)?
             boolean standard = !(Flag.CONVERT.set || Flag.COMPILE.set || Flag.RUN.set || Flag.JUST_COMPILE.set || Flag.JUST_RUN.set);
             // resolve flags to actions
-            boolean interpret = standard || Flag.RUN.set || Flag.COMPILE.set || Flag.CONVERT.set;
+            boolean convert = standard || Flag.RUN.set || Flag.COMPILE.set || Flag.CONVERT.set;
             boolean compile   = standard || Flag.RUN.set || Flag.COMPILE.set || Flag.JUST_COMPILE.set;
             boolean run       = standard || Flag.RUN.set || Flag.JUST_RUN.set;
 
@@ -116,7 +121,7 @@ public class Main {
             //
 
             // convert djava to java
-            if (interpret) {
+            if (convert) {
                 javaFiles = interpret(djavaFiles);
             }
 
@@ -137,6 +142,11 @@ public class Main {
                 }
             }
 
+            // delete java files? (only when conversion happened)
+            if (convert && !Flag.KEEP_JAVA.set) {
+                //Filer.deleteFiles(javaFiles); todo
+            }
+
             // run class with set java binary/exe, alternatively try global java command
             if (run) {
                 // no compilation happened?
@@ -144,13 +154,17 @@ public class Main {
                     classFiles = Filer.refactorExtension(javaFiles != null ? javaFiles : djavaFiles, "");
                 // don't run if conversion/compilation failed
                 if (classFiles.length == 0 || !mainFileIntact)
-                    Logger.warning("Ausführung wird übersprungen.");
+                    Logger.warning("Rennen wird übersprungen.");
                 else {
                     run(classFiles[0]);
                 }
             }
 
         }
+    }
+
+    private static void loadCustomPaths() {
+        // todo
     }
 
     /**
@@ -217,14 +231,14 @@ public class Main {
     }
 
     private static void startSettings() {
-        enum Choices { k,K, a,A, x,X, wrong }
+        enum Choices { k,K, r,R, x,X, wrong }
         String choice = "";
         while (!choice.equalsIgnoreCase("x")) {
             choice = Logger.request("""
                     
                     -- Einstellungen --
                     [k] Kompilierer-Pfad (javac) setzen (aktuell: %s)
-                    [a] Ausführer-Pfad (java) setzen (aktuell: %s)
+                    [r] Renner-Pfad (java) setzen (aktuell: %s)
                     [x] Beenden
                     
                     Auswahl""",
@@ -237,53 +251,68 @@ public class Main {
                 ch = Choices.wrong;
             }
             switch (ch) {
-                case k:
-                case K:
-                    Logger.warning("'k' noch nicht implementiert."); // todo
-                    break;
-                case a:
-                case A:
-                    Logger.warning("'a' noch nicht implementiert."); // todo
-                    break;
-                case x:
-                case X:
-                    Logger.log("Einstellungen beendet.");
-                    break;
-                default:
-                    Logger.error("Falsche Eingabe!");
+                case k, K -> setPath(0, "Kompilierer");
+                case r, R -> setPath(1, "Renner");
+                case x, X -> Logger.log("Einstellungen beendet.");
+                default -> Logger.error("Falsche Eingabe!");
             }
         }
+    }
+
+    private static void setPath(int type, String pathName) {
+        String path = Logger.request("Gib einen (absoluten) Pfad für die %s-Datei an (keinen Ordnerpfad)", pathName)
+                .replace("\"", "");
+        // no input?
+        if (path.isEmpty())
+            return;
+        // test existence of file
+        File f = new File(path);
+        if (f.isFile() && f.isAbsolute()) {
+            switch (type) {
+                case 0 -> compilerPath = path;
+                case 1 -> runnerPath = path;
+            }
+        } else
+            Logger.error("Ungültiger Pfad.");
     }
 
     private static File[] interpret(File[] djavaFiles) {
         //Converter c = new Converter(djavaFiles);
         //c.translateToJavaFiles();
         //return c.getFiles();
-        return Filer.refactorExtension(djavaFiles, JAVA_EXTENSION);
+
+        // todo temp
+        List<File> jf = new ArrayList<>(List.of(Filer.refactorExtension(djavaFiles, JAVA_EXTENSION)));
+        for (File f : jf) {
+            try {
+                f.delete();
+                if (f.createNewFile()) throw new IOException();
+                FileWriter w = new FileWriter(f);
+                w.write(Files.readString(f.toPath()));
+            } catch (IOException e) {
+                jf.remove(f);
+            }
+        }
+        return jf.toArray(new File[0]);
     }
 
     private static boolean compile(File[] javaFiles) {
-        Compiler compiler = Compiler.newInstance();
+        Compiler compiler = Compiler.newInstance(compilerPath);
         // not supported?
         if (compiler == null) {
             Logger.error("Kompilieren wird auf diesem Betriebssystem nicht unterstützt.");
             return false;
         }
-        //compiler.start(javaFiles);
-        return true;
+        return compiler.start(javaFiles);
     }
 
     private static void run(File mainClassFile) {
         Runner runner = Runner.newInstance(runnerPath);
         // not supported?
         if (runner == null) {
-            Logger.error("Ausführen wird auf diesem Betriebssystem nicht unterstützt.");
+            Logger.error("Rennen wird auf diesem Betriebssystem nicht unterstützt.");
         } else {
-            // try to get parent directory  // TODO ARTHUR: first, settings. then, this vvvvvvvvvvvvvvvv
-            //String parentDir = Filer.getParent(mainClassFile);  // todo create method and let it try f.getParent(), then f.getAbs&&f.getParent
-            //if (parentDir == null) error
-            //else
-            //runner.start(mainClassFile, parentDir);
+            runner.start(mainClassFile);
         }
     }
 

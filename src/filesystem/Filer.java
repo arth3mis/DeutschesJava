@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Filer {
+public final class Filer {
 
     public static File[] refactorExtension(File[] files, String newExtension) {
         List<File> newFiles = new ArrayList<>();

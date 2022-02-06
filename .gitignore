@@ -6,5 +6,10 @@
 /testing/test*
 /test_*
 
+# test results
+/*.bat
+/*.java
+/*.class
+
 # custom files
 errorlog.txt

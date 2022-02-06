@@ -7,7 +7,6 @@ import java.io.File;
 public abstract class Runner {
 
     protected String customRunner;
-    protected String batchName = "Pausen-Akro.bat";
 
     /**
      * @return new instance of subclass based on OS, null if OS is not supported
@@ -19,8 +18,6 @@ public abstract class Runner {
             return null;
     }
 
-    public String start(File file) {  // todo change signature
-        return null;
-    }
+    public abstract boolean start(File mainClassFile);
 
 }
