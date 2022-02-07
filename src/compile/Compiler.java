@@ -1,6 +1,7 @@
 package compile;
 
 import main.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.tools.*;
 import java.io.File;
@@ -40,7 +41,7 @@ public record Compiler(String customCompiler) {
         return compileWithCommand("javac", javaFiles);
     }
 
-    private boolean compileWithCommand(String compiler, File[] javaFiles) {
+    private boolean compileWithCommand(String compiler, File @NotNull [] javaFiles) {
         try {
             StringBuilder sb = new StringBuilder();
             for (File f : javaFiles)

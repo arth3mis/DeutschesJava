@@ -55,9 +55,9 @@ class RunnerWindows extends Runner {
             w.write(command);
             w.write("\ndel \"%~f0\"");
             w.close();
-            Logger.log("Stapel-Datei erstellt.");
+            Logger.log("Stapel-Datei fürs Rennen erstellt.");
         } catch (IOException e) {
-            Logger.error("Fehler beim Erstellen der Stapel-Datei: " + e.getMessage());
+            Logger.error("Fehler beim Erstellen der Stapel-Datei fürs Rennen: " + e.getMessage());
             return false;
         }
 
