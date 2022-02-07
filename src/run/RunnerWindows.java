@@ -15,21 +15,31 @@ class RunnerWindows extends Runner {
     }
 
     @Override
-    public boolean start(File mainClassFile) {
+    public boolean start(File mainClassFile, String[] args) {
         // custom runner set?
         String runnerPath = customRunner == null || customRunner.isEmpty() ? "java" : customRunner;
         // build command that executes java in a standalone (/k) cmd window
+        final String ARG_FLAG = "[ARGS]";
         String command = String.format(
                 "start cmd.exe @cmd /k " +
                         "\"" +
                         "\"%s\" " +
                         "-classpath \"%s\" " +           // parent dir (relative to user.dir)
                         "\"%s\"" +                       // file name
+                        ARG_FLAG +                       // args (added later)
                         "&&echo.&&echo.&&pause&&exit" +  // '&' also works
                         "\"",
                 runnerPath,
                 mainClassFile.getParent() == null ? "." : mainClassFile.getParent(),
                 mainClassFile.getName());
+
+        // add arguments
+        StringBuilder sbArgs = new StringBuilder();
+        if (args != null && args.length > 0) {
+            for (String arg : args)
+                sbArgs.append(" \"").append(arg).append("\"");
+        }
+        command = command.replace(ARG_FLAG, sbArgs.toString());
 
         // make batch file in user.dir to execute command and delete itself afterwards
         // executing the command directly does not find "start" or "cmd.exe"

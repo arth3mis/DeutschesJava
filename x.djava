@@ -14,6 +14,7 @@ offen klasse x {
 		doppel d = 4.0;
 		boolesch b = ja;
 		System.raus.druckz("\"Hallo Deutschland.\"");
+		wenn (argumente.länge > 0) System.raus.druckz(argumente[0]);
 
 		x instanz = neu x(42.0, 20.7);
 		instanz.rennen(99);

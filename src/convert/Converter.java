@@ -118,7 +118,7 @@ public class Converter {
                 System.out.println("\n");
 
             } catch (IOException e) {
-                Logger.error("Fehler beim Lesen der Djava-Datei: " + dJavaFile.getAbsolutePath());
+                Logger.error("Fehler beim Lesen der Djava-Datei: %s", dJavaFile.getAbsolutePath());
             }
         }
 
@@ -192,7 +192,7 @@ public class Converter {
         try {
             return Files.readString(file.toPath());
         } catch (IOException e) {
-            Logger.error("Djava-Datei konnte nicht gelesen werden: " + e.getMessage());
+            Logger.error("Djava-Datei konnte nicht gelesen werden: %s", e.getMessage());
             return null;
         }
     }
@@ -240,7 +240,7 @@ public class Converter {
                 bw.close();
                 successFiles.add(javaFile);
             } catch (IOException e) {
-                Logger.error("Java-Datei " + javaFile + " konnte nicht erstellt werden: " + e.getMessage());
+                Logger.error("Java-Datei %s konnte nicht erstellt werden: %s", javaFile, e.getMessage());
                 // main file lost?
                 if (successFiles.isEmpty())
                     Main.mainFileIntact = false;
@@ -312,7 +312,7 @@ public class Converter {
                     }
                 }
             } catch (IOException e) {
-                Logger.error("Fehler beim Lesen der Übersetzungs-Datei: " + file);
+                Logger.error("Fehler beim Lesen der Übersetzungs-Datei: %s", file);
             }
         }
         Logger.log("Übersetzungen geladen.");

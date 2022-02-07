@@ -1,5 +1,8 @@
 package filesystem;
 
+import main.Main;
+import main.OS;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,5 +24,36 @@ public final class Filer {
                 extDot > 0 ? extDot : name.length()) + (newExtension.isEmpty() ? "" : ".") + newExtension;
         // create file from path and name
         return new File(file.getParentFile(), newName);  // parent == null is handled by constructor
+    }
+
+    public static boolean deleteFiles(File[] files) {
+        boolean allSuccess = true;
+        for (File f : files) {
+            if (!f.delete())
+                allSuccess = false;
+        }
+        return allSuccess;
+    }
+
+    /**
+     * Windows: %APPDATA%\LANGUAGE_NAME;
+     * Mac: [user.home]/Library/Application Support/LANGUAGE_NAME;
+     * Linux: [user.home]/.config/LANGUAGE_NAME;
+     */
+    public static File getAppConfigFolder() {
+        String path = System.getProperty("user.home");
+        // empty path? link to user.dir
+        if (path == null)
+            return new File("");
+        // adjust based on OS
+        switch (OS.getOS()) {
+            case WINDOWS -> {
+                if (System.getenv("APPDATA") != null)
+                    path = System.getenv("APPDATA");
+            }
+            case MAC -> path += File.separator + "Library" + File.separator + "Application Support";
+            case LINUX -> path += File.separator + ".config";
+        }
+        return new File(path, Main.LANGUAGE_NAME);
     }
 }

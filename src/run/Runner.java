@@ -18,6 +18,6 @@ public abstract class Runner {
             return null;
     }
 
-    public abstract boolean start(File mainClassFile);
+    public abstract boolean start(File mainClassFile, String[] args);
 
 }

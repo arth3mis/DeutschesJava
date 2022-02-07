@@ -1,7 +1,6 @@
 package main;
 
 import compile.Compiler;
-import convert.Converter;
 import filesystem.Filer;
 import run.Runner;
 
@@ -63,10 +62,17 @@ public class Main {
     }
 
     public static boolean mainFileIntact = true;
-    static String compilerPath = "";
-    static String runnerPath = "";
+    private static String compilerPath = "";
+    private static String runnerPath = "";
+
+    public static final String pathSaveFileName = "pfade.txt";
+    public static final String compilerSave = "K=";
+    public static final String runnerSave = "R=";
+
 
     public static void main(String[] args) {
+        loadCustomPaths();
+
         String[][] eval = evaluateArgs(args);
 
         // verbose mode?
@@ -144,7 +150,11 @@ public class Main {
 
             // delete java files? (only when conversion happened)
             if (convert && !Flag.KEEP_JAVA.set) {
-                //Filer.deleteFiles(javaFiles); todo
+                Logger.log("Java-Dateien löschen...");
+                if (!Filer.deleteFiles(javaFiles))
+                    Logger.warning("Nicht alle Java-Dateien konnten gelöscht werden.");
+                else
+                    Logger.log("Alle Java-Dateien gelöscht.");
             }
 
             // run class with set java binary/exe, alternatively try global java command
@@ -156,15 +166,50 @@ public class Main {
                 if (classFiles.length == 0 || !mainFileIntact)
                     Logger.warning("Rennen wird übersprungen.");
                 else {
-                    run(classFiles[0]);
+                    run(classFiles[0], eval[1]);
                 }
             }
-
         }
     }
 
     private static void loadCustomPaths() {
-        // todo
+        File saveFile = new File(Filer.getAppConfigFolder(), pathSaveFileName);
+        if (!saveFile.exists())
+            return;
+        // extract paths
+        try {
+            String content = Files.readString(saveFile.toPath());
+            int index;
+            if ((index = content.indexOf(compilerSave)) >= 0)
+                compilerPath = content.substring(index + compilerSave.length(), content.indexOf("\n", index))
+                        .replace("\"", "");
+            if ((index = content.indexOf(runnerSave)) >= 0)
+                runnerPath = content.substring(index + runnerSave.length(), content.indexOf("\n", index))
+                        .replace("\"", "");
+        } catch (IOException ignored) {
+        }
+    }
+
+    private static void saveCustomPaths() {
+        File saveFile = new File(Filer.getAppConfigFolder(), "pfade.txt");
+        if (!saveFile.exists()) {
+            try {
+                if (!saveFile.getParentFile().mkdirs() && !saveFile.delete() && !saveFile.createNewFile())
+                    throw new IOException("Datei/Elternordner konnten nicht gelöscht/neu erstellt werden.");
+            } catch (IOException e) {
+                Logger.error("Einstellungen können nicht gespeichert werden: %s", e.getMessage());
+            }
+        }
+        // save paths
+        String content =
+                compilerSave + "\"" + compilerPath + "\"\n" +
+                runnerSave + "\"" + runnerPath + "\"\n";
+        try {
+            FileWriter w = new FileWriter(saveFile);
+            w.write(content);
+            w.close();
+        } catch (IOException ignored) {
+        }
     }
 
     /**
@@ -236,6 +281,7 @@ public class Main {
         while (!choice.equalsIgnoreCase("x")) {
             choice = Logger.request("""
                     
+                    
                     -- Einstellungen --
                     [k] Kompilierer-Pfad (javac) setzen (aktuell: %s)
                     [r] Renner-Pfad (java) setzen (aktuell: %s)
@@ -262,18 +308,20 @@ public class Main {
     private static void setPath(int type, String pathName) {
         String path = Logger.request("Gib einen (absoluten) Pfad für die %s-Datei an (keinen Ordnerpfad)", pathName)
                 .replace("\"", "");
-        // no input?
-        if (path.isEmpty())
-            return;
-        // test existence of file
-        File f = new File(path);
-        if (f.isFile() && f.isAbsolute()) {
-            switch (type) {
-                case 0 -> compilerPath = path;
-                case 1 -> runnerPath = path;
+        // path not empty?
+        if (!path.isEmpty()) {
+            // test existence of file
+            File f = new File(path);
+            if (!f.isFile() || !f.isAbsolute()) {
+                Logger.error("Ungültiger Pfad.");
+                return;
             }
-        } else
-            Logger.error("Ungültiger Pfad.");
+        }
+        switch (type) {
+            case 0 -> compilerPath = path;
+            case 1 -> runnerPath = path;
+        }
+        saveCustomPaths();
     }
 
     private static File[] interpret(File[] djavaFiles) {
@@ -281,38 +329,37 @@ public class Main {
         //c.translateToJavaFiles();
         //return c.getFiles();
 
-        // todo temp
+        // todo temp (and very scuffed god damn)
         List<File> jf = new ArrayList<>(List.of(Filer.refactorExtension(djavaFiles, JAVA_EXTENSION)));
-        for (File f : jf) {
+        List<File> unJf = new ArrayList<>();
+        for (int i = 0; i < djavaFiles.length; i++) {
+            File f = jf.get(i);
             try {
-                f.delete();
-                if (f.createNewFile()) throw new IOException();
+                if (!f.delete() && !f.createNewFile()) throw new IOException();
                 FileWriter w = new FileWriter(f);
-                w.write(Files.readString(f.toPath()));
+                w.write(Files.readString(djavaFiles[i].toPath()));
+                w.close();
             } catch (IOException e) {
-                jf.remove(f);
+                unJf.add(f);
             }
         }
+        for (File r : unJf)
+            jf.remove(r);
         return jf.toArray(new File[0]);
     }
 
     private static boolean compile(File[] javaFiles) {
-        Compiler compiler = Compiler.newInstance(compilerPath);
-        // not supported?
-        if (compiler == null) {
-            Logger.error("Kompilieren wird auf diesem Betriebssystem nicht unterstützt.");
-            return false;
-        }
+        Compiler compiler = new Compiler(compilerPath);
         return compiler.start(javaFiles);
     }
 
-    private static void run(File mainClassFile) {
+    private static void run(File mainClassFile, String[] args) {
         Runner runner = Runner.newInstance(runnerPath);
         // not supported?
         if (runner == null) {
             Logger.error("Rennen wird auf diesem Betriebssystem nicht unterstützt.");
         } else {
-            runner.start(mainClassFile);
+            runner.start(mainClassFile, args);
         }
     }
 
