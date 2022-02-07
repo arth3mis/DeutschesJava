@@ -148,8 +148,8 @@ public class Main {
                 }
             }
 
-            // delete java files? (only when conversion happened)
-            if (convert && !Flag.KEEP_JAVA.set) {
+            // delete java files? (only when conversion and compilation happened)
+            if (convert && compile && !Flag.KEEP_JAVA.set) {
                 Logger.log("Java-Dateien löschen...");
                 if (!Filer.deleteFiles(javaFiles))
                     Logger.warning("Nicht alle Java-Dateien konnten gelöscht werden.");
