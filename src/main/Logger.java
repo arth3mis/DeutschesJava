@@ -9,13 +9,12 @@ import static main.Main.LANGUAGE_NAME;
 
 public class Logger {
 
-    static boolean logToSystemOut = false;
     static boolean suppressWarnings = false;  // no user setting yet
 
     private static Scanner scanner = new Scanner(System.in);
 
     public static void log(String s, Object... args) {
-        if (logToSystemOut) {
+        if (Flag.VERBOSE.set) {
             System.out.printf(s+"\n", args);
         }
     }

@@ -4,7 +4,6 @@ import compile.Compiler;
 import filesystem.Filer;
 import run.Runner;
 
-import javax.tools.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,7 +26,7 @@ public class Main {
 
     public static final String SOURCE_PATH = "src";
 
-    public static final String WILDCARD = "*";
+    public static final String WILDCARD = "*"; // todo maybe "--alle" Flag to include subfolder recursive search?
 
     // program flags
     public enum Flag {
@@ -75,9 +74,8 @@ public class Main {
 
         String[][] eval = evaluateArgs(args);
 
-        // verbose mode?
-        if (Flag.VERBOSE.set)
-            Logger.logToSystemOut = true;
+        Logger.log(Arrays.toString(args));
+        if (args != null)return;
 
         // display help dialog?
         if (eval.length == 0) {
@@ -93,11 +91,10 @@ public class Main {
             if (Flag.HELP.set)
                 Logger.logHelp(false);
 
-            // turn djava file names into files
-            // check if they exist and have an extension (important for Interpreter.makeJavaFiles())
+            // turn djava file names into files, check if the files exist
             File[] djavaFiles = Arrays.stream(eval[0])
                     .map(File::new)
-                    .filter(File::exists)
+                    .filter(File::isFile)
                     .toList().toArray(new File[0]);
 
             if (djavaFiles.length < 1) {
@@ -250,15 +247,17 @@ public class Main {
         if (Flag.SETTINGS.set)
             return new String[1][];
 
-        // replace wildcard with all djava files in working directory
+        // replace wildcard with all djava files in current directory (user.dir) todo not working with '*'
         if (fileNames.contains(WILDCARD)) {
+            Logger.log("Suche alle %s-Dateien im aktuellen Ordner...", LANGUAGE_NAME);
             // remove wildcard from list
             while (fileNames.remove(WILDCARD));
 
-            // find all djava files present in current folder
+            // find all djava files present in working directory
             File workingDir = new File(System.getProperty("user.dir"));
             String[] newDjavaFiles = workingDir.list(
-                    (dir, name) -> name.substring(name.lastIndexOf('.') + 1).equalsIgnoreCase(EXTENSION_NAME));
+                    (dir, name) -> name.lastIndexOf('.') > 0 &&
+                           name.substring(name.lastIndexOf('.') + 1).equalsIgnoreCase(EXTENSION_NAME));
             // add all file names that are not already in the list
             if (newDjavaFiles != null)
                 fileNames.addAll(Arrays.stream(newDjavaFiles).filter(name -> !fileNames.contains(name)).toList());
