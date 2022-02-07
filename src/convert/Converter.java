@@ -28,7 +28,6 @@ public class Converter {
     }
 
     private static final String TRANSLATION_DIR = "translation";
-    private static final char[] SPLITTERS = new char[] {' ', '.' ,',' ,':' ,';' ,'=' ,'+' ,'+' ,'-' ,'*' ,'%' ,'<' ,'>' ,'&' ,'|' ,'!' ,'?' ,'^' ,'~' ,'(' ,')' ,'{' ,'}' ,'[' ,']'};
 
     private Translation rootTranslation;
     private final File[] files;
@@ -46,73 +45,12 @@ public class Converter {
         // Loop through every dJava File and create the chains
         for (File dJavaFile : djavaFiles) {
             try {
-                TextChain textChainStart = new TextChain("");
-                TextChain textChainLast = textChainStart;
-                ArrayList<String> elements = new ArrayList<>();
                 BufferedReader br = new BufferedReader(new FileReader(dJavaFile));
-                String line;
-                boolean inBlockComment = false;
 
                 // Communicate Debugging
                 System.out.println("\n\nStarte Lesen...\n");
+                TextChain textChainStart = new TextChain.Generator(br).generate();
 
-
-                //TODO Create a recursive "int createChain(int i, BufferedReader bf, TextChain textChain)" returning the current index and using "String analyseLine"
-                while ((line = br.readLine()) != null) {
-                    // Filter comments
-                    if (inBlockComment) {
-                        if (line.contains("*/")) {
-                            line = line.substring(line.indexOf("*/") + 2);
-                            inBlockComment = false;
-                        } else {
-                            continue;
-                        }
-
-                    // Recognize new Comments
-                    } else {
-                        if (line.contains("//")) {
-                            line = line.substring(0, line.indexOf("//"));
-                        } else if (line.contains("/*")) {
-                            int indexOfBegin = line.indexOf("/*");
-                            String beginLine = line.substring(0, indexOfBegin);
-                            String endLine = line.substring(indexOfBegin + 2);
-
-                            // If BlockComment ends in same line
-                            if (endLine.contains("*/")) {
-                                line = beginLine + endLine.substring(endLine.indexOf("*/") + 2);
-
-                            // If BlockComment goes beyond this line
-                            } else {
-                                line = beginLine;
-                                inBlockComment = true;
-                            }
-                        }
-                    }
-
-                    // Split elements in String
-                    StringBuilder stringBuilder = new StringBuilder();
-
-                    for (int i = 0; i < line.length(); i++) {
-                        char c = line.charAt(i);
-
-                        if (isSplitter(c)) {
-                            if (!stringBuilder.isEmpty()) {
-                                elements.add(stringBuilder.toString());
-                                stringBuilder = new StringBuilder();
-                            }
-                            elements.add(String.valueOf(c));
-                        } else {
-                            stringBuilder.append(c);
-                        }
-
-                    }
-
-
-
-
-
-                    System.out.println(Arrays.toString(elements.toArray()));
-                }
 
                 textChainStart.print();
                 System.out.println("\n");
@@ -124,7 +62,7 @@ public class Converter {
 
 
 
-
+        /*
         HashMap<String, File> translationFiles = new HashMap<>();
         File translationFolder = new File(Main.SOURCE_PATH, getClass().getPackageName() + File.separator + TRANSLATION_DIR);
         //System.out.println(translationFolder.getAbsolutePath() + " --- is dir: " + translationFolder.isDirectory());
@@ -132,7 +70,7 @@ public class Converter {
         for (File translationFile : translationFolder.listFiles()) {
 
         }
-
+        */
 
 
 
@@ -147,14 +85,6 @@ public class Converter {
         return 0;
     }
 
-
-
-    private static boolean isSplitter(char c) {
-        for (int i = 0; i < SPLITTERS.length; i++) {
-            if (SPLITTERS[i] == c) return true;
-        }
-        return false;
-    }
 
 
 
