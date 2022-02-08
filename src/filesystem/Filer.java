@@ -9,6 +9,11 @@ import java.util.List;
 
 public final class Filer {
 
+    public static boolean checkExtension(File file, String extension) {
+        int extDot = file.getName().lastIndexOf('.');
+        return extension.isEmpty() && extDot < 1 || file.getName().substring(extDot + 1).equals(extension);
+    }
+
     public static File[] refactorExtension(File[] files, String newExtension) {
         List<File> newFiles = new ArrayList<>();
         for (File f : files)
@@ -33,6 +38,13 @@ public final class Filer {
                 allSuccess = false;
         }
         return allSuccess;
+    }
+
+    /**
+     * @return user.dir
+     */
+    public static File getCurrentDir() {
+        return new File(System.getProperty("user.dir"));
     }
 
     /**

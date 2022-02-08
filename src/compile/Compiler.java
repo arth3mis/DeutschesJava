@@ -22,13 +22,16 @@ public record Compiler(String customCompiler) {
             Logger.log("Kompilierung mit System-Kompilierer starten...");
             try {
                 // stuff...
-                StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
+                StandardJavaFileManager fileManager =
+                        compiler.getStandardFileManager(null, null, null);
                 File pathRef = javaFiles[0].getAbsoluteFile().getParentFile();
                 fileManager.setLocation(StandardLocation.CLASS_OUTPUT, List.of(pathRef));
                 Iterable<? extends JavaFileObject> compilationUnits1 = fileManager.getJavaFileObjects(javaFiles);
 
                 // execute task
-                if (compiler.getTask(null, fileManager, null, null, null, compilationUnits1).call()) {
+                if (compiler
+                        .getTask(null, fileManager, null, null, null, compilationUnits1)
+                        .call()) {
                     Logger.log("Kompilieren erfolgreich.");
                     return true;
                 } else

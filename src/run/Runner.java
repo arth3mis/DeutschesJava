@@ -14,10 +14,23 @@ public abstract class Runner {
     public static Runner newInstance(String customRunner) {
         if (OS.isWindows())
             return new RunnerWindows(customRunner);
+        else if (OS.isMac())
+            return new RunnerGeneral(customRunner);
+        else if (OS.isLinux())
+            return new RunnerGeneral(customRunner);
         else
             return null;
     }
 
-    public abstract boolean start(File mainClassFile, String[] args);
+    public abstract void start(File mainClassFile, String[] args);
+
+    protected String formatArgs(String[] args) {
+        StringBuilder sbArgs = new StringBuilder();
+        if (args != null && args.length > 0) {
+            for (String arg : args)
+                sbArgs.append(" \"").append(arg).append("\"");
+        }
+        return sbArgs.toString();
+    }
 
 }

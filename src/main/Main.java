@@ -8,17 +8,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
 public class Main {
-
-    // -v -complete "D:\Benutzer\Arthur\Arthurs medien\Documents\Intellij\DeutschesJava\out\artifacts\DeutschesJava_jar\x.djava"
-    // -v -a "D:\Users\Art\Coding\Intellij\DeutschesJava\out\artifacts\DeutschesJava_jar\x.djava"
-    // new template:
-    // -v -u "D:\Users\Art\Coding\IdeaProjects\DeutschesJava\out\artifacts\DeutschesJava_jar\x.djava"
 
     public static final String LANGUAGE_NAME = "DJava";
     public static final String EXTENSION_NAME = "djava";
@@ -32,6 +28,8 @@ public class Main {
     public enum Flag {
         HELP("?", "hilfe"),
         VERBOSE("v", ""),
+        IGNORE_EXT("x", "unendung"),
+        INCLUDE_ALL("", "alle"),
         CONVERT("u", "umwandeln"),
         COMPILE("k", "kompilieren"),
         RUN("r", "rennen"),
@@ -46,7 +44,8 @@ public class Main {
         public static final String longFlag = "--";
 
         public static final int shortArgLength = 1;
-        public static final int longArgMaxLength = Arrays.stream(Flag.values()).map(f -> f.L).max(Comparator.comparingInt(String::length)).get().length();
+        public static final int longArgMaxLength =
+                Arrays.stream(Flag.values()).map(f -> f.L).max(Comparator.comparingInt(String::length)).get().length();
 
         public final String S;
         public final String L;
@@ -68,103 +67,94 @@ public class Main {
     public static final String compilerSave = "K=";
     public static final String runnerSave = "R=";
 
+    private static File[] djavaFiles;
+    private static String[] runArgs;
+
 
     public static void main(String[] args) {
         loadCustomPaths();
 
-        String[][] eval = evaluateArgs(args);
-
-        Logger.log(Arrays.toString(args));
-        if (args != null)return;
+        short eval = evaluateArgs(args);
 
         // display help dialog?
-        if (eval.length == 0) {
+        if (eval == 1) {
             Logger.logHelp(true);
+            return;
         }
         // settings?
-        else if (eval.length == 1) {
+        else if (eval == 2) {
             startSettings();
+            return;
         }
-        // standard call?
-        else if (eval.length == 2) {
-            // help?
-            if (Flag.HELP.set)
-                Logger.logHelp(false);
 
-            // turn djava file names into files, check if the files exist
-            File[] djavaFiles = Arrays.stream(eval[0])
-                    .map(File::new)
-                    .filter(File::isFile)
-                    .toList().toArray(new File[0]);
+        // standard call
+        //
 
-            if (djavaFiles.length < 1) {
-                Logger.error("Keine validen %s-Dateien gefunden.", LANGUAGE_NAME);
-                return;
-            } else {
-                if (!djavaFiles[0].getPath().equals(eval[0][0]))
-                    mainFileIntact = false;
-                if (djavaFiles.length != eval[0].length)
-                    Logger.warning("%d/%d %s-Dateien gefunden.", djavaFiles.length, eval[0].length, LANGUAGE_NAME);
+        // help?
+        if (Flag.HELP.set) {
+            Logger.logHelp(false);
+            // user entered more arguments?
+            if (args.length > 1)
+                Logger.warning("Nach der Hilfe werden keine weiteren Aktionen ausgeführt!");
+            // exit here
+            return;
+        }
+
+        // File array that are used to pass data to subsequent actions (or signal errors)
+        File[] javaFiles = null;
+        File[] classFiles = null;
+
+        // standard operation (run)?
+        boolean standard = !(Flag.CONVERT.set || Flag.COMPILE.set || Flag.RUN.set || Flag.JUST_COMPILE.set || Flag.JUST_RUN.set);
+        // resolve flags to actions
+        boolean convert   = standard || Flag.RUN.set || Flag.COMPILE.set || Flag.CONVERT.set;
+        boolean compile   = standard || Flag.RUN.set || Flag.COMPILE.set || Flag.JUST_COMPILE.set;
+        boolean run       = standard || Flag.RUN.set || Flag.JUST_RUN.set;
+
+        // actions
+        //
+
+        // convert djava to java
+        if (convert) {
+            javaFiles = interpret(djavaFiles);
+        }
+
+        // compile java with set javac binary/exe, alternatively try system compiler
+        if (compile) {
+            // no conversion happened?
+            if (javaFiles == null)
+                javaFiles = Filer.refactorExtension(djavaFiles, JAVA_EXTENSION);
+            // don't compile if converting failed
+            if (javaFiles.length == 0)
+                Logger.warning("Kompilierung wird übersprungen.");
+            else {
+                // successful compilation?
+                if (compile(javaFiles))
+                    classFiles = Filer.refactorExtension(javaFiles, "");
                 else
-                    Logger.log("%d/%d %s-Dateien gefunden.", djavaFiles.length, eval[0].length, LANGUAGE_NAME);
+                    classFiles = new File[0];
             }
+        }
 
-            // File array that are used to pass data to subsequent actions (or signal errors)
-            File[] javaFiles = null;
-            File[] classFiles = null;
+        // delete java files? (only when conversion and compilation happened)
+        if (convert && compile && !Flag.KEEP_JAVA.set) {
+            Logger.log("Java-Dateien löschen...");
+            if (!Filer.deleteFiles(javaFiles))
+                Logger.warning("Nicht alle Java-Dateien konnten gelöscht werden.");
+            else
+                Logger.log("Alle Java-Dateien gelöscht.");
+        }
 
-            // standard operation (run)?
-            boolean standard = !(Flag.CONVERT.set || Flag.COMPILE.set || Flag.RUN.set || Flag.JUST_COMPILE.set || Flag.JUST_RUN.set);
-            // resolve flags to actions
-            boolean convert = standard || Flag.RUN.set || Flag.COMPILE.set || Flag.CONVERT.set;
-            boolean compile   = standard || Flag.RUN.set || Flag.COMPILE.set || Flag.JUST_COMPILE.set;
-            boolean run       = standard || Flag.RUN.set || Flag.JUST_RUN.set;
-
-            // actions
-            //
-
-            // convert djava to java
-            if (convert) {
-                javaFiles = interpret(djavaFiles);
-            }
-
-            // compile java with set javac binary/exe, alternatively try system compiler
-            if (compile) {
-                // no conversion happened?
-                if (javaFiles == null)
-                    javaFiles = Filer.refactorExtension(djavaFiles, JAVA_EXTENSION);
-                // don't compile if converting failed
-                if (javaFiles.length == 0)
-                    Logger.warning("Kompilierung wird übersprungen.");
-                else {
-                    // successful compilation?
-                    if (compile(javaFiles))
-                        classFiles = Filer.refactorExtension(javaFiles, "");
-                    else
-                        classFiles = new File[0];
-                }
-            }
-
-            // delete java files? (only when conversion and compilation happened)
-            if (convert && compile && !Flag.KEEP_JAVA.set) {
-                Logger.log("Java-Dateien löschen...");
-                if (!Filer.deleteFiles(javaFiles))
-                    Logger.warning("Nicht alle Java-Dateien konnten gelöscht werden.");
-                else
-                    Logger.log("Alle Java-Dateien gelöscht.");
-            }
-
-            // run class with set java binary/exe, alternatively try global java command
-            if (run) {
-                // no compilation happened?
-                if (classFiles == null)
-                    classFiles = Filer.refactorExtension(javaFiles != null ? javaFiles : djavaFiles, "");
-                // don't run if conversion/compilation failed
-                if (classFiles.length == 0 || !mainFileIntact)
-                    Logger.warning("Rennen wird übersprungen.");
-                else {
-                    run(classFiles[0], eval[1]);
-                }
+        // run class with set java binary/exe, alternatively try global java command
+        if (run) {
+            // no compilation happened?
+            if (classFiles == null)
+                classFiles = Filer.refactorExtension(javaFiles != null ? javaFiles : djavaFiles, "");
+            // don't run if conversion/compilation failed
+            if (classFiles.length == 0 || !mainFileIntact)
+                Logger.warning("Rennen wird übersprungen.");
+            else {
+                run(classFiles[0], runArgs);
             }
         }
     }
@@ -211,21 +201,18 @@ public class Main {
 
     /**
      * @param args program launch arguments
-     * @return new String[0][0] for help dialog; String[2] with {{DJava files}, {run arguments}}
+     * @return 0: standard; 1: help dialog; 2: settings
      */
-    private static String[][] evaluateArgs(String[] args) {
-        String[][] ret = new String[2][];
-        List<String> fileNames = new ArrayList<>();
-
-        // empty args? return String[0][0] to trigger help dialog
+    private static short evaluateArgs(String[] args) {
+        // empty args? help dialog
         if (args.length == 0)
-            return new String[0][0];
+            return 1;
 
-        // check for flags
-        int runArgsPos = -1;
-
+        // check for flags, files and run arguments
         List<String> flagListS = Arrays.stream(Flag.values()).map(f -> Flag.shortFlag + f.S).toList();
         List<String> flagListL = Arrays.stream(Flag.values()).map(f -> Flag.longFlag + f.L).toList();
+        List<String> userFileNames = new ArrayList<>();
+        int runArgsPos = -1;
 
         int k = 0;
         for (String s : args) {
@@ -235,43 +222,90 @@ public class Main {
             } else if (flagListL.contains(s)) {
                 (f = Flag.values()[flagListL.indexOf(s)]).set = true;
             } else if (runArgsPos == -1) {  // don't add run arguments
-                fileNames.add(s);
+                userFileNames.add(s);
             }
             // save position of '-a' for run argument extraction
             if (f == Flag.ARGS)
                 runArgsPos = k;
             k++;
         }
+        Logger.log("%d Argumente wurden ausgelesen.", args.length);
 
-        // settings? return String[1][0] to trigger settings menu
+        // settings?
         if (Flag.SETTINGS.set)
-            return new String[1][];
+            return 2;
 
-        // replace wildcard with all djava files in current directory (user.dir) todo not working with '*'
-        if (fileNames.contains(WILDCARD)) {
-            Logger.log("Suche alle %s-Dateien im aktuellen Ordner...", LANGUAGE_NAME);
-            // remove wildcard from list
-            while (fileNames.remove(WILDCARD));
+        // evaluate djava files
+        //
+        // create files from user-given file names, check existence, make them absolute
+        // (relative paths also work, but absolute is standard for comparison reasons)
+        List<File> files = userFileNames.stream()
+                .map(File::new)
+                .filter(File::isFile)
+                .map(File::getAbsoluteFile)
+                .toList();
+        files = new ArrayList<>(files);  // make file list mutable
+        int validUserFileCount = files.size();
 
-            // find all djava files present in working directory
-            File workingDir = new File(System.getProperty("user.dir"));
-            String[] newDjavaFiles = workingDir.list(
-                    (dir, name) -> name.lastIndexOf('.') > 0 &&
-                           name.substring(name.lastIndexOf('.') + 1).equalsIgnoreCase(EXTENSION_NAME));
-            // add all file names that are not already in the list
-            if (newDjavaFiles != null)
-                fileNames.addAll(Arrays.stream(newDjavaFiles).filter(name -> !fileNames.contains(name)).toList());
+        // find all files in directory tree? (non-djava files are handled afterwards)
+        if (Flag.INCLUDE_ALL.set) {
+            Logger.log("Suche alle %s-Dateien in Ordner und Unterordnern...", LANGUAGE_NAME);
+
+            try {
+                // walk tree, create file, make absolute (already is, but be certain), exclude directories
+                List<File> includeFiles = Files.walk(Filer.getCurrentDir().toPath())
+                        .map(Path::toFile)
+                        .map(File::getAbsoluteFile)
+                        .filter(File::isFile)
+                        .toList();
+                includeFiles = new ArrayList<>(includeFiles);  // make file list mutable
+                // check duplicates with already present files
+                List<String> names = files.stream().map(File::getAbsolutePath).toList();
+                includeFiles.removeIf(file -> names.contains(file.getPath()));
+
+                files.addAll(includeFiles);
+                Logger.log("%d Dateien hinzugefügt.", includeFiles.size());
+            } catch (IOException | IllegalArgumentException e) {
+                Logger.error("Fehler beim rekursiven Suchen nach Dateien: %s", e.getMessage());
+            }
         }
 
-        // put all non-flags (DJava files) in ret[0]
-        ret[0] = fileNames.toArray(new String[0]);
+        // remove non-djava files?
+        if (!Flag.IGNORE_EXT.set) {
+            int oldSize = files.size();
+            if (files.removeIf(file -> !Filer.checkExtension(file, EXTENSION_NAME)))
+                Logger.log("%d Dateien entfernt, die nicht auf '.%s' enden.",
+                        oldSize - files.size(), EXTENSION_NAME);
+        }
 
-        //  put run arguments in ret[1]; they must come after -a
+        // put files in global field
+        djavaFiles = files.toArray(new File[0]);
+
+        // no files?
+        if (djavaFiles.length < 1) {
+            Logger.error("Keine validen %s-Dateien gefunden.", LANGUAGE_NAME);
+        } else {
+            // first user-given file not valid?
+            if (!userFileNames.isEmpty()
+                    && !djavaFiles[0].getPath().equals(new File(userFileNames.get(0)).getAbsolutePath())) {
+                mainFileIntact = false;
+                Logger.warning("Hauptdatei nicht erkannt!");
+            }
+            String message = String.format("%d/%d %s-Dateien gefunden.", djavaFiles.length,
+                    djavaFiles.length + userFileNames.size() - validUserFileCount, LANGUAGE_NAME);
+            // some files not valid?
+            if (djavaFiles.length != userFileNames.size())
+                Logger.warning(message);
+            else
+                Logger.log(message);
+        }
+
+        //  put run arguments in global field; they must come after -a
         if (Flag.ARGS.set && runArgsPos > -1) {
-            ret[1] = Arrays.copyOfRange(args, runArgsPos + 1, args.length);
+            runArgs = Arrays.copyOfRange(args, runArgsPos + 1, args.length);
         }
 
-        return ret;
+        return 0;
     }
 
     private static void startSettings() {

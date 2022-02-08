@@ -5,13 +5,15 @@ import java.awt.*;
 import java.util.Scanner;
 
 import main.Main.Flag;
+
+import static main.Main.EXTENSION_NAME;
 import static main.Main.LANGUAGE_NAME;
 
 public class Logger {
 
     static boolean suppressWarnings = false;  // no user setting yet
 
-    private static Scanner scanner = new Scanner(System.in);
+    private static final Scanner scanner = new Scanner(System.in);
 
     public static void log(String s, Object... args) {
         if (Flag.VERBOSE.set) {
@@ -26,7 +28,7 @@ public class Logger {
     }
 
     public static void error(String s, Object... args) {
-        System.err.printf(s+"\n", args);
+        System.out.printf(s+"\n", args);
     }
 
     public static String request(String s, Object... args) {
@@ -43,18 +45,22 @@ public class Logger {
                 String.format("Die 'Argumente...' werden an das %s-Programm weitergeleitet, wenn es ausgeführt wird.", LANGUAGE_NAME),
                 String.format("Wird '%s' verwendet, sind Einstellungen einsehbar und änderbar.", fFlag(Flag.SETTINGS, "|")),
                 "",
-                String.format("Die Optionen umfassen Folgendes:"),
+                              "Die Optionen umfassen Folgendes:",
                 String.format("    %s   Zeigt Hilfe in der Konsole an", fFlag(Flag.HELP, "  ", true)),
                 String.format("    %s   Aktiviert den 'Viel-Text-Modus' = Log-Ausgabe", fFlag(Flag.VERBOSE, "  ", true)),
                 String.format("    %s   Wandelt %s-Dateien in Java-Dateien um", fFlag(Flag.CONVERT, "  ", true), LANGUAGE_NAME),
                 String.format("    %s   Wandelt um und kompiliert", fFlag(Flag.COMPILE, "  ", true)),
                 String.format("    %s   Wandelt um, kompiliert und führt aus (STANDARD)", fFlag(Flag.RUN, "  ", true)),
-                String.format("    %s   Erstellte Java-Dateien werden nicht gelöscht", fFlag(Flag.KEEP_JAVA, "  ", true)),
                 String.format("    %s   Kompiliert bereits umgewandelte Dateien", fFlag(Flag.JUST_COMPILE, "  ", true)),
                 String.format("    %s   Führt Java-Klassen aus", fFlag(Flag.JUST_RUN, "  ", true)),
+                String.format("    %s   Erstellte Java-Dateien werden nicht gelöscht", fFlag(Flag.KEEP_JAVA, "  ", true)),
+                String.format("    %s   Auch Dateien, die nicht auf '.%s' enden, werden akzeptiert", fFlag(Flag.IGNORE_EXT, "  ", true), EXTENSION_NAME),
+                String.format("    %s   Fügt alle %s-Dateien aus diesem Ordner und Unterordnern hinzu", fFlag(Flag.INCLUDE_ALL, "  ", true), LANGUAGE_NAME),
                 "",
                 String.format("Statt Dateinamen kann auch '%s' angegeben werden (= alle Dateien im aktuellen Ordner).", Main.WILDCARD),
-                String.format("Achtung: Bei Ausführung wird immer die erste %s-Datei als Hauptklasse verwendet.", LANGUAGE_NAME),
+                "",
+                              "Achtung: Beim Rennen wird die erste Datei als Hauptklasse verwendet, diese sollte manuell angegeben werden.",
+                String.format("Achtung: Die Kombination '%s' und '%s' sollte vorsichtig verwendet werden.", fFlag(Flag.INCLUDE_ALL, "|"), fFlag(Flag.IGNORE_EXT, "|")),
                 "",
         };
         String helpText = String.join("\n", helpTextBuild);
@@ -73,8 +79,8 @@ public class Logger {
         String ret = s + (s.isEmpty() || l.isEmpty() ? "" : sep) + l;
         if (fillArgLength) {
             ret = " ".repeat(s.isEmpty() ? (Flag.shortFlag.length() + Flag.shortArgLength + sep.length()) : 0)
-                    + ret
-                    + " ".repeat((l.isEmpty() ? (sep.length() + Flag.longFlag.length()) : 0) + Flag.longArgMaxLength - f.L.length());
+                + ret
+                + " ".repeat((l.isEmpty() ? (sep.length() + Flag.longFlag.length()) : 0) + Flag.longArgMaxLength - f.L.length());
         }
         return ret;
     }
