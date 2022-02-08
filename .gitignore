@@ -9,5 +9,7 @@
 /*.java
 /*.class
 
+/.idea/shelf/**
+
 # custom files
 errorlog.txt

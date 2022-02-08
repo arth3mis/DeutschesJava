@@ -29,14 +29,13 @@ class RunnerGeneral extends Runner {
         // add arguments
         command = command.replace(ARG_FLAG, formatArgs(args));
 
-        // execute command via process builder (
+        // execute command via process builder
         // route streams to let user interact with the program
+        // (https://stackoverflow.com/questions/5711084/java-runtime-getruntime-getting-output-from-executing-a-command-line-program)
         try {
             Logger.log("Ausführung starten...");
             ProcessBuilder pb = new ProcessBuilder(command);
             pb.redirectErrorStream(true);
-
-
 
             final Process p = pb.start();
 
