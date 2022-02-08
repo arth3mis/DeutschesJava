@@ -57,8 +57,8 @@ public class Main {
     }
 
     public static boolean mainFileIntact = true;
-    private static String compilerPath = "";
-    private static String runnerPath = "";
+    private static String customCompiler = "";
+    private static String customRunner = "";
 
     public static final String pathSaveFileName = "pfade.txt";
     public static final String compilerSave = "K=";
@@ -111,6 +111,12 @@ public class Main {
         // actions
         //
 
+        // no input files
+        if (djavaFiles.length == 0) {
+            Logger.log("Aktionen werden übersprungen.");
+            return;
+        }
+
         // convert djava to java
         if (convert) {
             javaFiles = interpret(djavaFiles);
@@ -133,8 +139,10 @@ public class Main {
             }
         }
 
-        // delete java files? (only when conversion and compilation happened)
-        if (convert && compile && !Flag.KEEP_JAVA.set) {
+        // delete java files? (only when conversion and compilation were successful)
+        if (!Flag.KEEP_JAVA.set &&
+                convert && javaFiles.length > 0 &&
+                compile && classFiles.length > 0) {
             Logger.log("Java-Dateien löschen...");
             if (!Filer.deleteFiles(javaFiles))
                 Logger.warning("Nicht alle Java-Dateien konnten gelöscht werden.");
@@ -165,10 +173,10 @@ public class Main {
             String content = Files.readString(saveFile.toPath());
             int index;
             if ((index = content.indexOf(compilerSave)) >= 0)
-                compilerPath = content.substring(index + compilerSave.length(), content.indexOf("\n", index))
+                customCompiler = content.substring(index + compilerSave.length(), content.indexOf("\n", index))
                         .replace("\"", "");
             if ((index = content.indexOf(runnerSave)) >= 0)
-                runnerPath = content.substring(index + runnerSave.length(), content.indexOf("\n", index))
+                customRunner = content.substring(index + runnerSave.length(), content.indexOf("\n", index))
                         .replace("\"", "");
         } catch (IOException ignored) {
         }
@@ -186,8 +194,8 @@ public class Main {
         }
         // save paths
         String content =
-                compilerSave + "\"" + compilerPath + "\"\n" +
-                runnerSave + "\"" + runnerPath + "\"\n";
+                compilerSave + "\"" + customCompiler + "\"\n" +
+                runnerSave + "\"" + customRunner + "\"\n";
         try {
             FileWriter w = new FileWriter(saveFile);
             w.write(content);
@@ -311,13 +319,13 @@ public class Main {
                     
                     
                     -- Einstellungen --
-                    [k] Kompilierer-Pfad (javac) setzen (aktuell: %s)
-                    [r] Renner-Pfad (java) setzen (aktuell: %s)
+                    [k] Kompilierer-Befehl (javac) setzen (aktuell: %s)
+                    [r] Renner-Befehl (java) setzen (aktuell: %s)
                     [x] Beenden
                     
                     Auswahl""",
-                    compilerPath.isEmpty() ? "-" : compilerPath,
-                    runnerPath.isEmpty() ? "-" : runnerPath);
+                    customCompiler.isEmpty() ? "-" : customCompiler,
+                    customRunner.isEmpty() ? "-" : customRunner);
             Choices ch;
             try {
                 ch = Choices.valueOf(choice);
@@ -325,29 +333,20 @@ public class Main {
                 ch = Choices.wrong;
             }
             switch (ch) {
-                case k, K -> setPath(0, "Kompilierer");
-                case r, R -> setPath(1, "Renner");
+                case k, K -> setCommand(0, "Kompilierer");
+                case r, R -> setCommand(1, "Renner");
                 case x, X -> Logger.log("Einstellungen beendet.");
                 default -> Logger.error("Falsche Eingabe!");
             }
         }
     }
 
-    private static void setPath(int type, String pathName) {
-        String path = Logger.request("Gib einen (absoluten) Pfad für die %s-Datei an (keinen Ordnerpfad)", pathName)
+    private static void setCommand(int type, String name) {
+        String s = Logger.request("Gib einen Befehl für den %s an (ausführbare Datei, Umgebungsvariable usw.)", name)
                 .replace("\"", "");
-        // path not empty?
-        if (!path.isEmpty()) {
-            // test existence of file
-            File f = new File(path);
-            if (!f.isFile() || !f.isAbsolute()) {
-                Logger.error("Ungültiger Pfad.");
-                return;
-            }
-        }
         switch (type) {
-            case 0 -> compilerPath = path;
-            case 1 -> runnerPath = path;
+            case 0 -> customCompiler = s;
+            case 1 -> customRunner = s;
         }
         saveCustomPaths();
     }
@@ -377,12 +376,12 @@ public class Main {
     }
 
     private static boolean compile(File[] javaFiles) {
-        Compiler compiler = new Compiler(compilerPath);
+        Compiler compiler = new Compiler(customCompiler);
         return compiler.start(javaFiles);
     }
 
     private static void run(File mainClassFile, String[] args) {
-        Runner runner = Runner.newInstance(runnerPath);
+        Runner runner = Runner.newInstance(customRunner);
         // not supported?
         if (runner == null) {
             Logger.error("Rennen wird auf diesem Betriebssystem nicht unterstützt.");

@@ -15,7 +15,7 @@ class RunnerWindows extends Runner {
     @Override
     public void start(File mainClassFile, String[] args) {
         // custom runner set?
-        String runnerPath = customRunner == null || customRunner.isEmpty() ? "java" : customRunner;
+        String runnerCommand = customRunner == null || customRunner.isEmpty() ? "java" : customRunner;
         // build command that executes java in a standalone (/k) cmd window
         final String ARG_FLAG = "[ARGS]";
         String command = String.format(
@@ -27,7 +27,7 @@ class RunnerWindows extends Runner {
                         ARG_FLAG +                       // args (added later)
                         "&&echo.&&echo.&&pause&&exit" +  // '&' also works
                         "\"",
-                runnerPath,
+                runnerCommand,
                 mainClassFile.getParent() == null ? "." : mainClassFile.getParent(),
                 mainClassFile.getName());
 
@@ -60,7 +60,7 @@ class RunnerWindows extends Runner {
             Logger.log("Ausführung starten...");
             Process p = Runtime.getRuntime().exec("\"" + batchFile + "\"");
             // evaluate process return
-            Logger.log("Ausführung beendet (Endwert: " + p.waitFor() + ")");  // returns 1 (normal?)
+            Logger.log("Ausführung mit '%s' beendet (Endwert: %d)", runnerCommand, p.waitFor());  // returns 1 (normal?)
         } catch (IOException | SecurityException | InterruptedException e) {
             Logger.error("Prozess-Fehler beim Ausführen: " + e.getMessage());
         }

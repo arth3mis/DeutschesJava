@@ -28,7 +28,7 @@ public class Logger {
     }
 
     public static void error(String s, Object... args) {
-        System.out.printf(s+"\n", args);
+        System.out.printf(/*"Fehler: "+*/s+"\n", args);
     }
 
     public static String request(String s, Object... args) {

@@ -1,0 +1,50 @@
+// wie x.djavafake, nur mit eingabe vom nutzer
+/*
+ * guten tag
+ */
+
+import java.util.Scanner;
+
+public class y {
+	public static void main(String[] argumente) {
+		int g = 1;
+		short k = -1;
+		long l = 2;
+		float f = 3.0f;
+		double d = 4.0;
+		boolean b = true;
+		System.out.println("\"Hallo Deutschland.\"");
+		if (argumente.length > 0) System.out.println(argumente[0]);
+		System.out.print("Eingabe: ");
+		Scanner abt = new Scanner(System.in);
+		System.out.printf("Die Eingabe war: %s", abt.nextLine());
+
+		y instanz = new y(42.0, 20.7);
+		instanz.rennen(99);
+		instanz.length();
+
+		Scanner ab = new Scanner(System.in);
+	}
+
+	void rennen(int i) {
+		int i2 = 42;
+
+		if (i > i2+2 || i <= i2)
+			return;
+		else {
+			i2 += i + 1 - 2*3/4%5 + (i > 5 ? 1 : 0);
+			return;
+		}
+	}
+
+	double a, b;
+
+	public y(double a, double b) {
+		this.a = a;
+        this.b = b;
+    }
+
+    public double length() {
+        return Math.sqrt(a*a+b*b);
+    }
+}

@@ -13,7 +13,7 @@ public abstract class Runner {
      */
     public static Runner newInstance(String customRunner) {
         if (OS.isWindows())
-            return new RunnerWindows(customRunner);
+            return new RunnerGeneral(customRunner);// debug only
         else if (OS.isMac())
             return new RunnerGeneral(customRunner);
         else if (OS.isLinux())

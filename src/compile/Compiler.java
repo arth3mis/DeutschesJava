@@ -13,10 +13,10 @@ public record Compiler(String customCompiler) {
     public boolean start(File[] javaFiles) {
         // custom compiler set?
         if (customCompiler != null && !customCompiler.isEmpty()) {
-            if (compileWithCommand(customCompiler, javaFiles))
-                return true;
+            return compileWithCommand(customCompiler, javaFiles);
         }
-        // try system compiler
+
+        // try system compiler if no custom compiler set
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         if (compiler != null) {
             Logger.log("Kompilierung mit System-Kompilierer starten...");
@@ -34,13 +34,16 @@ public record Compiler(String customCompiler) {
                         .call()) {
                     Logger.log("Kompilieren erfolgreich.");
                     return true;
-                } else
+                } else {
                     Logger.error("Kompilieren mit System-Kompilierer fehlgeschlagen.");
+                    return false;
+                }
             } catch (IOException | NullPointerException e) {
                 Logger.error("Kompilierung mit System-Kompilierer fehlgeschlagen: %s", e.getMessage());
             }
         }
-        // try global "javac" command
+
+        // try global "javac" command if system compiler not found/had error (other than compilation failed)
         return compileWithCommand("javac", javaFiles);
     }
 
@@ -51,16 +54,28 @@ public record Compiler(String customCompiler) {
                 sb.append(" \"").append(f.toString()).append("\"");
             Logger.log("Kompilierung mit '%s' starten...", compiler);
             String command = "\"" + compiler + "\"" + sb;
-            Process p = Runtime.getRuntime().exec(command);
+
+            ProcessBuilder pb = new ProcessBuilder(command).redirectErrorStream(true);
+            Process p = pb.start();
+
+            // redirect output from process
+            p.getInputStream().transferTo(System.err);
+
+            // wait for process to finish
+            int exitValue = -1;
             try {
-                while (p.isAlive())
-                    Thread.sleep(10);
+                exitValue = p.waitFor();
             } catch (InterruptedException ignored) {
             }
-            Logger.log("Kompilierung durch Befehl beendet mit Rückgabewert: %d", p.exitValue());
-            return true;
+
+            // must return 0 for success (1 indicates errors during compilation)
+            if (exitValue == 0)
+                Logger.log("Kompilierung erfolgreich.");
+            else
+                Logger.error("Kompilierung mit '%s' fehlgeschlagen.", compiler);
+            return exitValue == 0;
         } catch (IOException e) {
-            Logger.error("Kompilierung durch Befehl fehlgeschlagen: %s", e.getMessage());
+            Logger.error("Kompilierung mit '%s' fehlgeschlagen: %s", compiler, e.getMessage());
             return false;
         }
     }

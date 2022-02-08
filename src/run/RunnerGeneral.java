@@ -2,10 +2,8 @@ package run;
 
 import main.Logger;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
+import java.util.Scanner;
 
 class RunnerGeneral extends Runner {
 
@@ -16,7 +14,7 @@ class RunnerGeneral extends Runner {
     @Override
     public void start(File mainClassFile, String[] args) {
         // custom runner set?
-        String runnerPath = customRunner == null || customRunner.isEmpty() ? "java" : customRunner;
+        String runnerCommand = customRunner == null || customRunner.isEmpty() ? "java" : customRunner;
         // build command that executes java
         final String ARG_FLAG = "[ARGS]";
         String command = String.format(
@@ -24,7 +22,7 @@ class RunnerGeneral extends Runner {
                         "-classpath \"%s\" " +           // parent dir (absolute path; see Main.evaluateArgs())
                         "\"%s\"" +                       // file name
                         ARG_FLAG,                        // args (added later)
-                runnerPath,
+                runnerCommand,
                 mainClassFile.getParent() == null ? "." : mainClassFile.getParent(),
                 mainClassFile.getName());
 
@@ -37,17 +35,46 @@ class RunnerGeneral extends Runner {
             Logger.log("Ausführung starten...");
             ProcessBuilder pb = new ProcessBuilder(command);
             pb.redirectErrorStream(true);
-            Process p = pb.start();
 
-            System.out.println("\n--------");
+            String programBorders = "_".repeat(40);
+
+            final Process p = pb.start();
+
+            System.out.println(programBorders);
+            /////////////////////////////////////////////////////////////////
+            final Scanner scanner = new Scanner(System.in);
+            Thread th = new Thread(() -> {
+                while (p.isAlive()) {
+                    try {
+                        if (scanner.hasNext()) {
+                            String input = scanner.nextLine() + "\n";
+                            p.outputWriter().write(input);
+                            p.outputWriter().flush();
+                        }
+                    } catch (IOException | NullPointerException ignored) {
+                        //Logger.error("DEBUG FEHLER: %s", ignored.getMessage());
+                    }
+                }
+            });
+            th.start();
+
             p.getInputStream().transferTo(System.out);
-            System.out.println("\n--------");
+            /////////////////////////////////////////////////////////////////
+            System.out.println("\n" + programBorders);
+
+            // user input necessary to kill thread
+            System.out.print("[ENTER] Beenden ");
+            scanner.close();
+            try {
+                scanner.nextLine();
+            } catch (IllegalStateException ignored) {
+            }
 
             // evaluate process return
             int exitValue = p.waitFor();
-            Logger.log("Ausführung beendet (Endwert: " + exitValue + ")");  // returns 1 (normal?)
+            Logger.log("Ausführung mit '%s' beendet (Endwert: %d)", runnerCommand, exitValue);
         } catch (IOException | SecurityException | InterruptedException e) {
-            Logger.error("Prozess-Fehler beim Ausführen: " + e.getMessage());
+            Logger.error("Prozess-Fehler beim Ausführen mit '%s': %s", runnerCommand, e.getMessage());
         }
     }
 }
