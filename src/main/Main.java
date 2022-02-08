@@ -9,10 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class Main {
 
@@ -22,7 +19,7 @@ public class Main {
 
     public static final String SOURCE_PATH = "src";
 
-    public static final String WILDCARD = "*"; // todo maybe "--alle" Flag to include subfolder recursive search?
+    public static final String WILDCARD = "*";
 
     // program flags
     public enum Flag {
@@ -237,15 +234,18 @@ public class Main {
 
         // evaluate djava files
         //
-        // create files from user-given file names, check existence, make them absolute
-        // (relative paths also work, but absolute is standard for comparison reasons)
+        // create files from user-given file names, remove non-existing, make them absolute
+        // (relative paths also work, but absolute is now standard for comparison reasons)
         List<File> files = userFileNames.stream()
                 .map(File::new)
                 .filter(File::isFile)
                 .map(File::getAbsoluteFile)
                 .toList();
-        files = new ArrayList<>(files);  // make file list mutable
-        int validUserFileCount = files.size();
+
+        // remove duplicates (and make mutable list at the same time)
+        // absolute paths are necessary here, because distinct() uses equals,
+        // which compares file paths lexicographically
+        files = new ArrayList<>(files.stream().distinct().toList());
 
         // find all files in directory tree? (non-djava files are handled afterwards)
         if (Flag.INCLUDE_ALL.set) {
@@ -285,19 +285,14 @@ public class Main {
         if (djavaFiles.length < 1) {
             Logger.error("Keine validen %s-Dateien gefunden.", LANGUAGE_NAME);
         } else {
-            // first user-given file not valid?
+            // first valid file not first user-given one?
             if (!userFileNames.isEmpty()
-                    && !djavaFiles[0].getPath().equals(new File(userFileNames.get(0)).getAbsolutePath())) {
-                mainFileIntact = false;
-                Logger.warning("Hauptdatei nicht erkannt!");
+                    && !djavaFiles[0].getAbsolutePath().equals(new File(userFileNames.get(0)).getAbsolutePath())) {
+                Logger.warning("Hauptklasse: %s", Filer.getCurrentDir().toPath()
+                        .relativize(djavaFiles[0].toPath())
+                        .toString());
             }
-            String message = String.format("%d/%d %s-Dateien gefunden.", djavaFiles.length,
-                    djavaFiles.length + userFileNames.size() - validUserFileCount, LANGUAGE_NAME);
-            // some files not valid?
-            if (djavaFiles.length != userFileNames.size())
-                Logger.warning(message);
-            else
-                Logger.log(message);
+            Logger.log("%d %s-Dateien gefunden.", djavaFiles.length, LANGUAGE_NAME);
         }
 
         //  put run arguments in global field; they must come after -a
