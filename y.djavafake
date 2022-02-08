@@ -17,13 +17,11 @@ public class y {
 		if (argumente.length > 0) System.out.println(argumente[0]);
 		System.out.print("Eingabe: ");
 		Scanner abt = new Scanner(System.in);
-		System.out.printf("Die Eingabe war: %s", abt.nextLine());
+		System.out.printf("Die Eingabe war: %s%n", abt.nextLine());
 
 		y instanz = new y(42.0, 20.7);
 		instanz.rennen(99);
 		instanz.length();
-
-		Scanner ab = new Scanner(System.in);
 	}
 
 	void rennen(int i) {

@@ -12,7 +12,7 @@ class RunnerGeneral extends Runner {
     }
 
     @Override
-    public void start(File mainClassFile, String[] args) {
+    public boolean start(File mainClassFile, String[] args) {
         // custom runner set?
         String runnerCommand = customRunner == null || customRunner.isEmpty() ? "java" : customRunner;
         // build command that executes java
@@ -36,14 +36,17 @@ class RunnerGeneral extends Runner {
             ProcessBuilder pb = new ProcessBuilder(command);
             pb.redirectErrorStream(true);
 
-            String programBorders = "_".repeat(40);
+
 
             final Process p = pb.start();
 
-            System.out.println(programBorders);
+            System.out.println(programBorder);
             /////////////////////////////////////////////////////////////////
+
+            // user input logic
             final Scanner scanner = new Scanner(System.in);
-            Thread th = new Thread(() -> {
+
+            new Thread(() -> {
                 while (p.isAlive()) {
                     try {
                         if (scanner.hasNext()) {
@@ -51,19 +54,20 @@ class RunnerGeneral extends Runner {
                             p.outputWriter().write(input);
                             p.outputWriter().flush();
                         }
-                    } catch (IOException | NullPointerException ignored) {
+                    } catch (IOException | NullPointerException | IllegalStateException ignored) {
                         //Logger.error("DEBUG FEHLER: %s", ignored.getMessage());
                     }
                 }
-            });
-            th.start();
+            }).start();
 
+            // program output logic
             p.getInputStream().transferTo(System.out);
+
             /////////////////////////////////////////////////////////////////
-            System.out.println("\n" + programBorders);
+            System.out.println("\n".repeat(programEndNewLines) + programBorder);
 
             // user input necessary to kill thread
-            System.out.print("[ENTER] Beenden ");
+            System.out.println("[ENTER] Beenden");
             scanner.close();
             try {
                 scanner.nextLine();
@@ -71,10 +75,12 @@ class RunnerGeneral extends Runner {
             }
 
             // evaluate process return
-            int exitValue = p.waitFor();
+            int exitValue = p.waitFor();  // is 0 for success (most probably, do more tests!)
             Logger.log("Ausführung mit '%s' beendet (Endwert: %d)", runnerCommand, exitValue);
+            return true;
         } catch (IOException | SecurityException | InterruptedException e) {
             Logger.error("Prozess-Fehler beim Ausführen mit '%s': %s", runnerCommand, e.getMessage());
+            return false;
         }
     }
 }

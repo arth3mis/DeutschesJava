@@ -2,9 +2,7 @@
 /out/production/**
 
 # test files
-/sublime syntax/test*
-/testing/test*
-/test_*
+/**/test*.*
 
 # test results
 /*.bat

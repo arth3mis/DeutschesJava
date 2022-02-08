@@ -44,6 +44,7 @@ public class Logger {
                 String.format("           (%s.jar kann auch anders heißen)", LANGUAGE_NAME),
                 String.format("Die 'Argumente...' werden an das %s-Programm weitergeleitet, wenn es ausgeführt wird.", LANGUAGE_NAME),
                 String.format("Wird '%s' verwendet, sind Einstellungen einsehbar und änderbar.", fFlag(Flag.SETTINGS, "|")),
+                              "Ohne Argumente wird die Hilfe in der Konsole und in einem grafischen Dialog angezeigt.",
                 "",
                               "Die Optionen umfassen Folgendes:",
                 String.format("    %s   Zeigt Hilfe in der Konsole an", fFlag(Flag.HELP, "  ", true)),
@@ -53,9 +54,11 @@ public class Logger {
                 String.format("    %s   Wandelt um, kompiliert und führt aus (STANDARD)", fFlag(Flag.RUN, "  ", true)),
                 String.format("    %s   Kompiliert bereits umgewandelte Dateien", fFlag(Flag.JUST_COMPILE, "  ", true)),
                 String.format("    %s   Führt Java-Klassen aus", fFlag(Flag.JUST_RUN, "  ", true)),
-                String.format("    %s   Erstellte Java-Dateien werden nicht gelöscht", fFlag(Flag.KEEP_JAVA, "  ", true)),
+                String.format("    %s   Spezielle Ausführung (Windows: eigenes Prozess-Fenster)", fFlag(Flag.SPECIAL_RUN, "  ", true)),
                 String.format("    %s   Auch Dateien, die nicht auf '.%s' enden, werden akzeptiert", fFlag(Flag.IGNORE_EXT, "  ", true), EXTENSION_NAME),
                 String.format("    %s   Fügt alle %s-Dateien aus diesem Ordner und Unterordnern hinzu", fFlag(Flag.INCLUDE_ALL, "  ", true), LANGUAGE_NAME),
+                String.format("    %s   Erstellte Java-Dateien werden nach Kompilierung nicht gelöscht", fFlag(Flag.KEEP_JAVA, "  ", true)),
+                String.format("    %s   Erstellte Klassen-Dateien werden nach Ausführung gelöscht", fFlag(Flag.DELETE_CLASS, "  ", true)),
                 "",
                 String.format("Statt Dateinamen kann auch '%s' angegeben werden (= alle Dateien im aktuellen Ordner).", Main.WILDCARD),
                 "",
@@ -70,7 +73,7 @@ public class Logger {
             showHelpDialog(helpText);
     }
 
-    private static String fFlag(Flag f, String sep) {
+    public static String fFlag(Flag f, String sep) {
         return fFlag(f, sep, false);
     }
     private static String fFlag(Flag f, String sep, boolean fillArgLength) {

@@ -13,7 +13,7 @@ class RunnerWindows extends Runner {
     }
 
     @Override
-    public void start(File mainClassFile, String[] args) {
+    public boolean start(File mainClassFile, String[] args) {
         // custom runner set?
         String runnerCommand = customRunner == null || customRunner.isEmpty() ? "java" : customRunner;
         // build command that executes java in a standalone (/k) cmd window
@@ -25,11 +25,14 @@ class RunnerWindows extends Runner {
                         "-classpath \"%s\" " +           // parent dir (absolute path; see Main.evaluateArgs())
                         "\"%s\"" +                       // file name
                         ARG_FLAG +                       // args (added later)
-                        "&&echo.&&echo.&&pause&&exit" +  // '&' also works
+                        "&&echo.".repeat(programEndNewLines) +
+                        "&&echo %s" +                    // '&' also works
+                        "&&pause&&exit" +
                         "\"",
                 runnerCommand,
                 mainClassFile.getParent() == null ? "." : mainClassFile.getParent(),
-                mainClassFile.getName());
+                mainClassFile.getName(),
+                programBorder);
 
         // add arguments
         command = command.replace(ARG_FLAG, formatArgs(args));
@@ -52,7 +55,7 @@ class RunnerWindows extends Runner {
             Logger.log("Stapel-Datei fürs Rennen erstellt.");
         } catch (IOException e) {
             Logger.error("Fehler beim Erstellen der Stapel-Datei fürs Rennen: " + e.getMessage());
-            return;
+            return false;
         }
 
         // execute batch file and wait for result
@@ -60,9 +63,12 @@ class RunnerWindows extends Runner {
             Logger.log("Ausführung starten...");
             Process p = Runtime.getRuntime().exec("\"" + batchFile + "\"");
             // evaluate process return
-            Logger.log("Ausführung mit '%s' beendet (Endwert: %d)", runnerCommand, p.waitFor());  // returns 1 (normal?)
+            int exitValue = p.waitFor();
+            Logger.log("Ausführung der Stapel-Datei beendet.");
+            return true;
         } catch (IOException | SecurityException | InterruptedException e) {
             Logger.error("Prozess-Fehler beim Ausführen: " + e.getMessage());
+            return false;
         }
     }
 }

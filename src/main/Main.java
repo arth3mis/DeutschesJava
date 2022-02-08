@@ -25,14 +25,16 @@ public class Main {
     public enum Flag {
         HELP("?", "hilfe"),
         VERBOSE("v", ""),
-        IGNORE_EXT("x", "unendung"),
-        INCLUDE_ALL("", "alle"),
         CONVERT("u", "umwandeln"),
         COMPILE("k", "kompilieren"),
         RUN("r", "rennen"),
-        KEEP_JAVA("j", "behaltejava"),
         JUST_COMPILE("K", "nurkompilieren"),
         JUST_RUN("R", "nurrennen"),
+        SPECIAL_RUN("s", "spezialrennen"),
+        IGNORE_EXT("x", "unendung"),
+        INCLUDE_ALL("", "alle"),
+        KEEP_JAVA("j", "behaltejava"),
+        DELETE_CLASS("l", "löschklassen"),
         ARGS("a", ""),
         SETTINGS("e", ""),
         ;
@@ -98,8 +100,8 @@ public class Main {
         }
 
         // File array that are used to pass data to subsequent actions (or signal errors)
-        File[] javaFiles = null;
-        File[] classFiles = null;
+        File[] javaFiles = null;   // java extension
+        File[] classFiles = null;  // no extension
 
         // standard operation (run)?
         boolean standard = !(Flag.CONVERT.set || Flag.COMPILE.set || Flag.RUN.set || Flag.JUST_COMPILE.set || Flag.JUST_RUN.set);
@@ -151,6 +153,7 @@ public class Main {
         }
 
         // run class with set java binary/exe, alternatively try global java command
+        boolean runSuccess = false;
         if (run) {
             // no compilation happened?
             if (classFiles == null)
@@ -159,7 +162,23 @@ public class Main {
             if (classFiles.length == 0 || !mainFileIntact)
                 Logger.warning("Rennen wird übersprungen.");
             else {
-                run(classFiles[0], runArgs);
+                runSuccess = run(classFiles[0], runArgs);
+            }
+        }
+
+        // delete class files? (only when compilation and running were successful)
+        if (Flag.DELETE_CLASS.set &&
+                compile && run && runSuccess) {
+            // do not allow deletion for windows batch runs, because class files are needed asynchronous
+            if (Flag.SPECIAL_RUN.set && OS.isWindows())
+                Logger.warning("Klassen-Dateien werden aufgrund der Option '%s' nicht gelöscht",
+                        Logger.fFlag(Flag.SPECIAL_RUN, "|"));
+            else {
+                Logger.log("Klassen-Dateien löschen...");
+                if (!Filer.deleteFiles(Filer.refactorExtension(classFiles, "class")))
+                    Logger.warning("Nicht alle Klassen-Dateien konnten gelöscht werden.");
+                else
+                    Logger.log("Alle Klassen-Dateien gelöscht.");
             }
         }
     }
@@ -239,6 +258,10 @@ public class Main {
         // settings?
         if (Flag.SETTINGS.set)
             return 2;
+
+        // warnings for flags/flag combos
+        if (Flag.SPECIAL_RUN.set && OS.isWindows())
+            Logger.warning("Die Option '%s' ist für %s nicht verfügbar.", Logger.fFlag(Flag.SPECIAL_RUN, "|"), OS.getOsName());
 
         // evaluate djava files
         //
@@ -380,13 +403,8 @@ public class Main {
         return compiler.start(javaFiles);
     }
 
-    private static void run(File mainClassFile, String[] args) {
+    private static boolean run(File mainClassFile, String[] args) {
         Runner runner = Runner.newInstance(customRunner);
-        // not supported?
-        if (runner == null) {
-            Logger.error("Rennen wird auf diesem Betriebssystem nicht unterstützt.");
-        } else {
-            runner.start(mainClassFile, args);
-        }
+        return runner.start(mainClassFile, args);
     }
 }
