@@ -2,15 +2,15 @@
 
 Math;                               Mathe
 {
-    acos
-    asin
-    atan
-    atan2
-    cos
-    pow;                                hoch
-    random;                             zufall
-    sin
-    tan
+    $acos
+    $asin
+    $atan
+    $atan2
+    $cos
+    $pow;                                hoch
+    $random;                             zufall
+    $sin
+    $tan
 }
 
 Object;                             Objekt
@@ -20,21 +20,21 @@ String;                             Strippe
 
 System
 {
-    out;                            raus
+    $out;                            raus
         print;                          druck
         println;                        druckz
         printf;                         druckf
-    in;                             rein
-    currentTimeMillis;              aktuelleZeitMillis
-    exit;                           ichmussraus
+    $in;                             rein
+    $currentTimeMillis;              aktuelleZeitMillis
+    $exit;                           ichmussraus
 }
 
 Thread;                             Faden
 {
-    sleep;                              schlaf
+    $sleep;                              schlaf
 }
 
 Exception;                          Ausnahme
-InterruptedException;               UnterbrochenAusnahme
+InterruptedException;               UnterbrocheneAusnahme
 NullPointerException;               NullZeigerAusnahme
 NumberFormatException;              ZahlFormatAusnahme
