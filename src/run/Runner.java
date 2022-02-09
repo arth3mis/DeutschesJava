@@ -24,6 +24,10 @@ public abstract class Runner {
     public static Runner newInstance(File mainClassFile, String[] runArgs, String customRunner) {
         if (OS.isWindows())
             return new RunnerWindows(mainClassFile, runArgs, customRunner);
+        else if (OS.isLinux())
+            return new RunnerLinux(mainClassFile, runArgs, customRunner);
+        else if (OS.isMac())
+            return new RunnerMac(mainClassFile, runArgs, customRunner);
         return null;
     }
 
