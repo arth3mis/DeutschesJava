@@ -13,6 +13,8 @@ import java.util.*;
 
 public class Main {
 
+    public static final int VERSION = 19;
+
     public static final String LANGUAGE_NAME = "DJava";
     public static final String EXTENSION_NAME = "djava";
     public static final String JAVA_EXTENSION = "java";
@@ -74,6 +76,12 @@ public class Main {
         loadCustomPaths();
 
         short eval = evaluateArgs(args);
+
+        // display info in verbose mode
+        Logger.log("%s", Runner.programBorder);
+        Logger.log("%s (.%s) Version %d", LANGUAGE_NAME, EXTENSION_NAME, VERSION);
+        Logger.log("Einstellungs-Datei: %s", new File(Filer.getAppConfigFolder(), pathSaveFileName).toString());
+        Logger.log("%s\n", Runner.programBorder);
 
         // display help dialog?
         if (eval == 1) {
@@ -312,23 +320,27 @@ public class Main {
         // put files in global field
         djavaFiles = files.toArray(new File[0]);
 
-        // no files?
+        //  put run arguments in global field; they must come after -a
+        if (Flag.ARGS.set && runArgsPos > -1) {
+            runArgs = Arrays.copyOfRange(args, runArgsPos + 1, args.length);
+        }
+
+        // skip file evaluation if help is set
+        if (Flag.HELP.set)
+            return 0;
+
+        // no valid files found?
         if (djavaFiles.length < 1) {
             Logger.error("Keine validen %s-Dateien gefunden.", LANGUAGE_NAME);
         } else {
-            // first valid file not first user-given one?
+            // first valid file is not the first user-given one?
             if (!userFileNames.isEmpty()
                     && !djavaFiles[0].getAbsolutePath().equals(new File(userFileNames.get(0)).getAbsolutePath())) {
                 Logger.warning("Hauptklasse: %s", Filer.getCurrentDir().toPath()
                         .relativize(djavaFiles[0].toPath())
                         .toString());
             }
-            Logger.log("%d %s-Dateien gefunden.", djavaFiles.length, LANGUAGE_NAME);
-        }
-
-        //  put run arguments in global field; they must come after -a
-        if (Flag.ARGS.set && runArgsPos > -1) {
-            runArgs = Arrays.copyOfRange(args, runArgsPos + 1, args.length);
+            Logger.log("%d Dateien gefunden.", djavaFiles.length);
         }
 
         return 0;
@@ -365,7 +377,7 @@ public class Main {
     }
 
     private static void setCommand(int type, String name) {
-        String s = Logger.request("Gib einen Befehl für den %s an (ausführbare Datei, Umgebungsvariable usw.)", name)
+        String s = Logger.request("Gib einen Befehl für den %s an (ausführbare Datei, Umgebungsvariable, ...)", name)
                 .replace("\"", "");
         switch (type) {
             case 0 -> customCompiler = s;
@@ -404,7 +416,11 @@ public class Main {
     }
 
     private static boolean run(File mainClassFile, String[] args) {
-        Runner runner = Runner.newInstance(customRunner);
-        return runner.start(mainClassFile, args);
+        Runner runner = Runner.newInstance(mainClassFile, args, customRunner);
+        if (runner == null) {
+            Logger.error("Rennen wird auf diesem Betriebssystem nicht unterstützt.");
+            return false;
+        }
+        return runner.start();
     }
 }

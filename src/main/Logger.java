@@ -89,6 +89,9 @@ public class Logger {
     }
 
     private static void showHelpDialog(String out) {
+        // avoid errors on headless systems
+        if (GraphicsEnvironment.isHeadless())
+            return;
         while (out.startsWith("\n"))
             out = out.substring(1);
         out = "<html>" + out.replaceAll("\\n", "<br>").replaceAll(" ", "&nbsp;");

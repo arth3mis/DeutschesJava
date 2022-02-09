@@ -1,11 +1,14 @@
 package compile;
 
+import filesystem.Commander;
 import main.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.tools.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public record Compiler(String customCompiler) {
@@ -49,11 +52,9 @@ public record Compiler(String customCompiler) {
 
     private boolean compileWithCommand(String compiler, File @NotNull [] javaFiles) {
         try {
-            StringBuilder sb = new StringBuilder();
-            for (File f : javaFiles)
-                sb.append(" \"").append(f.toString()).append("\"");
-            Logger.log("Kompilierung mit '%s' starten...", compiler);
-            String command = "\"" + compiler + "\"" + sb;
+            Logger.log("Kompilierung mit %s starten...", Commander.buildMain(compiler));
+            String command = Commander.build(compiler,
+                    Arrays.stream(javaFiles).map(File::getPath).toList().toArray(new String[0]), "");
 
             ProcessBuilder pb = new ProcessBuilder(command).redirectErrorStream(true);
             Process p = pb.start();

@@ -1,6 +1,8 @@
 package run;
 
+import filesystem.Commander;
 import main.Logger;
+import main.Main;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -8,35 +10,47 @@ import java.io.IOException;
 
 class RunnerWindows extends Runner {
 
-    public RunnerWindows(String customRunner) {
+    public RunnerWindows(File mainClassFile, String[] args, String customRunner) {
+        this.mainClassFile = mainClassFile;
+        this.args = args;
         this.customRunner = customRunner;
+        buildCommand();
     }
 
     @Override
-    public boolean start(File mainClassFile, String[] args) {
-        // custom runner set?
-        String runnerCommand = customRunner == null || customRunner.isEmpty() ? "java" : customRunner;
-        // build command that executes java in a standalone (/k) cmd window
-        final String ARG_FLAG = "[ARGS]";
-        String command = String.format(
-                "start cmd.exe @cmd /k " +
-                        "\"" +
-                        "\"%s\" " +
-                        "-classpath \"%s\" " +           // parent dir (absolute path; see Main.evaluateArgs())
-                        "\"%s\"" +                       // file name
-                        ARG_FLAG +                       // args (added later)
-                        "&&echo.".repeat(programEndNewLines) +
-                        "&&echo %s" +                    // '&' also works
-                        "&&pause&&exit" +
-                        "\"",
-                runnerCommand,
-                mainClassFile.getParent() == null ? "." : mainClassFile.getParent(),
-                mainClassFile.getName(),
-                programBorder);
+    protected void buildCommand() {
+        // standard command build
+        super.buildCommand();
 
-        // add arguments
-        command = command.replace(ARG_FLAG, formatArgs(args));
+        // special flag set?
+        if (Main.Flag.SPECIAL_RUN.set) {
+            // build command that executes java in a standalone (/k) cmd window
+            command = String.format(
+                    "start cmd.exe @cmd /k \"%s\"",
+                    Commander.build(runnerCommand, args,
+                            "%s " +
+                            "-classpath %s " +           // parent dir (absolute path; see Main.evaluateArgs())
+                            "%s" +                       // file name
+                            "&&echo.".repeat(programEndNewLines) +
+                            "&&echo "+programBorder +    // '&' also works
+                            "&&pause&&exit" +
+                            "\"",
+                            mainClassFile.getParent() == null ? "." : mainClassFile.getParent(),
+                            mainClassFile.getName())
+            );
+        }
+    }
 
+    @Override
+    public boolean start() {
+        // special run?
+        if (Main.Flag.SPECIAL_RUN.set)
+            return startSpecial();
+        else
+            return super.start();
+    }
+
+    private boolean startSpecial() {
         // make batch file in user.dir to execute command and delete itself afterwards
         // executing the command directly does not find "start" or "cmd.exe"
         File batchFile;
