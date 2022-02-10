@@ -73,7 +73,41 @@ public abstract class Runner {
         try {
             Logger.log("Ausführung mit %s starten...", Commander.formatCommand(runnerCommand));
 
-            ProcessBuilder pb = Commander.createProcessBuilder(commands);
+            // debug for linux
+            Logger.log("%s", commands.toString());
+            if (Main.Flag.TEST.set) {
+                String in = "";
+                Scanner sc = new Scanner(System.in);
+                while (!in.equals("xx")) {
+                    System.out.print("index: ");
+                    int i = Integer.parseInt(sc.nextLine());
+                    System.out.print("was tun: ");
+                    in = sc.nextLine();
+                    if (in.equals("a")) {
+                        System.out.print("add value: ");
+                        String s = sc.nextLine();
+                        commands.add(i, s);
+                    }else if (in.equals("rm")) {
+                        commands.remove(commands.get(i));
+                    }else if (in.equals("v")) {
+                        System.out.print("new value: ");
+                        String s = sc.nextLine();
+                        commands.set(i, s.equals("--") ? commands.get(i) : s);
+                    }else if (in.equals("e")) {
+                        commands.set(i, Commander.escape(commands.get(i)));
+                    }else if (in.equals("ue")) {
+                        commands.set(i, Commander.unescape(commands.get(i)));
+                    }
+                    Logger.log("%s", commands.toString());
+                }
+            }
+
+            ProcessBuilder pb =           //////////////// debug - todo i guess no spaces on linux/mac... windows is fine, maybe i need to get some deeper understanding
+                    new ProcessBuilder()
+                            .redirectErrorStream(
+                                    true)
+                            .command(
+                                    commands);//Commander.createProcessBuilder(commands);
             final Process p = pb.start();
 
             System.out.println(Main.OUTPUT_SEP);

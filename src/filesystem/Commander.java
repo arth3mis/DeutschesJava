@@ -66,6 +66,14 @@ public class Commander {
         return s;
     }
 
+    public static String unescape(String s) {
+        switch (OS.getOS()) {
+            case WINDOWS -> s = s.contains(" ") && s.startsWith("\"") ? s.substring(1, s.length()-1) : s;
+            case LINUX, MAC -> s = s.replace("\\ ", " ");
+        }
+        return s;
+    }
+
     public static boolean isEscaped(String s) {
         boolean b = false;
         switch (OS.getOS()) {
