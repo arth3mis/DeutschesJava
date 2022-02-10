@@ -8,7 +8,6 @@ import javax.tools.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public record Compiler(String customCompiler) {
@@ -52,11 +51,12 @@ public record Compiler(String customCompiler) {
 
     private boolean compileWithCommand(String compiler, File @NotNull [] javaFiles) {
         try {
-            Logger.log("Kompilierung mit %s starten...", Commander.buildMain(compiler));
-            String command = Commander.build(compiler,
-                    Arrays.stream(javaFiles).map(File::getPath).toList().toArray(new String[0]), "");
+            Logger.log("Kompilierung mit %s starten...", Commander.formatCommand(compiler));
+            List<String> commands = Commander.basicCommand();
+            commands.add(Commander.replaceEnvVars(compiler));
+            commands.addAll(Arrays.stream(javaFiles).map(File::getPath).toList());
 
-            ProcessBuilder pb = new ProcessBuilder(command).redirectErrorStream(true);
+            ProcessBuilder pb = Commander.createProcessBuilder(commands);
             Process p = pb.start();
 
             // redirect output from process

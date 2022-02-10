@@ -7,63 +7,52 @@ import main.Main;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 class RunnerWindows extends Runner {
 
     public RunnerWindows(File mainClassFile, String[] args, String customRunner) {
-        this.mainClassFile = mainClassFile;
-        this.args = args;
-        this.customRunner = customRunner;
-        buildCommand();
+        super(mainClassFile, args, customRunner);
     }
 
     @Override
     protected void buildCommand() {
-        // standard command build
-        super.buildCommand();
+        commands = new ArrayList<>();
 
         // special flag set?
         if (Main.Flag.SPECIAL_RUN.set) {
             // build command that executes java in a standalone (/k) cmd window
-            command = String.format(
-                    "start cmd.exe @cmd /k \"%s\"",
-                    Commander.build(runnerCommand, args,
-                            "%s " +
-                            "-classpath %s " +           // parent dir (absolute path; see Main.evaluateArgs())
-                            "%s" +                       // file name
-                            "&&echo.".repeat(programEndNewLines) +
-                            "&&echo "+programBorder +    // '&' also works
-                            "&&pause&&exit" +
-                            "\"",
-                            mainClassFile.getParent() == null ? "." : mainClassFile.getParent(),
-                            mainClassFile.getName())
-            );
-        }
+            // list is joined later (without spaces), it is not passed to a process builder
+            commands.add("start cmd.exe /c ");  // original: "start cmd.exe @cmd /k " (the /k is better for debugging, but no idea about @cmd)
+            commands.add("\"");
+            // do escape of basic run command now (tries to replace env vars everywhere, it's easier this way though)
+            commands.add(String.join(" ", basicRunCommand().stream().map(Commander::formatCommand).toList()));
+            commands.add("&&echo.".repeat(programEndNewLines));
+            commands.add("&&echo " + Main.OUTPUT_SEP);
+            commands.add("&&pause&&exit");
+            commands.add("\"");
+        } else
+            super.buildCommand();
     }
 
     @Override
     public boolean start() {
-        // special run?
-        if (Main.Flag.SPECIAL_RUN.set)
-            return startSpecial();
-        else
-            return super.start();
+        return Main.Flag.SPECIAL_RUN.set ? startSpecial() : super.start();
     }
 
     private boolean startSpecial() {
         // make batch file in user.dir to execute command and delete itself afterwards
         // executing the command directly does not find "start" or "cmd.exe"
-        File batchFile;
+        File batchFile = new File("Pausen-Akro.bat");
         try {
-            final String BATCH_FILE_NAME = "Pausen-Akro.bat";
-            batchFile = new File(BATCH_FILE_NAME);
             if (batchFile.delete())
-                Logger.log("Stapel-Datei '%s' wird überschrieben.", BATCH_FILE_NAME);
+                Logger.log("Stapel-Datei '%s' wird überschrieben.", batchFile.getName());
             if (!batchFile.createNewFile()) {
-                throw new IOException("Datei existiert bereits");
+                throw new IOException("Datei konnte nicht überschrieben werden.");
             }
+            // write commands to file (join list without spaces)
             FileWriter w = new FileWriter(batchFile);
-            w.write(command);
+            w.write(String.join("", commands));
             w.write("\ndel \"%~f0\"");
             w.close();
             Logger.log("Stapel-Datei fürs Rennen erstellt.");
@@ -72,12 +61,12 @@ class RunnerWindows extends Runner {
             return false;
         }
 
-        // execute batch file and wait for result
+        // execute batch file and wait for return (not return of java program)
         try {
             Logger.log("Ausführung starten...");
-            Process p = Runtime.getRuntime().exec("\"" + batchFile + "\"");
-            // evaluate process return
-            int exitValue = p.waitFor();
+            Runtime.getRuntime()
+                    .exec(Commander.escape(batchFile.getPath()))
+                    .waitFor();
             Logger.log("Ausführung der Stapel-Datei beendet.");
             return true;
         } catch (IOException | SecurityException | InterruptedException e) {

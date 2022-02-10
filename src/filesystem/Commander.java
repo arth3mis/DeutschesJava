@@ -1,66 +1,78 @@
 package filesystem;
 
+import main.Main;
 import main.OS;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Commander {
 
-    /**
-     * builds a safe command based on OS.
-     * @param mainCommand first part of command; referenced environment variables will be replaced, spaces escaped
-     * @param endArguments arguments that are appended to command end
-     * @param appendFormat string that follows mainCommand, to be formatted with args
-     * @param args appended arguments, spaces in strings will be escaped IF they are part of
-     * @return command string
-     */
-    public static String build(String mainCommand, String[] endArguments, String appendFormat, String... args) {
-        // escape main command after replacing variables
-        String s1 = buildMain(mainCommand);
-
-        // escape all strings that are part of the format string
-        for (int i = 0; i < args.length; i++) {
-                args[i] = escape(args[i], true);
+    public static List<String> basicCommand() {
+        List<String> c = new ArrayList<>();
+        switch (OS.getOS()) {
+            case WINDOWS -> c.addAll(List.of(new String[]{"cmd.exe", "/c"}));
+            case LINUX, MAC -> c.addAll(List.of(new String[]{"bash", "-c"}));
         }
-        String s2 = "";
-        if (appendFormat != null)
-            s2 = String.format(appendFormat, (Object[]) args);
-
-        // append additional args as run arguments
-        String s3 = formatArgs(endArguments);
-
-        return s1 + (s2.isEmpty() ? "" : " " + s2) + (s3.isEmpty() ? "" : s3);
+        return c;
     }
 
     /**
-     * @param mainCommand first part of command; referenced environment variables will be replaced, spaces escaped
+     * @param command first part of command; referenced environment variables will be replaced, spaces escaped
      * @return formatted mainCommand
      */
-    public static String buildMain(String mainCommand) {
-        return escape(replaceEnvVars(mainCommand), false);
+    public static String formatCommand(String command) {
+        return escape(replaceEnvVars(command));
+    }
+
+    /**
+     * Sets up new process builder, escapes strings if necessary. Error stream is redirected to stdout.
+     * @param commands list of commands and arguments, split in single items that can be escaped together
+     * @return process builder ready to start
+     */
+    public static ProcessBuilder createProcessBuilder(List<String> commands) {
+        ProcessBuilder pb = new ProcessBuilder().redirectErrorStream(true);
+        // escape strings
+        commands = new ArrayList<>(commands.stream()
+                .map(Commander::escape)
+                .toList());
+        // move strings with spaces to environment variables?
+        if (OS.isWindows() || Main.Flag.TEST.set) {
+            final String envVarPrefix = "TEMP_DJAVA_VAR_";
+
+            for (int i = 0; i < commands.size(); i++) {
+                if (commands.get(i).contains(" ")) {
+                    // save command and change to variable name
+                    pb.environment().put(envVarPrefix + i, commands.get(i));
+                    commands.set(i, formatEnvVar(envVarPrefix + i));
+                }
+            }
+        }
+        return pb.command(commands);
     }
 
     /**
      * @param s input
      * @return s with escaped spaces, based on OS
      */
-    public static String escape(String s, boolean force) {
+    public static String escape(String s) {
         switch (OS.getOS()) {
-            case WINDOWS -> {
-                if (s.contains(" ") || force)
-                    return String.format("\"%s\"", s);
-                else
-                    return s;
-            }
-            case LINUX, MAC -> {
-                return s.replace(" ", "\\ ");
-            }
+            case WINDOWS -> s = s.contains(" ") ? String.format("\"%s\"", s) : s;
+            case LINUX, MAC -> s = s.replace(" ", "\\ ");
         }
         return s;
+    }
+
+    public static boolean isEscaped(String s) {
+        boolean b = false;
+        switch (OS.getOS()) {
+            case WINDOWS -> b = s.contains(" ") && s.startsWith("\"") && s.endsWith("\"");
+            case LINUX, MAC -> b = s.contains("\\ ");
+        }
+        return b;
     }
 
     /**
@@ -85,32 +97,18 @@ public class Commander {
                 } else {
                     envValue = envValue.replace("\\", "\\\\");
                 }
-                Pattern subexpr = Pattern.compile(Pattern.quote(matcher.group(0)));
-                s = subexpr.matcher(s).replaceAll(envValue);
+                Pattern subExpr = Pattern.compile(Pattern.quote(matcher.group(0)));
+                s = subExpr.matcher(s).replaceAll(envValue);
             }
         }
         return s;
     }
 
-    private static String formatArgs(String[] args) {
-        StringBuilder sbArgs = new StringBuilder();
-        if (args != null && args.length > 0) {
-            for (String arg : args)
-                sbArgs.append(" \"").append(arg).append("\"");
+    public static String formatEnvVar(String s) {
+        switch (OS.getOS()) {
+            case WINDOWS -> s = "%" + s + "%";
+            case LINUX, MAC -> s = "${" + s + "}";
         }
-        return sbArgs.toString();
-    }
-
-    private static int getFormatSpecifierCount(String format) {
-        // https://stackoverflow.com/questions/37413816/get-number-of-placeholders-in-formatter-format-string
-        String formatSpecifier = "%(\\d+\\$)?([-#+ 0,(<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
-        Pattern pattern = Pattern.compile(formatSpecifier);
-        // Build the matcher for a given String
-        Matcher matcher = pattern.matcher(format);
-        // Count the total amount of matches in the String
-        int counter = 0;
-        while (matcher.find())
-            counter++;
-        return counter;
+        return s;
     }
 }

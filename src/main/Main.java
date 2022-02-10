@@ -13,7 +13,7 @@ import java.util.*;
 
 public class Main {
 
-    public static final int VERSION = 19;
+    public static final int VERSION = 21;
 
     public static final String LANGUAGE_NAME = "DJava";
     public static final String EXTENSION_NAME = "djava";
@@ -39,6 +39,7 @@ public class Main {
         DELETE_CLASS("l", "löschklassen"),
         ARGS("a", ""),
         SETTINGS("e", ""),
+        TEST("t", ""),// debug only
         ;
 
         public static final String shortFlag = "-";
@@ -71,6 +72,8 @@ public class Main {
     private static File[] djavaFiles;
     private static String[] runArgs;
 
+    public static final String OUTPUT_SEP = "_".repeat(70);
+
 
     public static void main(String[] args) {
         loadCustomPaths();
@@ -78,10 +81,10 @@ public class Main {
         short eval = evaluateArgs(args);
 
         // display info in verbose mode
-        Logger.log("%s", Runner.programBorder);
+        Logger.log("%s", OUTPUT_SEP);
         Logger.log("%s (.%s) Version %d", LANGUAGE_NAME, EXTENSION_NAME, VERSION);
         Logger.log("Einstellungs-Datei: %s", new File(Filer.getAppConfigFolder(), pathSaveFileName).toString());
-        Logger.log("%s\n", Runner.programBorder);
+        Logger.log("%s\n", OUTPUT_SEP);
 
         // display help dialog?
         if (eval == 1) {
@@ -268,8 +271,9 @@ public class Main {
             return 2;
 
         // warnings for flags/flag combos
-        if (Flag.SPECIAL_RUN.set && OS.isWindows())
-            Logger.warning("Die Option '%s' ist für %s nicht verfügbar.", Logger.fFlag(Flag.SPECIAL_RUN, "|"), OS.getOsName());
+        if (Flag.SPECIAL_RUN.set && !OS.isWindows())
+            Logger.warning("Die Option '%s' ist für %s nicht verfügbar.",
+                    Logger.fFlag(Flag.SPECIAL_RUN, "|"), OS.getOsName());
 
         // evaluate djava files
         //
@@ -323,7 +327,8 @@ public class Main {
         //  put run arguments in global field; they must come after -a
         if (Flag.ARGS.set && runArgsPos > -1) {
             runArgs = Arrays.copyOfRange(args, runArgsPos + 1, args.length);
-        }
+        } else
+            runArgs = new String[0];
 
         // skip file evaluation if help is set
         if (Flag.HELP.set)
