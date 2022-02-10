@@ -1,6 +1,7 @@
 package filesystem;
 
 import main.Logger;
+import main.Main;
 import main.OS;
 
 import java.io.File;
@@ -31,11 +32,15 @@ public class Commander {
 
     /**
      * Sets up new process builder, escapes strings if necessary. Error stream is redirected to stdout.
-     * @param appendItems list of commands and arguments, split in single items that can be escaped together
+     * @param mainCommand javac/java
+     * @param appendItems list of command arguments, split in single items that can be escaped together
      * @return process builder ready to start
      */
     public static ProcessBuilder createProcessBuilder(String mainCommand, List<String> appendItems) {
         ProcessBuilder pb = new ProcessBuilder().redirectErrorStream(true);
+
+        // todo break up in parts that are moved to runners (the ones with if windows/linux) and call together-parts from there
+        // todo mechanic (linux) to try to eliminate spaces: mainCommand by pb.dir -> cp by pb.dir (or maybe both, relativize?)
 
         // pre-format main command
         mainCommand = replaceEnvVars(mainCommand);
@@ -46,20 +51,23 @@ public class Commander {
                 .toList());
 
         // handle main command
-        // Linux/Mac: change working directory of process builder (because main command is path with spaces)?
-        if ((OS.isLinux() || OS.isMac())
-                && mainCommand.contains(" ")) {
-            File f = new File(mainCommand);
-            if (f.getParentFile() != null) {
-                Logger.log("Prozess relativ zur Datei des Rennen-Befehls verschoben.");
-                pb.directory(f.getParentFile());
-                // main Command is set relative to working dir
-                mainCommand = f.getName();
-                // spaces in name? basically no hope
-                if (mainCommand.contains(" ")) {
+        // Linux/Mac: change working directory of process builder (because of spaces)?
+        if ((OS.isLinux() || OS.isMac())) {
+            if (mainCommand.contains(" ")) {
+                File f = new File(mainCommand);
+                if (f.getParentFile() != null) {
+                    Logger.log("Prozess relativ zur Datei des Rennen-Befehls verschoben.");
+                    pb.directory(f.getParentFile());
+                    // main Command is set relative to working dir
+                    mainCommand = f.getName();
+                }
+                // spaces in name itself? basically no hope
+                if (f.getParentFile() == null || mainCommand.contains(" ")) {
                     Logger.warning("Leerzeichen im Dateinamen des Rennen-Befehls!");
                     mainCommand = Commander.escape(mainCommand);
                 }
+            } else {
+                // check if an argument contains
             }
         } else if (mainCommand.contains(" "))
             mainCommand = Commander.escape(mainCommand);
@@ -81,8 +89,44 @@ public class Commander {
                     n++;
                 }
             }
-            Logger.log("%d Befehls-Elemente mit Leerzeichen in Umgebungsvariablen verschoben", n);
+            if (n > 0)
+                Logger.log("%d Befehls-Elemente mit Leerzeichen in Umgebungsvariablen verschoben", n);
         }
+
+        Logger.log("Erstellter Befehl: %s", commands.toString());
+
+        /*if (Main.Flag.TEST.set) {
+            String in = "";
+            java.util.Scanner sc = new java.util.Scanner(System.in);
+            while (!in.equals("xx")) {
+                System.out.print("index: ");
+                int i = Integer.parseInt(sc.nextLine());
+                System.out.print("was tun: ");
+                in = sc.nextLine();
+                if (in.equals("a")) {
+                    System.out.print("add value: ");
+                    String s = sc.nextLine();
+                    commands.add(i, s);
+                }else if (in.equals("rm")) {
+                    commands.remove(commands.get(i));
+                }else if (in.equals("env")) {
+                    System.out.print("add env: ");
+                    String s = sc.nextLine();
+                    pb.environment().put(s.split(";")[0], s.split(";")[1]);
+                }else if (in.equals("getenv")) {
+                    System.out.println(pb.environment().toString().replace(", ", "\n"));
+                }else if (in.equals("v")) {
+                    System.out.print("new value: ");
+                    String s = sc.nextLine();
+                    commands.set(i, s.equals("--") ? commands.get(i) : s);
+                }else if (in.equals("e")) {
+                    commands.set(i, Commander.escape(commands.get(i)));
+                }else if (in.equals("ue")) {
+                    commands.set(i, Commander.unescape(commands.get(i)));
+                }
+                Logger.log("%s", commands.toString());
+            }
+        }*/
 
         return pb.command(commands);
     }
@@ -93,8 +137,8 @@ public class Commander {
      */
     public static String escape(String s) {
         switch (OS.getOS()) {
-            case WINDOWS -> s = s.contains(" ") ? String.format("\"%s\"", s) : s;
-            case LINUX, MAC -> s = s.replace(" ", "\\ ");
+            case WINDOWS, LINUX -> s = s.contains(" ") ? String.format("\"%s\"", s) : s;
+            case MAC -> s = s.replace(" ", "\\ ");
         }
         return s;
     }
