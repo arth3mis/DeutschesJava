@@ -18,7 +18,6 @@ public abstract class Runner {
     protected String[] args;
 
     protected String runnerCommand;
-    protected List<String> commands;
 
     protected final int programEndNewLines = 2;
 
@@ -40,21 +39,13 @@ public abstract class Runner {
         this.args = args;
         // custom runner set?
         runnerCommand = customRunner == null || customRunner.isEmpty() ? "java" : customRunner;
-        // command setup
-        buildCommand();
-    }
-
-    protected void buildCommand() {
-        commands = Commander.basicCommand();
-        commands.addAll(basicRunCommand());
     }
 
     /**
-     * @return (java_executable) -classpath (path) (main_class) [args]
+     * @return -classpath (path) (main_class) [args]
      */
-    protected List<String> basicRunCommand() {
+    protected List<String> javaCommandArguments() {
         List<String> c = new ArrayList<>();
-        c.add(Commander.replaceEnvVars(runnerCommand));
         c.add("-classpath");
         c.add(mainClassFile.getParent() == null ? "." : mainClassFile.getParent());
         c.add(mainClassFile.getName());
@@ -71,10 +62,14 @@ public abstract class Runner {
         // route streams to let user interact with the program
         // (https://stackoverflow.com/questions/5711084/java-runtime-getruntime-getting-output-from-executing-a-command-line-program)
         try {
-            Logger.log("Ausführung mit %s starten...", Commander.formatCommand(runnerCommand));
+            Logger.log("Ausführung mit %s starten...", runnerCommand);
 
+            ProcessBuilder pb = Commander.createProcessBuilder(runnerCommand, javaCommandArguments());
             // debug for linux
-            Logger.log("%s", commands.toString());
+            //ProcessBuilder pb = new ProcessBuilder().redirectErrorStream(true).command(commands);
+            //pb.directory(new File(Commander.replaceEnvVars(runnerCommand)).getParentFile());
+            /*commands = commands.stream().map(Commander::escape).toList();
+            Logger.log("%s; %s", commands.toString(), pb.directory());
             if (Main.Flag.TEST.set) {
                 String in = "";
                 Scanner sc = new Scanner(System.in);
@@ -89,6 +84,12 @@ public abstract class Runner {
                         commands.add(i, s);
                     }else if (in.equals("rm")) {
                         commands.remove(commands.get(i));
+                    }else if (in.equals("env")) {
+                        System.out.print("add env: ");
+                        String s = sc.nextLine();
+                        pb.environment().put(s.split(";")[0], s.split(";")[1]);
+                    }else if (in.equals("getenv")) {
+                        System.out.println(pb.environment().toString().replace(", ", "\n"));
                     }else if (in.equals("v")) {
                         System.out.print("new value: ");
                         String s = sc.nextLine();
@@ -100,14 +101,11 @@ public abstract class Runner {
                     }
                     Logger.log("%s", commands.toString());
                 }
-            }
+            }*/
+            //pb.command(commands.subList(0,commands.size()-1));
+                    //Commander.createProcessBuilder(commands.subList(0,commands.size()-1), doEnvs);
+            //Logger.log("%s", commands.toString());
 
-            ProcessBuilder pb =           //////////////// debug - todo i guess no spaces on linux/mac... windows is fine, maybe i need to get some deeper understanding
-                    new ProcessBuilder()
-                            .redirectErrorStream(
-                                    true)
-                            .command(
-                                    commands);//Commander.createProcessBuilder(commands);
             final Process p = pb.start();
 
             System.out.println(Main.OUTPUT_SEP);

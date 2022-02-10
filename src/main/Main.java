@@ -13,7 +13,7 @@ import java.util.*;
 
 public class Main {
 
-    public static final int VERSION = 21;
+    public static final int VERSION = 22;
 
     public static final String LANGUAGE_NAME = "DJava";
     public static final String EXTENSION_NAME = "djava";
@@ -115,7 +115,8 @@ public class Main {
         File[] classFiles = null;  // no extension
 
         // standard operation (run)?
-        boolean standard = !(Flag.CONVERT.set || Flag.COMPILE.set || Flag.RUN.set || Flag.JUST_COMPILE.set || Flag.JUST_RUN.set);
+        boolean standard =
+                !(Flag.CONVERT.set || Flag.COMPILE.set || Flag.RUN.set || Flag.JUST_COMPILE.set || Flag.JUST_RUN.set);
         // resolve flags to actions
         boolean convert   = standard || Flag.RUN.set || Flag.COMPILE.set || Flag.CONVERT.set;
         boolean compile   = standard || Flag.RUN.set || Flag.COMPILE.set || Flag.JUST_COMPILE.set;
@@ -153,9 +154,9 @@ public class Main {
         }
 
         // delete java files? (only when conversion and compilation were successful)
-        if (!Flag.KEEP_JAVA.set &&
-                convert && javaFiles.length > 0 &&
-                compile && classFiles.length > 0) {
+        if (!Flag.KEEP_JAVA.set
+                && convert && javaFiles.length > 0
+                && compile && classFiles.length > 0) {
             Logger.log("Java-Dateien löschen...");
             if (!Filer.deleteFiles(javaFiles))
                 Logger.warning("Nicht alle Java-Dateien konnten gelöscht werden.");
@@ -178,8 +179,8 @@ public class Main {
         }
 
         // delete class files? (only when compilation and running were successful)
-        if (Flag.DELETE_CLASS.set &&
-                compile && run && runSuccess) {
+        if (Flag.DELETE_CLASS.set
+                && compile && run && runSuccess) {
             // do not allow deletion for windows batch runs, because class files are needed asynchronous
             if (Flag.SPECIAL_RUN.set && OS.isWindows())
                 Logger.warning("Klassen-Dateien werden aufgrund der Option '%s' nicht gelöscht",

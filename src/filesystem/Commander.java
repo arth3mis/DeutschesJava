@@ -1,8 +1,9 @@
 package filesystem;
 
-import main.Main;
+import main.Logger;
 import main.OS;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,7 @@ public class Commander {
         List<String> c = new ArrayList<>();
         switch (OS.getOS()) {
             case WINDOWS -> c.addAll(List.of(new String[]{"cmd.exe", "/c"}));
-            case LINUX, MAC -> c.addAll(List.of(new String[]{"bash", "-c"}));
+            case LINUX, MAC -> {}//c.addAll(List.of(new String[]{"bash", "-c"}));
         }
         return c;
     }
@@ -30,27 +31,59 @@ public class Commander {
 
     /**
      * Sets up new process builder, escapes strings if necessary. Error stream is redirected to stdout.
-     * @param commands list of commands and arguments, split in single items that can be escaped together
+     * @param appendItems list of commands and arguments, split in single items that can be escaped together
      * @return process builder ready to start
      */
-    public static ProcessBuilder createProcessBuilder(List<String> commands) {
+    public static ProcessBuilder createProcessBuilder(String mainCommand, List<String> appendItems) {
         ProcessBuilder pb = new ProcessBuilder().redirectErrorStream(true);
+
+        // pre-format main command
+        mainCommand = replaceEnvVars(mainCommand);
+
         // escape strings
-        commands = new ArrayList<>(commands.stream()
+        appendItems = new ArrayList<>(appendItems.stream()
                 .map(Commander::escape)
                 .toList());
-        // move strings with spaces to environment variables?
-        if (OS.isWindows() || Main.Flag.TEST.set) {
-            final String envVarPrefix = "TEMP_DJAVA_VAR_";
 
+        // handle main command
+        // Linux/Mac: change working directory of process builder (because main command is path with spaces)?
+        if ((OS.isLinux() || OS.isMac())
+                && mainCommand.contains(" ")) {
+            File f = new File(mainCommand);
+            if (f.getParentFile() != null) {
+                Logger.log("Prozess relativ zur Datei des Rennen-Befehls verschoben.");
+                pb.directory(f.getParentFile());
+                // main Command is set relative to working dir
+                mainCommand = f.getName();
+                // spaces in name? basically no hope
+                if (mainCommand.contains(" ")) {
+                    Logger.warning("Leerzeichen im Dateinamen des Rennen-Befehls!");
+                    mainCommand = Commander.escape(mainCommand);
+                }
+            }
+        } else if (mainCommand.contains(" "))
+            mainCommand = Commander.escape(mainCommand);
+
+        // build command list
+        List<String> commands = basicCommand();
+        commands.add(mainCommand);
+        commands.addAll(appendItems);
+
+        // Windows: move strings with spaces to environment variables?
+        if (OS.isWindows()) {
+            int n = 0;
+            final String envVarPrefix = "TEMP_DJAVA_VAR_";
             for (int i = 0; i < commands.size(); i++) {
                 if (commands.get(i).contains(" ")) {
                     // save command and change to variable name
                     pb.environment().put(envVarPrefix + i, commands.get(i));
                     commands.set(i, formatEnvVar(envVarPrefix + i));
+                    n++;
                 }
             }
+            Logger.log("%d Befehls-Elemente mit Leerzeichen in Umgebungsvariablen verschoben", n);
         }
+
         return pb.command(commands);
     }
 

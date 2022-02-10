@@ -50,13 +50,11 @@ public record Compiler(String customCompiler) {
     }
 
     private boolean compileWithCommand(String compiler, File @NotNull [] javaFiles) {
-        try {
-            Logger.log("Kompilierung mit %s starten...", Commander.formatCommand(compiler));
-            List<String> commands = Commander.basicCommand();
-            commands.add(Commander.replaceEnvVars(compiler));
-            commands.addAll(Arrays.stream(javaFiles).map(File::getPath).toList());
+        Logger.log("Kompilierung mit %s starten...", compiler);
 
-            ProcessBuilder pb = Commander.createProcessBuilder(commands);
+        try {
+            ProcessBuilder pb = Commander.createProcessBuilder(
+                    compiler, Arrays.stream(javaFiles).map(File::getPath).toList());
             Process p = pb.start();
 
             // redirect output from process
