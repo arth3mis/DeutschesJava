@@ -4,7 +4,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
 
-import convert.translation.TextChain;
 import filesystem.Filer;
 import main.Logger;
 import main.Main;
@@ -29,7 +28,7 @@ public class Converter {
 
     private static final String TRANSLATION_DIR = "translation";
 
-    private Translation rootTranslation;
+    private Translation rootTranslation = new Translation();
     private final File[] files;
     private HashMap<File, TextChain> fileChains = new HashMap<>();
 
@@ -46,13 +45,31 @@ public class Converter {
         for (File dJavaFile : djavaFiles) {
             try {
                 BufferedReader br = new BufferedReader(new FileReader(dJavaFile));
+                File packageTranslationFolder = new File(Main.SOURCE_PATH, getClass().getPackageName() + File.separator + TRANSLATION_DIR);
+                HashMap<String, File> packageTranslationFiles = new HashMap<>();
 
-                // Communicate Debugging
-                System.out.println("\n\nStarte Lesen...\n");
-                TextChain textChainStart = new TextChain.Generator(br).generate();
+                // Importing TextChain
+                Logger.log("Dateien werden in Sinneinheiten unterteilt...");
+                fileChains.put(dJavaFile, new TextChain.Generator(br).generate());
+                fileChains.get(dJavaFile).print();
+                System.out.println("\n\n");
+
+                // Import Import files
+                Logger.log("Lade Übersetzungsdateien von " + packageTranslationFolder.getAbsolutePath());
+                for (File translationFile : Objects.requireNonNull(packageTranslationFolder.listFiles())) {
+                    if (translationFile.getName().startsWith("0_")) {
+                        // Add to Root translation
+                        loadPackageTranslationFile(translationFile);
+                    } else {
+                        // Note the Package Name
+                        String packageName = translationFile.getName().substring(0, translationFile.getName().lastIndexOf('.'));
+                        packageTranslationFiles.put(packageName, translationFile);
+                    }
+                }
+
+                rootTranslation.print("");
 
 
-                textChainStart.print();
                 System.out.println("\n");
 
             } catch (IOException e) {
@@ -62,16 +79,6 @@ public class Converter {
 
 
 
-        /*
-        HashMap<String, File> translationFiles = new HashMap<>();
-        File translationFolder = new File(Main.SOURCE_PATH, getClass().getPackageName() + File.separator + TRANSLATION_DIR);
-        //System.out.println(translationFolder.getAbsolutePath() + " --- is dir: " + translationFolder.isDirectory());
-
-        for (File translationFile : translationFolder.listFiles()) {
-
-        }
-        */
-
 
 
 
@@ -80,9 +87,65 @@ public class Converter {
             // store in "rootTranslation" object
     }
 
-    //TODO: see above
-    int createChain(int i, BufferedReader bf, TextChain textChain) {
-        return 0;
+
+    private void loadPackageTranslationFile(File translationFile) {
+        try (BufferedReader br = new BufferedReader(new FileReader(translationFile))) {
+
+            readPackageTranslationFile(br, rootTranslation);
+        } catch (IOException e) {
+            Logger.warning("Fehler beim Lesen der Übersetzungsdatei: %s", translationFile.getAbsolutePath());
+        } /*catch (NullPointerException e) {
+            Logger.warning("Fehler beim Lesen der Übersetzungsdatei: %s\n\tDetails: Fehlerhafte Klammersetzung!",
+                    translationFile.getAbsolutePath());
+        }*/
+    }
+
+    /**
+     * Recursive Method to read a translation File
+     * @param br
+     * @param staticContextTranslation
+     * @throws IOException
+     * @throws NullPointerException
+     */
+    private void readPackageTranslationFile(BufferedReader br, Translation staticContextTranslation) throws IOException {
+        String line;
+        Translation lastTranslation = null;
+
+        // Read lines & Return if context goes up a layer
+        while ((line = br.readLine()) != null) {
+            line = line.replaceAll(" ", "");
+            if (line.length() == 0) continue;
+            if (line.startsWith("#")) continue;
+            if (line.startsWith("}")) return;
+            if (line.startsWith("{")) {
+                if (lastTranslation == null) throw new NullPointerException();
+                readPackageTranslationFile(br, lastTranslation);
+                continue;
+            }
+
+            HashMap<String, Translation> context;
+            // Check if is static and delete $
+            if (line.startsWith("$")) {
+                context = staticContextTranslation.getStaticTranslations();
+                line = line.substring(1);
+            } else context = rootTranslation.getStaticTranslations();
+
+            // Add translation if in File
+            if (line.contains(";")) {
+                String[] splitLine = line.split(";");
+                Translation value = new Translation(splitLine[0]);
+
+                Arrays.stream(splitLine[1].split(",")).forEach(key -> context.put(key, value));
+
+                lastTranslation = value;
+
+            } else {
+                lastTranslation = new Translation(line);
+                context.put(line, lastTranslation);
+            }
+
+
+        }
     }
 
 
@@ -184,7 +247,7 @@ public class Converter {
         return successFiles.toArray(new File[0]);
     }
 
-    public void loadTranslation() {
+    public void loadOldTranslation() {
         oldTranslationHashMap = new HashMap<>();
 
         //todo:

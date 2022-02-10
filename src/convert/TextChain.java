@@ -1,8 +1,7 @@
-package convert.translation;
+package convert;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Arrays;
 
 public class TextChain {
 
@@ -58,7 +57,7 @@ public class TextChain {
         private BufferedReader br;
         private String line;
         private int index = 0;
-        private boolean inBlockComment = false;
+        private boolean inBlockComment = false, inStringLiteral = false;
 
         public Generator(BufferedReader br) {
             super("");
@@ -77,8 +76,68 @@ public class TextChain {
             // Read new Line if necessary
             while (line != null) {
 
+                // Examines single Line
                 for (; index < line.length(); index++) {
                     char c = line.charAt(index);
+                    char cNext = line.length() > index + 1 ? line.charAt(index + 1) : ' ';
+
+                    // Filter Comments
+                    if (inBlockComment && !inStringLiteral) {
+                        if (c == '*' && cNext == '/') {
+                            index++;
+                            inBlockComment = false;
+                        }
+                        continue;
+
+                    } else if (c == '/' && cNext == '*') {
+                        // Recognize Block-Comments using /*
+                        index ++;
+                        inBlockComment = true;
+
+                        // Add previous Text
+                        if (!text.isEmpty()) {
+                            chainEnd = chainEnd.setAndGetNextChain(new TextChain(text.toString()));
+                            text = new StringBuilder();
+                        }
+                        continue;
+
+                    } else if (c == '/' && cNext == '/') {
+                        // Recognize Line-Comments using //
+                        break;
+                    }
+
+
+                    // Group String Literals
+                    if (inStringLiteral) {
+                        if (c == '\\') {
+                            // Check for \'s to ignore \" but not ignore \\"
+                            text.append(c).append(cNext);
+                            index++;
+                            continue;
+
+                        } else if (c == '"') {
+                            // End String
+                            text.append(c);
+                            chainEnd = chainEnd.setAndGetNextChain(new TextChain(text.toString()));
+                            text = new StringBuilder();
+                            inStringLiteral = false;
+                            continue;
+
+                        }
+                        text.append(c);
+                        continue;
+
+                    } else if (c == '"') {
+                        // Add previous Text
+                        if (!text.isEmpty()) {
+                            chainEnd = chainEnd.setAndGetNextChain(new TextChain(text.toString()));
+                            text = new StringBuilder();
+                        }
+                        inStringLiteral = true;
+                        text.append(c);
+                        continue;
+                    }
+
 
                     // Create new chain part, if isSplitter
                     if (isSymbol(c, SPLITTERS)) {
@@ -119,14 +178,16 @@ public class TextChain {
                         // Append Character
                         text.append(c);
                     }
+
                 }
 
-
-                if (!text.isEmpty()) {
-                    chainEnd = chainEnd.setAndGetNextChain(new TextChain(text.toString()));
-                    text = new StringBuilder();
+                if (!inBlockComment) {
+                    if (!text.isEmpty()) {
+                        chainEnd = chainEnd.setAndGetNextChain(new TextChain(text.toString()));
+                        text = new StringBuilder();
+                    }
+                    chainEnd = chainEnd.setAndGetNextChain(new TextChain(LINE_SEPARATOR));
                 }
-                chainEnd = chainEnd.setAndGetNextChain(new TextChain(LINE_SEPARATOR));
 
                 // Reads next line
                 readNextLine();
@@ -145,38 +206,6 @@ public class TextChain {
 
             // Return false if null
             if (line == null) return false;
-
-            // Filter comments
-            if (inBlockComment) {
-                // Recognize end of comments
-                if (line.contains("*/")) {
-                    line = line.substring(line.indexOf("*/") + 2);
-                    inBlockComment = false;
-                } else {
-                    // Repeat until end of comment is found
-                    readNextLine();
-                }
-
-            } else {
-                // Recognize new comments
-                if (line.contains("//")) {
-                    line = line.substring(0, line.indexOf("//"));
-                } else if (line.contains("/*")) {
-                    int indexOfBegin = line.indexOf("/*");
-                    String beginLine = line.substring(0, indexOfBegin);
-                    String endLine = line.substring(indexOfBegin + 2);
-
-                    // If BlockComment ends in same line
-                    if (endLine.contains("*/")) {
-                        line = beginLine + endLine.substring(endLine.indexOf("*/") + 2);
-
-                        // If BlockComment goes beyond this line
-                    } else {
-                        line = beginLine;
-                        inBlockComment = true;
-                    }
-                }
-            }
 
             return true;
         }

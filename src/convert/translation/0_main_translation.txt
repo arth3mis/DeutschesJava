@@ -19,18 +19,18 @@ main;           haupt
 
 # Deklarationen
 class;          klasse
-enum;           numm | aufzählung
+enum;           numm, aufzählung
 interface;      schnittstelle
 # Meme
-interface;      ganzzahlgesicht | zwischengesicht
+interface;      ganzzahlgesicht, zwischengesicht
 #/ Meme
 record;         rekord
 var
 void;           leer
 extends;        erweitert
 implements;     benutzt
-import;         zufuhr | einbau
-package;        paket | päckchen
+import;         zufuhr , einbau
+package;        paket , päckchen
 
 # Module
 module;         modul
@@ -63,7 +63,7 @@ switch;         schalt
 throw;          wirf
 throws;         wirft
 try;            versuch
-while;          solange | während
+while;          solange , während
 yield;          ernte
 
 
@@ -80,7 +80,7 @@ goto;           gehzu
 # Speichertypen
 boolean;        boolesch
 byte;           binärfolge
-char;           zeichen | buchstabe
+char;           zeichen , buchstabe
 # Meme
 char;           kerl
 #/ Meme
@@ -100,7 +100,7 @@ this;           dies
 
 
 # Modifikatoren
-public;         offen | öffentlich
+public;         offen , öffentlich
 protected;      geschützt
 private;        privat
 # Meme
