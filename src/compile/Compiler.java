@@ -1,6 +1,6 @@
 package compile;
 
-import filesystem.Commander;
+import filesystem.JCmd;
 import main.Logger;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,7 +53,7 @@ public record Compiler(String customCompiler) {
         Logger.log("Kompilierung mit %s starten...", compiler);
 
         try {
-            ProcessBuilder pb = Commander.createProcessBuilder(
+            ProcessBuilder pb = JCmd.get().createProcessBuilder(
                     compiler, Arrays.stream(javaFiles).map(File::getPath).toList());
             Process p = pb.start();
 

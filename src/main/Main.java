@@ -182,10 +182,10 @@ public class Main {
         if (Flag.DELETE_CLASS.set
                 && compile && run && runSuccess) {
             // do not allow deletion for windows batch runs, because class files are needed asynchronous
-            if (Flag.SPECIAL_RUN.set && OS.isWindows())
+            if (Flag.SPECIAL_RUN.set && OS.isWindows()) {
                 Logger.warning("Klassen-Dateien werden aufgrund der Option '%s' nicht gelöscht",
                         Logger.fFlag(Flag.SPECIAL_RUN, "|"));
-            else {
+            } else {
                 Logger.log("Klassen-Dateien löschen...");
                 if (!Filer.deleteFiles(Filer.refactorExtension(classFiles, "class")))
                     Logger.warning("Nicht alle Klassen-Dateien konnten gelöscht werden.");

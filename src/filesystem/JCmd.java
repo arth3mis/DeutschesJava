@@ -1,54 +1,65 @@
 package filesystem;
 
 import main.Logger;
-import main.Main;
 import main.OS;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Commander {
+public class JCmd {
 
-    public static List<String> basicCommand() {
-        List<String> c = new ArrayList<>();
-        switch (OS.getOS()) {
-            case WINDOWS -> c.addAll(List.of(new String[]{"cmd.exe", "/c"}));
-            case LINUX, MAC -> {}//c.addAll(List.of(new String[]{"bash", "-c"}));
+    protected JCmd() { }
+
+    @Contract(" -> new")
+    public static @NotNull JCmd get() {
+        if (OS.isWindows()) {
+            return new JCmdWindows();
+        } else if (OS.isLinux() || OS.isMac()) {
+            return new JCmdUnixLike();
         }
+        return new JCmd();
+    }
+
+    public List<String> basicCommand() {
+        return new ArrayList<>();
+    }
+
+    /**
+     * @return -classpath (path) (main_class)
+     */
+    protected List<String> runCommand(String runnerExecutable, File mainClassFile) {
+        List<String> c = new ArrayList<>();
+        c.add(runnerExecutable);
+        c.add("-classpath");
+        c.add(mainClassFile.getParent() == null ? "." : mainClassFile.getParent());
+        c.add(mainClassFile.getName());
         return c;
     }
 
     /**
-     * @param command first part of command; referenced environment variables will be replaced, spaces escaped
-     * @return formatted mainCommand
-     */
-    public static String formatCommand(String command) {
-        return escape(replaceEnvVars(command));
-    }
-
-    /**
-     * Sets up new process builder, escapes strings if necessary. Error stream is redirected to stdout.
+     * Sets up new process builder, formats commands. Error stream is redirected to stdout.
      * @param mainCommand javac/java
      * @param appendItems list of command arguments, split in single items that can be escaped together
      * @return process builder ready to start
      */
-    public static ProcessBuilder createProcessBuilder(String mainCommand, List<String> appendItems) {
+    public ProcessBuilder createProcessBuilder(String mainCommand, List<String> appendItems) {
         ProcessBuilder pb = new ProcessBuilder().redirectErrorStream(true);
 
-        // todo break up in parts that are moved to runners (the ones with if windows/linux) and call together-parts from there
-        // todo mechanic (linux) to try to eliminate spaces: mainCommand by pb.dir -> cp by pb.dir (or maybe both, relativize?)
+        // todo break up in parts that are moved to subclasses
+        // todo check if * as space works in linux/mac? no, but keep testing
+        // todo mechanic (linux) to try to eliminate spaces: mainCommand by pb.dir -> args by pb.dir (or maybe both, relativize?)
 
         // pre-format main command
         mainCommand = replaceEnvVars(mainCommand);
-
         // escape strings
-        appendItems = new ArrayList<>(appendItems.stream()
-                .map(Commander::escape)
-                .toList());
+        appendItems = escape(appendItems);
 
         // handle main command
         // Linux/Mac: change working directory of process builder (because of spaces)?
@@ -64,13 +75,13 @@ public class Commander {
                 // spaces in name itself? basically no hope
                 if (f.getParentFile() == null || mainCommand.contains(" ")) {
                     Logger.warning("Leerzeichen im Dateinamen des Rennen-Befehls!");
-                    mainCommand = Commander.escape(mainCommand);
+                    mainCommand = escape(mainCommand);
                 }
             } else {
                 // check if an argument contains
             }
         } else if (mainCommand.contains(" "))
-            mainCommand = Commander.escape(mainCommand);
+            mainCommand = escape(mainCommand);
 
         // build command list
         List<String> commands = basicCommand();
@@ -132,18 +143,26 @@ public class Commander {
     }
 
     /**
+     * @param command input
+     * @return referenced environment variables will be replaced, spaces escaped
+     */
+    public String formatCommand(String command) {
+        return escape(replaceEnvVars(command));
+    }
+
+    /**
      * @param s input
      * @return s with escaped spaces, based on OS
      */
-    public static String escape(String s) {
-        switch (OS.getOS()) {
-            case WINDOWS, LINUX -> s = s.contains(" ") ? String.format("\"%s\"", s) : s;
-            case MAC -> s = s.replace(" ", "\\ ");
-        }
-        return s;
+    public String escape(String s) {
+        return s.contains(" ") ? String.format("\"%s\"", s) : s;
     }
 
-    public static String unescape(String s) {
+    public List<String> escape(List<String> list) {
+        return new ArrayList<>(list.stream().map(this::escape).toList());
+    }
+
+    public String unescape(String s) {
         switch (OS.getOS()) {
             case WINDOWS -> s = s.contains(" ") && s.startsWith("\"") ? s.substring(1, s.length()-1) : s;
             case LINUX, MAC -> s = s.replace("\\ ", " ");
@@ -151,7 +170,7 @@ public class Commander {
         return s;
     }
 
-    public static boolean isEscaped(String s) {
+    public boolean isEscaped(String s) {
         boolean b = false;
         switch (OS.getOS()) {
             case WINDOWS -> b = s.contains(" ") && s.startsWith("\"") && s.endsWith("\"");
@@ -164,7 +183,7 @@ public class Commander {
      * @param s input
      * @return s with replaced environment variable, based on OS
      */
-    public static String replaceEnvVars(String s) {
+    public String replaceEnvVars(String s) {
         // https://stackoverflow.com/questions/4752817/expand-environment-variables-in-text
         Map<String, String> envMap = System.getenv();
         String pattern = null;
@@ -189,7 +208,7 @@ public class Commander {
         return s;
     }
 
-    public static String formatEnvVar(String s) {
+    public String formatEnvVar(String s) {
         switch (OS.getOS()) {
             case WINDOWS -> s = "%" + s + "%";
             case LINUX, MAC -> s = "${" + s + "}";

@@ -52,7 +52,7 @@ public class Logger {
                 "    %s   Wandelt %s-Dateien in Java-Dateien um"                                                        .formatted(fFlag(Flag.CONVERT, "  ", true), LANGUAGE_NAME),
                 "    %s   Wandelt um und kompiliert"                                                                    .formatted(fFlag(Flag.COMPILE, "  ", true)),
                 "    %s   Wandelt um, kompiliert und führt aus (STANDARD)"                                              .formatted(fFlag(Flag.RUN, "  ", true)),
-                "    %s   Kompiliert bereits umgewandelte Dateien"                                                      .formatted(fFlag(Flag.JUST_COMPILE, "  ", true)),
+                "    %s   Kompiliert Java-Dateien"                                                                      .formatted(fFlag(Flag.JUST_COMPILE, "  ", true)),
                 "    %s   Führt Java-Klassen aus"                                                                       .formatted(fFlag(Flag.JUST_RUN, "  ", true)),
                 "    %s   Spezielle Ausführung (Windows: eigenes Prozess-Fenster)"                                      .formatted(fFlag(Flag.SPECIAL_RUN, "  ", true)),
                 "    %s   Auch Dateien, die nicht auf '.%s' enden, werden akzeptiert"                                   .formatted(fFlag(Flag.IGNORE_EXT, "  ", true), EXTENSION_NAME),

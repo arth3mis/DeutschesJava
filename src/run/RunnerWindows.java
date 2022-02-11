@@ -1,6 +1,6 @@
 package run;
 
-import filesystem.Commander;
+import filesystem.JCmd;
 import main.Logger;
 import main.Main;
 
@@ -24,8 +24,8 @@ class RunnerWindows extends Runner {
         String command =
                 "start cmd.exe /c " // original: "start cmd.exe @cmd /k " (the /k is better for debugging, but no idea about @cmd)
                         + "\""
-                        + Commander.formatCommand(runnerCommand)
-                        + String.join(" ", javaCommandArguments().stream().map(Commander::escape).toList())
+                        + JCmd.get().formatCommand(runnerCommand)
+                        + String.join(" ", javaCommandArguments().stream().map(JCmd.get()::escape).toList())
                         + "&&echo.".repeat(programEndNewLines)
                         + "&&echo " + Main.OUTPUT_SEP
                         + "&&pause&&exit"
@@ -55,7 +55,7 @@ class RunnerWindows extends Runner {
         try {
             Logger.log("Ausführung starten...");
             Runtime.getRuntime()
-                    .exec(Commander.escape(batchFile.getPath()))
+                    .exec(JCmd.get().escape(batchFile.getPath()))
                     .waitFor();
             Logger.log("Ausführung der Stapel-Datei beendet.");
             return true;
