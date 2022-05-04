@@ -53,7 +53,7 @@ public class JCmd {
         ProcessBuilder pb = new ProcessBuilder().redirectErrorStream(true);
 
         // todo break up in parts that are moved to subclasses
-        // todo check if * as space works in linux/mac? no, but keep testing
+        // todo check if * as space works in linux/mac? -> no, but keep testing
         // todo mechanic (linux) to try to eliminate spaces: mainCommand by pb.dir -> args by pb.dir (or maybe both, relativize?)
 
         // pre-format main command

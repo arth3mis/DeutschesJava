@@ -71,7 +71,6 @@ public class Runner {
 
             // user input logic
             final Scanner scanner = new Scanner(System.in);
-
             new Thread(() -> {
                 while (p.isAlive()) {
                     try {
