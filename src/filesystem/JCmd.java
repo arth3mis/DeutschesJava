@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -47,99 +46,42 @@ public class JCmd {
      * Sets up new process builder, formats commands. Error stream is redirected to stdout.
      * @param mainCommand javac/java
      * @param appendItems list of command arguments, split in single items that can be escaped together
-     * @return process builder ready to start
+     * @return process builder ready to start, null if problems occur
      */
     public ProcessBuilder createProcessBuilder(String mainCommand, List<String> appendItems) {
-        ProcessBuilder pb = new ProcessBuilder().redirectErrorStream(true);
-
-        // todo break up in parts that are moved to subclasses
-        // todo check if * as space works in linux/mac? -> no, but keep testing
-        // todo mechanic (linux) to try to eliminate spaces: mainCommand by pb.dir -> args by pb.dir (or maybe both, relativize?)
+        // spaces not allowed?
+        if (!acceptSpaces(mainCommand, appendItems))
+            return null;
 
         // pre-format main command
         mainCommand = replaceEnvVars(mainCommand);
         // escape strings
         appendItems = escape(appendItems);
 
-        // handle main command
-        // Linux/Mac: change working directory of process builder (because of spaces)?
-        if ((OS.isLinux() || OS.isMac())) {
-            if (mainCommand.contains(" ")) {
-                File f = new File(mainCommand);
-                if (f.getParentFile() != null) {
-                    Logger.log("Prozess relativ zur Datei des Rennen-Befehls verschoben.");
-                    pb.directory(f.getParentFile());
-                    // main Command is set relative to working dir
-                    mainCommand = f.getName();
-                }
-                // spaces in name itself? basically no hope
-                if (f.getParentFile() == null || mainCommand.contains(" ")) {
-                    Logger.warning("Leerzeichen im Dateinamen des Rennen-Befehls!");
-                    mainCommand = escape(mainCommand);
-                }
-            } else {
-                // check if an argument contains
-            }
-        } else if (mainCommand.contains(" "))
-            mainCommand = escape(mainCommand);
+        ProcessBuilder pb = new ProcessBuilder().redirectErrorStream(true);
 
         // build command list
         List<String> commands = basicCommand();
         commands.add(mainCommand);
         commands.addAll(appendItems);
 
-        // Windows: move strings with spaces to environment variables?
-        if (OS.isWindows()) {
-            int n = 0;
-            final String envVarPrefix = "TEMP_DJAVA_VAR_";
-            for (int i = 0; i < commands.size(); i++) {
-                if (commands.get(i).contains(" ")) {
-                    // save command and change to variable name
-                    pb.environment().put(envVarPrefix + i, commands.get(i));
-                    commands.set(i, formatEnvVar(envVarPrefix + i));
-                    n++;
-                }
-            }
-            if (n > 0)
-                Logger.log("%d Befehls-Elemente mit Leerzeichen in Umgebungsvariablen verschoben", n);
-        }
+        moveToEnvVars(commands, pb);
 
         Logger.log("Erstellter Befehl: %s", commands.toString());
-
-        /*if (Main.Flag.TEST.set) {
-            String in = "";
-            java.util.Scanner sc = new java.util.Scanner(System.in);
-            while (!in.equals("xx")) {
-                System.out.print("index: ");
-                int i = Integer.parseInt(sc.nextLine());
-                System.out.print("was tun: ");
-                in = sc.nextLine();
-                if (in.equals("a")) {
-                    System.out.print("add value: ");
-                    String s = sc.nextLine();
-                    commands.add(i, s);
-                }else if (in.equals("rm")) {
-                    commands.remove(commands.get(i));
-                }else if (in.equals("env")) {
-                    System.out.print("add env: ");
-                    String s = sc.nextLine();
-                    pb.environment().put(s.split(";")[0], s.split(";")[1]);
-                }else if (in.equals("getenv")) {
-                    System.out.println(pb.environment().toString().replace(", ", "\n"));
-                }else if (in.equals("v")) {
-                    System.out.print("new value: ");
-                    String s = sc.nextLine();
-                    commands.set(i, s.equals("--") ? commands.get(i) : s);
-                }else if (in.equals("e")) {
-                    commands.set(i, Commander.escape(commands.get(i)));
-                }else if (in.equals("ue")) {
-                    commands.set(i, Commander.unescape(commands.get(i)));
-                }
-                Logger.log("%s", commands.toString());
-            }
-        }*/
-
         return pb.command(commands);
+    }
+
+    protected boolean acceptSpaces(String mainCommand, List<String> appendItems) {
+        // do not accept spaces by default
+        if (mainCommand.contains(" ") || appendItems.stream().anyMatch(s -> s.contains(" "))) {
+            Logger.error("Leerzeichen in Befehl/Argumenten funktionieren auf diesem Betriebssystem nicht.");
+            return false;
+        }
+        return true;
+    }
+
+    protected void moveToEnvVars(List<String> commands, ProcessBuilder pb) {
+        // no standard implementation
     }
 
     /**
@@ -152,7 +94,7 @@ public class JCmd {
 
     /**
      * @param s input
-     * @return s with escaped spaces, based on OS
+     * @return s with escaped spaces
      */
     public String escape(String s) {
         return s.contains(" ") ? String.format("\"%s\"", s) : s;
@@ -163,20 +105,11 @@ public class JCmd {
     }
 
     public String unescape(String s) {
-        switch (OS.getOS()) {
-            case WINDOWS -> s = s.contains(" ") && s.startsWith("\"") ? s.substring(1, s.length()-1) : s;
-            case LINUX, MAC -> s = s.replace("\\ ", " ");
-        }
-        return s;
+        return s.contains(" ") && s.startsWith("\"") ? s.substring(1, s.length()-1) : s;
     }
 
     public boolean isEscaped(String s) {
-        boolean b = false;
-        switch (OS.getOS()) {
-            case WINDOWS -> b = s.contains(" ") && s.startsWith("\"") && s.endsWith("\"");
-            case LINUX, MAC -> b = s.contains("\\ ");
-        }
-        return b;
+        return s.contains(" ") && s.startsWith("\"") && s.endsWith("\"");
     }
 
     /**
@@ -204,14 +137,6 @@ public class JCmd {
                 Pattern subExpr = Pattern.compile(Pattern.quote(matcher.group(0)));
                 s = subExpr.matcher(s).replaceAll(envValue);
             }
-        }
-        return s;
-    }
-
-    public String formatEnvVar(String s) {
-        switch (OS.getOS()) {
-            case WINDOWS -> s = "%" + s + "%";
-            case LINUX, MAC -> s = "${" + s + "}";
         }
         return s;
     }

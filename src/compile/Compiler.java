@@ -75,7 +75,9 @@ public record Compiler(String customCompiler) {
             return exitValue == 0;
         } catch (IOException e) {
             Logger.error("Kompilierung mit '%s' fehlgeschlagen: %s", compiler, e.getMessage());
-            return false;
+        } catch (NullPointerException e) {
+            Logger.error("Kompilierung mit '%s' fehlgeschlagen.", compiler);
         }
+        return false;
     }
 }
