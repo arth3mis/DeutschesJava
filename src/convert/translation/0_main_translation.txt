@@ -10,6 +10,8 @@
 # "*"  = Verweis auf denselben Sub-Raum wie Begriff, der nach * steht
 # Begriffe ohne ";" sind auf Deutsch und Englisch gleich
 
+# [JDK-install-path]\lib\src.zip\java.base   da sind alle packages in 1:1 ordnerstruktur mit dateien drin
+
 
 # Auch Anker für Pakete
 java;           djava
