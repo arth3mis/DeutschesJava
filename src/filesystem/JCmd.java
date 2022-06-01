@@ -52,9 +52,8 @@ public class JCmd {
         // spaces not allowed?
         if (!acceptSpaces(mainCommand, appendItems))
             return null;
-
         // pre-format main command
-        mainCommand = replaceEnvVars(mainCommand);
+        mainCommand = escape(replaceEnvVars(mainCommand));
         // escape strings
         appendItems = escape(appendItems);
 
@@ -64,9 +63,7 @@ public class JCmd {
         List<String> commands = basicCommand();
         commands.add(mainCommand);
         commands.addAll(appendItems);
-
         moveToEnvVars(commands, pb);
-
         Logger.log("Erstellter Befehl: %s", commands.toString());
         return pb.command(commands);
     }

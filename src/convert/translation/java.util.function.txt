@@ -1,0 +1,10 @@
+# Übersetzung für das "java.util.function" Paket
+
+Consumer;       Konsument
+Function;       Funktion
+Predicate;      Prädikat
+IntConsumer;    GanzKonsument
+IntFunction;    GanzFunktion
+IntPredicate;   GanzPrädikat
+IntSupplier;    GanzVersorger
+Supplier;       Versorger

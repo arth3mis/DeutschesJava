@@ -13,7 +13,7 @@ import java.util.*;
 
 public class Main {
 
-    public static final int VERSION = 22;
+    public static final int VERSION = 24;
 
     public static final String LANGUAGE_NAME = "DJava";
     public static final String EXTENSION_NAME = "djava";
@@ -25,7 +25,7 @@ public class Main {
 
     // program flags
     public enum Flag {
-        HELP("?", "hilfe"),
+        HELP("h", "hilfe"),
         VERBOSE("v", ""),
         CONVERT("u", "umwandeln"),
         COMPILE("k", "kompilieren"),
@@ -33,7 +33,7 @@ public class Main {
         JUST_COMPILE("K", "nurkompilieren"),
         JUST_RUN("R", "nurrennen"),
         SPECIAL_RUN("s", "spezialrennen"),
-        IGNORE_EXT("x", "unendung"),
+        IGNORE_EXT("x", "endungx"),
         INCLUDE_ALL("", "alle"),
         KEEP_JAVA("j", "behaltejava"),
         DELETE_CLASS("l", "löschklassen"),
@@ -76,6 +76,8 @@ public class Main {
 
 
     public static void main(String[] args) {
+        assert Arrays.stream(Flag.values()).mapToInt(f -> f.S.length()).max().orElse(0) == Flag.shortArgLength;
+
         loadCustomPaths();
 
         short eval = evaluateArgs(args);
@@ -249,6 +251,22 @@ public class Main {
         List<String> flagListL = Arrays.stream(Flag.values()).map(f -> Flag.longFlag + f.L).toList();
         List<String> userFileNames = new ArrayList<>();
         int runArgsPos = -1;
+
+        // allow multiple short args after one short flag
+        List<String> argList = new ArrayList<>(Arrays.asList(args));
+        int counter = 0;
+        while (counter < argList.size()) {
+            String s = argList.get(counter);
+            if (s.startsWith(Flag.shortFlag) && !s.startsWith(Flag.longFlag)) {
+                argList.remove(counter);
+                for (int i = Flag.shortFlag.length(); i < s.length(); i += Flag.shortArgLength) {
+                    argList.add(counter++, Flag.shortFlag + s.charAt(i));
+                }
+                counter--;
+            }
+            counter++;
+        }
+        args = argList.toArray(new String[0]);
 
         int k = 0;
         for (String s : args) {
