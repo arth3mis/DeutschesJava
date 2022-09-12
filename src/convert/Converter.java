@@ -1,8 +1,17 @@
 package convert;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Stream;
 
 import filesystem.Filer;
 import main.Logger;
@@ -27,6 +36,16 @@ public class Converter {
     }
 
     private static final String TRANSLATION_DIR = "translation";
+    private static final String[] TRANSLATION_FILES = {
+            "0_java.lang",
+            "0_main_translation",
+            "java",
+            "java.util.function",
+            "java.util",
+            "javax.swing",
+            "javax",
+    };
+    private static final String TRANSLATION_EXT = ".txt";
 
     private Translation rootTranslation = new Translation();
     private final File[] files;
@@ -45,9 +64,8 @@ public class Converter {
         for (File dJavaFile : djavaFiles) {
             try {
                 BufferedReader br = new BufferedReader(new FileReader(dJavaFile));
-                File packageTranslationFolder = new File(Main.SOURCE_PATH, getClass().getPackageName() + File.separator + TRANSLATION_DIR);
-                HashMap<String, File> packageTranslationFiles = new HashMap<>();
-
+                // Note (Arthur): using File objects and dynamic translation file searching doesn't work in jar file
+                HashMap<String, InputStream> packageTranslationFiles = new HashMap<>();
                 // Importing TextChain
                 Logger.log("Dateien werden in Sinneinheiten unterteilt...");
                 fileChains.put(dJavaFile, new TextChain.Generator(br).generate());
@@ -55,15 +73,13 @@ public class Converter {
                 System.out.println("\n\n");
 
                 // Import Import files
-                Logger.log("Lade Übersetzungsdateien von " + packageTranslationFolder.getAbsolutePath());
-                for (File translationFile : Objects.requireNonNull(packageTranslationFolder.listFiles())) {
-                    if (translationFile.getName().startsWith("0_")) {
+                for (String trFileName : TRANSLATION_FILES) {
+                    if (trFileName.startsWith("0_")) {
                         // Add to Root translation
-                        loadPackageTranslationFile(translationFile);
+                        loadPackageTranslationFile(trFileName);
                     } else {
                         // Note the Package Name
-                        String packageName = translationFile.getName().substring(0, translationFile.getName().lastIndexOf('.'));
-                        packageTranslationFiles.put(packageName, translationFile);
+                        packageTranslationFiles.putIfAbsent(trFileName, getTrStream(trFileName));
                     }
                 }
 
@@ -87,16 +103,19 @@ public class Converter {
             // store in "rootTranslation" object
     }
 
+    private InputStream getTrStream(String trFileName) {
+        return getClass().getResourceAsStream(TRANSLATION_DIR + File.separator + trFileName + TRANSLATION_EXT);
+    }
 
-    private void loadPackageTranslationFile(File translationFile) {
-        try (BufferedReader br = new BufferedReader(new FileReader(translationFile))) {
-
+    private void loadPackageTranslationFile(String trFileName) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(Objects.requireNonNull(
+                getTrStream(trFileName))))) {
             readPackageTranslationFile(br, rootTranslation);
-        } catch (IOException e) {
-            Logger.warning("Fehler beim Lesen der Übersetzungsdatei: %s", translationFile.getAbsolutePath());
+        } catch (IOException | NullPointerException e) {
+            Logger.warning("Fehler beim Lesen der Übersetzungsdatei: %s", trFileName);
         } /*catch (NullPointerException e) {
             Logger.warning("Fehler beim Lesen der Übersetzungsdatei: %s\n\tDetails: Fehlerhafte Klammersetzung!",
-                    translationFile.getAbsolutePath());
+                    trFileName.getAbsolutePath());
         }*/
     }
 
@@ -153,7 +172,6 @@ public class Converter {
 
     /**
      * called by Main class to start the translation
-     * @return nothing hehe
      */
     public void translateToJavaFiles() {
         for (int i = 0; i < files.length; i++) {

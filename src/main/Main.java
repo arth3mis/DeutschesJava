@@ -1,6 +1,7 @@
 package main;
 
 import compile.Compiler;
+import convert.Converter;
 import filesystem.Filer;
 import run.Runner;
 
@@ -13,7 +14,7 @@ import java.util.*;
 
 public class Main {
 
-    public static final int VERSION = 24;
+    public static final int VERSION = 25;
 
     public static final String LANGUAGE_NAME = "DJava";
     public static final String EXTENSION_NAME = "djava";
@@ -114,7 +115,7 @@ public class Main {
 
         // File array that are used to pass data to subsequent actions (or signal errors)
         File[] javaFiles = null;   // java extension
-        File[] classFiles = null;  // no extension
+        File[] classFiles = null;  // no extension (.class in file names, none here as they are not needed in java command call)
 
         // standard operation (run)?
         boolean standard =
@@ -411,12 +412,12 @@ public class Main {
     }
 
     private static File[] interpret(File[] djavaFiles) {
-        //Converter c = new Converter(djavaFiles);
-        //c.translateToJavaFiles();
-        //return c.getFiles();
+        Converter c = new Converter(djavaFiles);
+        c.translateToJavaFiles();
+        return c.getFiles();
 
         // todo temp (and very scuffed god damn)
-        List<File> jf = new ArrayList<>(List.of(Filer.refactorExtension(djavaFiles, JAVA_EXTENSION)));
+        /*List<File> jf = new ArrayList<>(List.of(Filer.refactorExtension(djavaFiles, JAVA_EXTENSION)));
         List<File> unJf = new ArrayList<>();
         for (int i = 0; i < djavaFiles.length; i++) {
             File f = jf.get(i);
@@ -431,7 +432,7 @@ public class Main {
         }
         for (File r : unJf)
             jf.remove(r);
-        return jf.toArray(new File[0]);
+        return jf.toArray(new File[0]);*/
     }
 
     private static boolean compile(File[] javaFiles) {

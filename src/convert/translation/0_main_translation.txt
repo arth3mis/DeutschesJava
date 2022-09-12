@@ -149,7 +149,7 @@ wait;           warte
 getClass;       gibKlasse
 {
     getName;                gibName
-    getResourceAsStream;    gibResourceAlsStrom
+    getResourceAsStream;    gibRessourceAlsStrom
 }
 .class
     *getClass
