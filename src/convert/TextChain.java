@@ -63,7 +63,7 @@ public class TextChain {
     }
 
     /** Traverses chains collecting all chain links that match the given words */
-    public List<TextChain> findAllInChains(String[] germanWords) {
+    public List<TextChain> findAllInChain(String[] germanWords) {
         List<TextChain> results = new ArrayList<>();
         TextChain tc = this;
         while ((tc = tc.find(germanWords)) != null) {

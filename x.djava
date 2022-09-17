@@ -3,7 +3,7 @@
  * guten tag
  */
 
-zufuhr djava .werkz. Abtaster;
+zufuhr djava . werkz. Abtaster;
 
 offen klasse x {
 	offen statisch leer haupt(Strippe[] argumente) {
@@ -19,6 +19,10 @@ offen klasse x {
 		x instanz = neu x(42.0, 20.7);
 		instanz.rennen(99);
 		instanz.länge();
+
+        // wird vom konvertierer als ""|"|\n|    abc"|""|; erkannt
+		Strippe s = """
+		        abc""";
 
 		Abtaster ab = neu Abtaster(System.rein);
 		djava.werkz.funktion.GanzVersorger gv = () -> 42;

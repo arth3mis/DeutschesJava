@@ -7,9 +7,10 @@ Math;                               Mathe
     $atan
     $atan2
     $cos
-    $pow;                                hoch
-    $random;                             zufall
+    $pow;                               hoch
+    $random;                            zufall
     $sin
+    $sqrt;                              qwrz
     $tan
 }
 
