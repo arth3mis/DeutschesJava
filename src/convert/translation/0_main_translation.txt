@@ -7,31 +7,30 @@
 #  + mit -/--/^
 # Namensräume:
 # "{}" = Umschließung eines Namensraumes, der den darüberliegenden Begriff als "Elternteil" hat
-# "*"  = Verweis auf denselben Sub-Raum wie Begriff, der nach * steht
+# "*"  = Verweis auf denselben Sub-Raum wie Begriff, der nach * steht (NOCH NICHT IMPLEMENTIERT)
 # Begriffe ohne ";" sind auf Deutsch und Englisch gleich
+# "_" = Paket
 
 # [JDK-install-path]\lib\src.zip\java.base   da sind alle packages in 1:1 ordnerstruktur mit dateien drin
 
 
-# Auch Anker für Pakete
-java;           djava
+# Anker für Pakete
+_java;           djava
+_javax;           djavax
 
 main;           haupt
 
 
 # Deklarationen
 class;          klasse
-enum;           numm, aufzählung
-interface;      schnittstelle
-# Meme
-interface;      ganzzahlgesicht, zwischengesicht
-#/ Meme
+enum;           numm , aufzählung
+interface;      schnittstelle , ganzzahlgesicht , zwischengesicht
 record;         rekord
 var
 void;           leer
 extends;        erweitert
 implements;     benutzt
-import;         zufuhr , einbau
+import;         zufuhr , einfuhr
 package;        paket , päckchen
 
 # Module
@@ -65,7 +64,7 @@ switch;         schalt
 throw;          wirf
 throws;         wirft
 try;            versuch
-while;          solange , während
+while;          während , solange
 yield;          ernte
 
 
@@ -82,10 +81,7 @@ goto;           gehzu
 # Speichertypen
 boolean;        boolesch
 byte;           binärfolge
-char;           zeichen , buchstabe
-# Meme
-char;           kerl
-#/ Meme
+char;           zeichen , buchstabe , kerl
 short;          kurz
 int;            ganz
 float;          fließ
@@ -104,10 +100,7 @@ this;           dies
 # Modifikatoren
 public;         offen , öffentlich
 protected;      geschützt
-private;        privat
-# Meme
-private;        privatisiert
-#/ Meme
+private;        privat , privatisiert
 abstract;       abstrakt
 final;          endgültig
 sealed;         versiegelt
@@ -126,10 +119,10 @@ volatile;       sprunghaft
 
 # Häufige Begriffe nach Zugriffsoperator
 # v.a. Arrays/Strings
-length;        länge
+length;         länge
 # v.a. Enums
-values;        werte
-valueOf;       wertVon
+values;         werte
+valueOf;        wertVon
 
 
 
@@ -151,6 +144,7 @@ getClass;       gibKlasse
     getName;                gibName
     getResourceAsStream;    gibRessourceAlsStrom
 }
-.class
-    *getClass
-    # (= erhält denselben Namensraum wie vorheriger Begriff)
+#.class
+#    *getClass
+#    # (= erhält denselben Namensraum wie vorheriger Begriff)
+# !!! feature noch ungenutzt, weil bisher keine $-Methoden betroffen sind

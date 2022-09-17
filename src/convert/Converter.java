@@ -1,21 +1,13 @@
 package convert;
 
-import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Stream;
-
 import filesystem.Filer;
 import main.Logger;
 import main.Main;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.util.*;
 
 public class Converter {
 
@@ -48,6 +40,7 @@ public class Converter {
     private static final String TRANSLATION_EXT = ".txt";
 
     private Translation rootTranslation = new Translation();
+    private Translation packageContext;
     private final File[] files;
     private HashMap<File, TextChain> fileChains = new HashMap<>();
 
@@ -58,44 +51,101 @@ public class Converter {
     public Converter(File[] djavaFiles) {
         files = djavaFiles;
 
-        HashSet<String> neededPackages = new HashSet<>();
-
         // Loop through every dJava File and create the chains
+        Logger.log("Dateien werden in Sinneinheiten unterteilt...");
         for (File dJavaFile : djavaFiles) {
             try {
                 BufferedReader br = new BufferedReader(new FileReader(dJavaFile));
-                // Note (Arthur): using File objects and dynamic translation file searching doesn't work in jar file
-                HashMap<String, InputStream> packageTranslationFiles = new HashMap<>();
+                TextChain tc = new TextChain.Generator(br).generate();
                 // Importing TextChain
-                Logger.log("Dateien werden in Sinneinheiten unterteilt...");
-                fileChains.put(dJavaFile, new TextChain.Generator(br).generate());
+                fileChains.put(dJavaFile, tc);
+
                 fileChains.get(dJavaFile).print();
-                System.out.println("\n\n");
-
-                // Import Import files
-                for (String trFileName : TRANSLATION_FILES) {
-                    if (trFileName.startsWith("0_")) {
-                        // Add to Root translation
-                        loadPackageTranslationFile(trFileName);
-                    } else {
-                        // Note the Package Name
-                        packageTranslationFiles.putIfAbsent(trFileName, getTrStream(trFileName));
-                    }
-                }
-
-                rootTranslation.print("");
-
-
-                System.out.println("\n");
-
+                Logger.debug("\n\n");
             } catch (IOException e) {
                 Logger.error("Fehler beim Lesen der Djava-Datei: %s", dJavaFile.getAbsolutePath());
+                // main file lost?
+                if (fileChains.isEmpty())
+                    Main.mainFileIntact = false;
             }
         }
 
+        //      Name  , isLoaded
+        HashMap<String, Boolean> packageTranslationFiles = new HashMap<>();
+        packageContext = rootTranslation;
+        // Import import files
+        // Note (Arthur): using File objects and dynamic translation file searching doesn't work in jar file
+        for (String trFileName : TRANSLATION_FILES) {
+            if (trFileName.startsWith("0_")) {
+                // Add to Root translation
+                loadPackageTranslationFile(trFileName);
+            } else {
+                // Note the Package Name
+                packageTranslationFiles.put(trFileName, false);
+            }
+        }
 
+        rootTranslation.print("");
+        Logger.debug("\n");
 
+        // collect all tokens that are top-level package names
+        // 0_main_translation.txt must have been loaded before this!!!
+        String[] packages = rootTranslation.getPackageTranslations().keySet().toArray(new String[0]);
+        TextChain[] imports = fileChains.values().stream()
+                .flatMap(t -> t.findAllInChains(packages).stream())
+                .toArray(TextChain[]::new);
 
+        Arrays.stream(imports).forEach(t -> {
+            TextChain t1 = t, t2 = t.find(";");  // todo watch out, can contain "unwanted" code
+            String sb = "";
+            while (t1 != t2) {
+                sb += t1.germanWord;
+                t1 = t1.nextChain;
+            }
+            Logger.debug(sb);
+        });
+
+        // for each import, load all needed package translations
+        // note: an object named "djava" calling a field (e.g. "djava.sub.value = 2;") has the same syntax.
+        //       Thus, a warning for "wrong import statements" or similar is not easy to implement
+        for (TextChain t : imports) {
+            StringBuilder packageName = new StringBuilder();
+            Translation currentPackage = rootTranslation;
+            // check if it is really an import (not e.g. "djava = 42;")
+            if (t.find(new String[]{".",";"}).germanWord.equals(";"))
+                continue;
+            // check and load sub-packages
+            while (t != null) {
+                if (t.germanWord.equals(";"))
+                    break;
+                else if (t.germanWord.equals(".")) {
+                    packageName.append(".");
+                } else if (!t.isWhitespace()) {
+                    Map<String, Translation> pt = currentPackage.getPackageTranslations();
+                    // no sub-packages available?
+                    if (pt == null)
+                        break;
+                    // add translation and load package
+                    else if (pt.containsKey(t.germanWord)) {
+                        currentPackage = pt.get(t.germanWord);
+                        t.translate(currentPackage.getTranslationText());
+                        packageName.append(t.translation);
+                        String s = packageName.toString();
+                        // package does not exist? (can mean: error; reached class identifier; was no import at all; ...)
+                        if (!packageTranslationFiles.containsKey(s))
+                            break;
+                        // package file not already loaded?
+                        if (!packageTranslationFiles.get(s)) {
+                            packageContext = currentPackage;
+                            loadPackageTranslationFile(s);
+                            packageTranslationFiles.put(s, true);
+                        }
+                    }
+                }
+                t = t.nextChain;
+            }
+        }
+        packageContext = rootTranslation;  // no need yet, just for status quo
 
 
         // setup imports in all translations
@@ -103,16 +153,12 @@ public class Converter {
             // store in "rootTranslation" object
     }
 
-    private InputStream getTrStream(String trFileName) {
-        return getClass().getResourceAsStream(TRANSLATION_DIR + File.separator + trFileName + TRANSLATION_EXT);
-    }
-
     private void loadPackageTranslationFile(String trFileName) {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(Objects.requireNonNull(
-                getTrStream(trFileName))))) {
+                getClass().getResourceAsStream(TRANSLATION_DIR + File.separator + trFileName + TRANSLATION_EXT))))) {
             readPackageTranslationFile(br, rootTranslation);
         } catch (IOException | NullPointerException e) {
-            Logger.warning("Fehler beim Lesen der Übersetzungsdatei: %s", trFileName);
+            Logger.error("Fehler beim Lesen der Übersetzungsdatei: %s", trFileName);
         } /*catch (NullPointerException e) {
             Logger.warning("Fehler beim Lesen der Übersetzungsdatei: %s\n\tDetails: Fehlerhafte Klammersetzung!",
                     trFileName.getAbsolutePath());
@@ -133,7 +179,7 @@ public class Converter {
         // Read lines & Return if context goes up a layer
         while ((line = br.readLine()) != null) {
             line = line.replaceAll(" ", "");
-            if (line.length() == 0) continue;
+            if (line.isEmpty()) continue;
             if (line.startsWith("#")) continue;
             if (line.startsWith("}")) return;
             if (line.startsWith("{")) {
@@ -142,12 +188,21 @@ public class Converter {
                 continue;
             }
 
+            // delete trailing comment
+            line = line.substring(0, line.contains("#") ? line.indexOf("#") : line.length());
+
             HashMap<String, Translation> context;
             // Check if is static and delete $
             if (line.startsWith("$")) {
                 context = staticContextTranslation.getStaticTranslations();
                 line = line.substring(1);
-            } else context = rootTranslation.getStaticTranslations();
+            } else if (line.startsWith("_")) {
+                if (packageContext.getPackageTranslations() == null)
+                    packageContext.initPackageTranslations();
+                context = packageContext.getPackageTranslations();
+                line = line.substring(1);
+            } else
+                context = rootTranslation.getStaticTranslations();
 
             // Add translation if in File
             if (line.contains(";")) {
@@ -162,12 +217,8 @@ public class Converter {
                 lastTranslation = new Translation(line);
                 context.put(line, lastTranslation);
             }
-
-
         }
     }
-
-
 
 
     /**
@@ -176,18 +227,18 @@ public class Converter {
     public void translateToJavaFiles() {
         for (int i = 0; i < files.length; i++) {
             // TODO if first file (=main class) fails, set flag: Main.mainFileIntact = false;
-            //files[i] = Filer.refactorExtension(translateToJavaFile(files[i]), Main.JAVA_EXTENSION);;
+            files[i] = Filer.refactorExtension(translateToJavaFile(files[i]), Main.JAVA_EXTENSION);;
         }
     }
 
-    private File translateToJavaFile(File djavaFile) {
+    @NotNull private File translateToJavaFile(File djavaFile) {
 
         // Setup text chain
             // setup sub chains on every ()
 
         // Translate Text chains and put it into StringBuilder
 
-        return null;
+        return djavaFile;
     }
 
     /**
@@ -198,6 +249,18 @@ public class Converter {
 
         return files;
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
     private String read(File file) {
         try {

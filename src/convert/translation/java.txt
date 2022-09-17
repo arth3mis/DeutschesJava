@@ -1,16 +1,17 @@
 # Übersetzung für das "java" Paket
 
-io;             rr              # Rein-Raus
-util;           werkz
-awt;            afk             # Abstrakte Fenster-Kiste
-applet;         minianwendung
-nio;            nrr
-beans;          bohne
-lang;           sprach
-math;           mathe
-net;            netz
-rmi;            fma             # Fern-Methodenaufruf
-security;       sicherheit
-sql;            sas             # Strukturierte Abfrage-Sprache
-text
-time;           zeit
+# Sub-Pakete
+_io;             rr              # Rein-Raus
+_util;           werkz
+_awt;            afk             # Abstrakte Fenster-Kiste
+_applet;         minianwendung
+_nio;            nrr
+_beans;          bohne
+_lang;           sprach
+_math;           mathe
+_net;            netz
+_rmi;            fma             # Fern-Methodenaufruf
+_security;       sicherheit
+_sql;            sas             # Strukturierte Abfrage-Sprache
+_text
+_time;           zeit

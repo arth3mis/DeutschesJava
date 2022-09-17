@@ -2,10 +2,14 @@ package convert;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class TextChain {
 
     String germanWord;
+    String translation;
     TextChain nextChain;
     TextChain subChain;
 
@@ -14,7 +18,7 @@ public class TextChain {
     }
 
     public void print() {
-        System.out.print("'" + germanWord + "'");
+        System.out.print("'" + (translation == null ? germanWord : translation) + "'");
         if (subChain != null) {
             System.out.print("  v  ");
             subChain.print();
@@ -34,8 +38,16 @@ public class TextChain {
         return this.subChain = subChain;
     }
 
+    public void translate(String translation) {
+        this.translation = translation;
+    }
+
     public String getGermanWord() {
         return germanWord;
+    }
+
+    public String getTranslation() {
+        return translation != null ? translation : germanWord;
     }
 
     public TextChain getNextChain() {
@@ -46,6 +58,41 @@ public class TextChain {
         return subChain;
     }
 
+    public boolean isWhitespace() {
+        return germanWord.replaceAll("\\s+", "").isEmpty();
+    }
+
+    /** Traverses chains collecting all chain links that match the given words */
+    public List<TextChain> findAllInChains(String[] germanWords) {
+        List<TextChain> results = new ArrayList<>();
+        TextChain tc = this;
+        while ((tc = tc.find(germanWords)) != null) {
+            results.add(tc);
+            tc = tc.nextChain;
+            if (tc == null) break;
+        }
+        return results;
+    }
+
+    /** returns next chain link that contains the search term, or null */
+    public TextChain find(String germanWord) {
+        return find(new String[]{germanWord});
+    }
+
+    // todo if no string array needed, remove multi-word match feature
+    public TextChain find(String[] germanWords) {
+        if (Arrays.asList(germanWords).contains(this.germanWord))
+            return this;
+        if (subChain != null) {
+            TextChain subResult = subChain.find(germanWords);
+            if (subResult != null)
+                return subResult;
+        }
+        if (nextChain != null)
+            return nextChain.find(germanWords);
+        return null;
+    }
+
 
     public static class Generator extends TextChain {
 
@@ -54,7 +101,7 @@ public class TextChain {
         private static final char[] SUB_CLOSER = new char[] {')', ']'};
         private static final String LINE_SEPARATOR = "\n";
 
-        private BufferedReader br;
+        private final BufferedReader br;
         private String line;
         private int index = 0;
         private boolean inBlockComment = false, inStringLiteral = false;
@@ -209,7 +256,6 @@ public class TextChain {
 
             return true;
         }
-
 
 
         private static boolean isSymbol(char c, char[] symbols) {

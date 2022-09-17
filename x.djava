@@ -3,7 +3,7 @@
  * guten tag
  */
 
-zufuhr djava.werkz.Abtaster;
+zufuhr djava .werkz. Abtaster;
 
 offen klasse x {
 	offen statisch leer haupt(Strippe[] argumente) {
@@ -21,6 +21,7 @@ offen klasse x {
 		instanz.länge();
 
 		Abtaster ab = neu Abtaster(System.rein);
+		djava.werkz.funktion.GanzVersorger gv = () -> 42;
 	}
 
 	leer rennen(ganz i) {

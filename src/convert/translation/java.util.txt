@@ -1,4 +1,8 @@
 # Übersetzung für das "java.util" Paket
 
-Scanner;Abtaster
-    next;nächste
+# Sub-Pakete
+_function;      funktion
+_stream;        strom
+
+Scanner;        Abtaster
+    next;           nächste

@@ -12,6 +12,7 @@ import static main.Main.LANGUAGE_NAME;
 public class Logger {
 
     static boolean suppressWarnings = false;  // no user setting yet
+    static boolean debugMessages = true;
 
     private static final Scanner scanner = new Scanner(System.in);
 
@@ -34,6 +35,12 @@ public class Logger {
     public static String request(String s, Object... args) {
         System.out.printf(s+": ", args);
         return scanner.nextLine();
+    }
+
+    public static void debug(String s, Object... args) {
+        if (debugMessages) {
+            System.out.printf(s+"\n", args);
+        }
     }
 
     static void logHelp(boolean helpDialog) {

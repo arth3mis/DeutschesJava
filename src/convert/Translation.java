@@ -1,11 +1,14 @@
 package convert;
 
+import main.Logger;
+
 import java.util.HashMap;
 
 public class Translation {
 
     private String translationText;
     private HashMap<String, Translation> staticTranslations = new HashMap<>();
+    private HashMap<String, Translation> packageTranslations;
 
 
     Translation() {
@@ -18,7 +21,13 @@ public class Translation {
 
     public void print(String preText) {
         staticTranslations.forEach((k, v) -> {
-            System.out.println(preText + k + " -> " + v.translationText);
+            Logger.debug(preText + k + " -> " + v.translationText);
+            v.print(preText + "\t");
+        });
+        if (packageTranslations == null)
+            return;
+        packageTranslations.forEach((k, v) -> {
+            Logger.debug(preText + k + " (paket) -> " + v.translationText);
             v.print(preText + "\t");
         });
     }
@@ -30,8 +39,14 @@ public class Translation {
     public HashMap<String, Translation> getStaticTranslations() {
         return staticTranslations;
     }
+    public HashMap<String, Translation> getPackageTranslations() {
+        return packageTranslations;
+    }
 
     public void setStaticTranslations(HashMap<String, Translation> staticTranslations) {
         this.staticTranslations = staticTranslations;
+    }
+    public void initPackageTranslations() {
+        packageTranslations = new HashMap<>();
     }
 }

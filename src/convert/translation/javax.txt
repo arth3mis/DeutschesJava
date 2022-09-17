@@ -1,14 +1,15 @@
 # Übersetzung für das "javax" Paket
 
-tools;werkzeuge
-swing;schaukel
-accessibility
-crypto
-imageio
-management
-naming
-net
-print
-script
-sql
-xml
+# Sub-Pakete
+_tools;             werkzeuge
+_swing;             schaukel
+_accessibility;     zugänglichkeit
+_crypto;            krypto
+_imageio;           bildrr          # rr = rein-raus
+_management;        verwaltung
+_naming;            benennung
+_net;               netz
+_print;             druck
+_script;            skript
+_sql;               sas
+_xml;               eas             # Erweiterbare Auszeichnungssprache
