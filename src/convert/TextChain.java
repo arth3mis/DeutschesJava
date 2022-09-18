@@ -30,6 +30,10 @@ public class TextChain {
         }
     }
 
+    public StringBuilder collectTranslation() {
+        return null;
+    }
+
     public TextChain setAndGetNextChain(TextChain nextChain) {
         return this.nextChain = nextChain;
     }

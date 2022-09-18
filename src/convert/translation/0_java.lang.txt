@@ -17,6 +17,9 @@ Math;                               Mathe
 Object;                             Objekt
     # Methoden: siehe main tr.
 
+Boolean;                            Boolesch
+Character;                          Buchstabe
+Integer;                            Ganzzahl
 String;                             Strippe
 
 System

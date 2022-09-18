@@ -81,7 +81,7 @@ goto;           gehzu
 # Speichertypen
 boolean;        boolesch
 byte;           binärfolge
-char;           zeichen , buchstabe , kerl
+char;           zeichen , buch , kerl
 short;          kurz
 int;            ganz
 float;          fließ

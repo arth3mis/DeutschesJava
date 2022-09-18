@@ -40,7 +40,7 @@ public class Converter {
 
     private Translation rootTranslation = new Translation();
     private Translation packageContext;
-    private final File[] files;
+    private File[] files;
     private HashMap<File, TextChain> fileChains = new HashMap<>();
 
     // old version
@@ -74,21 +74,33 @@ public class Converter {
     public void translateToJavaFiles() {
         loadTranslationFiles();
 
+        fileChains.values().forEach(this::translateToJavaFile);
+        Logger.log("Übersetzung abgeschlossen.");
 
+        File[] javaFiles = Filer.refactorExtension(files, Main.JAVA_EXTENSION);
+        // create and write files
         for (int i = 0; i < files.length; i++) {
-            // TODO if first file (=main class) fails, set flag: Main.mainFileIntact = false;
-            files[i] = Filer.refactorExtension(translateToJavaFile(files[i]), Main.JAVA_EXTENSION);;
+            try {
+                if (!javaFiles[i].exists() && !javaFiles[i].createNewFile())
+                    throw new IOException("");
+                BufferedWriter bw = new BufferedWriter(new FileWriter(javaFiles[i]));
+                bw.write(fileChains.get(files[i]).collectTranslation().toString());
+            } catch (IOException e) {
+                Logger.error("Fehler beim Erstellen der Datei %s: %s", javaFiles[i].getAbsolutePath(), e.getMessage());
+            }
         }
+        files = javaFiles;
     }
 
-    @NotNull private File translateToJavaFile(File djavaFile) {
+    private void translateToJavaFile(TextChain tc) {
+
+
+
 
         // Setup text chain
         // setup sub chains on every ()
 
         // Translate Text chains and put it into StringBuilder
-
-        return djavaFile;
     }
 
     /**
@@ -123,6 +135,8 @@ public class Converter {
         // if there are no top-level package names specified (such as java/javax), exit method here
         if (rootTranslation.getPackageTranslations() == null)
             return;
+
+        // TODO all pointless? see x.djava implicit example -> need all package translations
 
         // collect all tokens that are top-level package names
         String[] packages = rootTranslation.getPackageTranslations().keySet().toArray(new String[0]);
@@ -198,7 +212,7 @@ public class Converter {
             readPackageTranslationFile(br, rootTranslation);
             this.packageContext = rootTranslation;
         } catch (IOException | NullPointerException e) {
-            Logger.error("Fehler beim Lesen der Übersetzungsdatei: %s", trFileName);
+            Logger.error("Fehler beim Lesen der Übersetzungsdatei %s: %s", trFileName, e.getMessage());
         }
     }
 

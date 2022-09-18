@@ -4,5 +4,7 @@
 _function;      funktion
 _stream;        strom
 
+HashMap;        HaschKarte
+Map;            Karte
 Scanner;        Abtaster
     next;           nächste

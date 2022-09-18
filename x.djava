@@ -4,6 +4,7 @@
  */
 
 zufuhr djava . werkz. Abtaster;
+zufuhr djava.werkz.HaschKarte;
 
 offen klasse x {
 	offen statisch leer haupt(Strippe[] argumente) {
@@ -20,9 +21,13 @@ offen klasse x {
 		instanz.rennen(99);
 		instanz.länge();
 
-        // wird vom konvertierer als ""|"|\n|    abc"|""|; erkannt
+        // wird vom umwandler als ""|"|\n|    abc"|""|; erkannt
 		Strippe s = """
 		        abc""";
+
+		HaschKarte<Ganzzahl, Strippe> k = neu HaschKarte<>();
+		// enthält implizit Kollektion und Strom, wofür Übersetzungen gebraucht werden
+		k.werte().strom().fürAlle(System.raus::druckz);
 
 		Abtaster ab = neu Abtaster(System.rein);
 		djava.werkz.funktion.GanzVersorger gv = () -> 42;

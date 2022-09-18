@@ -14,7 +14,7 @@ import java.util.*;
 
 public class Main {
 
-    public static final int VERSION = 27;
+    public static final int VERSION = 28;
 
     public static final String LANGUAGE_NAME = "DJava";
     public static final String EXTENSION_NAME = "djava";
