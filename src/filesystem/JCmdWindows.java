@@ -35,7 +35,7 @@ class JCmdWindows extends JCmd {
             }
         }
         if (n > 0)
-            Logger.log("%d Befehls-Elemente mit Leerzeichen in Umgebungsvariablen verschoben", n);
+            Logger.debug("%d Befehls-Elemente mit Leerzeichen in Umgebungsvariablen verschoben", n);
     }
 
     private String formatEnvVar(String s) {

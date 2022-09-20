@@ -16,6 +16,12 @@ class RunnerWindows extends Runner {
 
     @Override
     public boolean start() {
+        // file does not exist? (mostly happens with -R option)
+        if (!mainClassFile.isFile()) {
+            Logger.error("Rennen abgebrochen, Klassen-Datei existiert nicht");
+            return false;
+        }
+
         return Main.Flag.SPECIAL_RUN.set ? startSpecial() : super.start();
     }
 

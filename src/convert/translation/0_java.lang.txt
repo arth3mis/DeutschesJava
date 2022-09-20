@@ -6,9 +6,16 @@ Math;                               Mathe
     $asin
     $atan
     $atan2
+    $cbrt;                              kwrz
+    $ceil;                              aufrund
     $cos
+    $exp
+    $floor;                             abrund
+    $log
+    $log10
     $pow;                               hoch
     $random;                            zufall
+    $round;                             rund
     $sin
     $sqrt;                              qwrz
     $tan
@@ -18,24 +25,26 @@ Object;                             Objekt
     # Methoden: siehe main tr.
 
 Boolean;                            Boolesch
+Byte;                               Binärfolge
 Character;                          Buchstabe
 Integer;                            Ganzzahl
 String;                             Strippe
+StringBuilder;                      StrippenBauer
 
 System
 {
-    $out;                            raus
-        print;                          druck
-        println;                        druckz
-        printf;                         druckf
-    $in;                             rein
-    $currentTimeMillis;              aktuelleZeitMillis
-    $exit;                           ichmussraus
+    $out;                               raus
+        print;                              druck
+        println;                            druckz
+        printf;                             druckf
+    $in;                                rein
+    $currentTimeMillis;                 aktuelleZeitMillis
+    $exit;                              ichmussraus
 }
 
 Thread;                             Faden
 {
-    $sleep;                              schlaf
+    $sleep;                             schlaf
 }
 
 Exception;                          Ausnahme

@@ -5,6 +5,10 @@
 
 zufuhr djava . werkz. Abtaster;
 zufuhr djava.werkz.HaschKarte;
+zufuhr djava.werkz.Karte;
+zufuhr statisch djava.sprach.Mathe.PI;
+zufuhr statisch djava.sprach.Mathe.rund;
+zufuhr statisch djava.werkz.strom.Strom.Bauer;
 
 offen klasse x {
 	offen statisch leer haupt(Strippe[] argumente) {
@@ -25,16 +29,16 @@ offen klasse x {
 		Strippe s = """
 		        abc""";
 
-		HaschKarte<Ganzzahl, Strippe> k = neu HaschKarte<>();
+		Karte<Ganzzahl, Strippe> m = neu HaschKarte<>(Karte.aus(69, "[Gruß aus der HaschKarte!]"));
 		// enthält implizit Kollektion und Strom, wofür Übersetzungen gebraucht werden
-		k.werte().strom().fürAlle(System.raus::druckz);
+		m.werte().strom().fürAlle(System.raus::druckz);
 
 		Abtaster ab = neu Abtaster(System.rein);
 		djava.werkz.funktion.GanzVersorger gv = () -> 42;
 	}
 
 	leer rennen(ganz i) {
-		ganz i2 = 42;
+		ganz i2 = (ganz) rund(42 + PI);
 
 		wenn (i > i2+2 || i <= i2)
 			zurück;

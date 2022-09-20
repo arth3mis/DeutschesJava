@@ -1,6 +1,7 @@
 package convert;
 
 import main.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
@@ -36,14 +37,14 @@ public class Translation {
         return translationText;
     }
 
-    public HashMap<String, Translation> getStaticTranslations() {
+    public @NotNull HashMap<String, Translation> getStaticTranslations() {
         return staticTranslations;
     }
     public HashMap<String, Translation> getPackageTranslations() {
         return packageTranslations;
     }
 
-    public void setStaticTranslations(HashMap<String, Translation> staticTranslations) {
+    public void setStaticTranslations(@NotNull HashMap<String, Translation> staticTranslations) {
         this.staticTranslations = staticTranslations;
     }
     public void initPackageTranslations() {

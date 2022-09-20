@@ -1,0 +1,46 @@
+// linienkommentar
+/*
+ * guten tag
+ */
+
+zufuhr djava.werkz.Abtaster;
+
+offen klasse x {
+	offen statisch leer haupt(Strippe[] argumente) {
+		ganz g = 1;
+		kurz k = -1;
+		lang l = 2;
+		fließ f = 3.0f;
+		doppel d = 4.0;
+		boolesch b = ja;
+		System.raus.druckz("\"Hallo Deutschland.\"");
+
+		x instanz = neu x(42.0, 20.7);
+		instanz.rennen(99);
+		instanz.länge();
+
+		Abtaster ab = neu Abtaster(System.rein);
+	}
+
+	leer rennen(ganz i) {
+		ganz i2 = 42;
+
+		wenn (i > i2+2 || i <= i2)
+			zurück;
+		sonst {
+			i2 += i + 1 - 2*3/4%5 + (i > 5 ? 1 : 0);
+			zurück;
+		}
+	}
+
+	doppel a, b;
+
+	offen x(doppel a, doppel b) {
+		dies.a = a;
+        dies.b = b;
+    }
+
+    offen doppel länge() {
+        zurück Mathe.qwrz(a*a+b*b);
+    }
+}

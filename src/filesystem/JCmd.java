@@ -64,7 +64,7 @@ public class JCmd {
         commands.add(mainCommand);
         commands.addAll(appendItems);
         moveToEnvVars(commands, pb);
-        Logger.log("Erstellter Befehl: %s", commands.toString());
+        Logger.debug("Erstellter Befehl: %s", commands.toString());
         return pb.command(commands);
     }
 
@@ -125,7 +125,7 @@ public class JCmd {
             Pattern expr = Pattern.compile(pattern);
             Matcher matcher = expr.matcher(s);
             while (matcher.find()) {
-                String envValue = envMap.get(matcher.group(1).toUpperCase());
+                String envValue = envMap.get(matcher.group(1));
                 if (envValue == null) {
                     envValue = "";
                 } else {

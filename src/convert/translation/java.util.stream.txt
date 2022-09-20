@@ -1,0 +1,53 @@
+# Übersetzung für das "java.util.stream" Paket
+
+Stream;             Strom
+{
+    $Builder;           Bauer                   # ist ein Interface
+    {
+        accept;         akzeptier
+        add;            plus
+        build;          bau
+    }
+    $builder;           bauer
+    $concat;            verkette
+    $empty;             leer
+    $generate;          generier
+    $iterate;           wiederhol
+    $of;                aus
+    $ofNullable;        ausNullbar
+
+    allMatch;           allesPasst
+    anyMatch;           etwasPasst
+    collect;            sammel
+    count;              anzahl
+    distinct;           deutlich
+    dropWhile;          tropfWährend
+    filter
+    findAny;            findeEtwas
+    findFirst;          findeErstes
+    flatMap;            flachAbb
+    flatMapToInt;       flachAbbAufGanz
+    flatMapToDouble;    flachAbbAufDoppel
+    flatMapToLong;      flachAbbAufLang
+    forEach;            fürAlle
+    forEachOrdered;     fürAlleGeordnet
+    limit
+    map;                abb                     # abbilden
+    mapMulti;           abbMulti
+    mapMultiToInt;      abbMultiAufGanz
+    mapMultiToDouble;   abbMultiAufDoppel
+    mapMultiToLong;     abbMultiAufLang
+    mapToInt;           abbAufGanz
+    mapToDouble;        abbAufDoppel
+    mapToLong;          abbAufLang
+    max
+    min
+    noneMatch;          nichtsPasst
+    peek;               guck
+    reduce;             reduzier
+    skip;               spring
+    sorted;             sortiert
+    takeWhile;          nimmWährend
+    toArray;            zuReihe
+    toList;             zuListe
+}

@@ -4,35 +4,19 @@ import convert.translation.TranslationFolder;
 import filesystem.Filer;
 import main.Logger;
 import main.Main;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.*;
 
 public class Converter {
 
-    /**
-     * TEST METHOD for Converter
-     */
-    public static void main(String[] args) {
-        File[] djavaFiles = Arrays.stream(args)
-                .map(File::new)
-                .filter(File::exists)
-                .toList().toArray(new File[0]);
-
-        Converter c = new Converter(djavaFiles);
-        c.translateToJavaFiles();
-        File[] javaFiles = c.getFiles();
-
-        System.out.println(Arrays.toString(javaFiles));
-    }
-
     private static final String TRANSLATION_EXT = ".txt";
-    private static final String[] TRANSLATION_FILES = {
+    private static final String[] TRANSLATION_FILES = {         // TODO always add new txt files!
             "0_java.lang",
             "0_main_translation",
             "java",
             "java.util.function",
+            "java.util.stream",
             "java.util",
             "javax.swing",
             "javax",
@@ -40,6 +24,7 @@ public class Converter {
 
     private Translation rootTranslation = new Translation();
     private Translation packageContext;
+    private String[] importNames, staticNames;
     private File[] files;
     private HashMap<File, TextChain> fileChains = new HashMap<>();
 
@@ -57,8 +42,7 @@ public class Converter {
                 BufferedReader br = new BufferedReader(new FileReader(djavaFile));
                 TextChain tc = new TextChain.Generator(br).generate();
                 fileChains.put(djavaFile, tc);
-
-                fileChains.get(djavaFile).print();
+//                fileChains.get(djavaFile).print();
             } catch (IOException e) {
                 Logger.error("Fehler beim Lesen der %s-Datei: %s", Main.LANGUAGE_NAME, djavaFile.getAbsolutePath());
                 // main file lost?
@@ -72,7 +56,9 @@ public class Converter {
      * called by Main class to start the translation
      */
     public void translateToJavaFiles() {
+        Logger.log("Übersetzungsdateien laden...");
         loadTranslationFiles();
+        Logger.log("Übersetzungsdateien geladen.");
 
         fileChains.values().forEach(this::translateToJavaFile);
         Logger.log("Übersetzung abgeschlossen.");
@@ -85,22 +71,53 @@ public class Converter {
                     throw new IOException("");
                 BufferedWriter bw = new BufferedWriter(new FileWriter(javaFiles[i]));
                 bw.write(fileChains.get(files[i]).collectTranslation().toString());
+                bw.close();
             } catch (IOException e) {
                 Logger.error("Fehler beim Erstellen der Datei %s: %s", javaFiles[i].getAbsolutePath(), e.getMessage());
             }
         }
         files = javaFiles;
+        Logger.log("Umwandlung abgeschlossen.");
     }
 
     private void translateToJavaFile(TextChain tc) {
+        // go through every chain link
+        Stack<TextChain> parent = new Stack<>();
+        Translation lastWord = null;
+        boolean searchStatic = false;
 
-
-
-
-        // Setup text chain
-        // setup sub chains on every ()
-
-        // Translate Text chains and put it into StringBuilder
+        while (tc != null) {
+            if (tc.isAccessOrMethodRef()) {
+                searchStatic = true;
+            } else if (tc.translation == null) {
+                // check static translations first
+                if (searchStatic && lastWord != null) {
+                    Translation t = lastWord.getStaticTranslations().get(tc.getGermanWord());
+                    if (t != null) {
+                        tc.translate(t);
+                        lastWord = t;
+                    }
+                }
+                // not translated? check root translation
+                if (tc.translation == null) {
+                    Translation t = rootTranslation.getStaticTranslations().get(tc.getGermanWord());
+                    if (t != null) {
+                        tc.translate(t);
+                        lastWord = t;
+                    }
+                }
+            } else {  // translation exists
+                lastWord = tc.translation;
+            }
+            if (tc.subChain != null) {
+                parent.push(tc);
+                tc = tc.subChain;
+            } else if (tc.nextChain == null && !parent.empty()) {
+                tc = parent.pop().nextChain;
+            } else {
+                tc = tc.nextChain;
+            }
+        }
     }
 
     /**
@@ -117,8 +134,6 @@ public class Converter {
      * (package names in chains are translated in the process)
      */
     private void loadTranslationFiles() {
-        Logger.log("Übersetzungsdateien laden...");
-
         HashMap<String, Boolean> packageTranslationFiles = new HashMap<>();  // name, hasBeenLoaded
         // Import import files
         // Note (Arthur): using File objects and dynamic translation file searching doesn't work in jar file
@@ -144,43 +159,34 @@ public class Converter {
                 .flatMap(t -> t.findAllInChain(packages).stream())
                 .toArray(TextChain[]::new);
 
-        // print all found package references
-        /*Arrays.stream(imports).forEach(t -> {
-            TextChain t1 = t, t2 = t.find(";");
-            String sb = "";
-            while (t1 != t2) {
-                sb += t1.germanWord;
-                t1 = t1.nextChain;
-            }
-            Logger.debug(sb);
-        });*/
-
         // for each import, load all needed package translations
         // note: an object named "djava" calling a field (e.g. "djava.sub.value = 2;") has the same syntax.
         //       Thus, a warning for "wrong import statements" or similar is not easy to implement
-        Logger.log("Benötigte Pakete hinzufügen...");
-        for (TextChain t : imports) {
+        for (TextChain tc : imports) {
             StringBuilder packageName = new StringBuilder();
             Translation currentPackage = rootTranslation;
+
             // check if it is really an import (not e.g. "djava = 42;")
-            if (t.find(new String[]{".",";"}).germanWord.equals(";"))
+            if (tc.find(new String[]{".",";"}).germanWord.equals(";"))
                 continue;
+
             // check and load sub-packages
-            while (t != null) {
-                if (t.germanWord.equals(";"))
+            while (tc != null) {
+                if (tc.germanWord.equals(";"))
                     break;
-                else if (t.germanWord.equals(".")) {
+                else if (tc.germanWord.equals(".")) {
                     packageName.append(".");
-                } else if (!t.isWhitespace()) {
+                } else if (!tc.isWhitespace()) {
                     Map<String, Translation> pt = currentPackage.getPackageTranslations();
                     // no sub-packages available?
                     if (pt == null)
                         break;
-                        // add translation and load package
-                    else if (pt.containsKey(t.germanWord)) {
-                        currentPackage = pt.get(t.germanWord);
-                        t.translate(currentPackage.getTranslationText());
-                        packageName.append(t.translation);
+
+                    // add translation and load package
+                    else if (pt.containsKey(tc.getGermanWord())) {
+                        currentPackage = pt.get(tc.getGermanWord());
+                        tc.translate(currentPackage);
+                        packageName.append(tc.translation.getTranslationText());
                         String s = packageName.toString();
                         // package does not exist? (cause: reached class identifier, missing translation, was no import in the first place, ...)
                         if (!packageTranslationFiles.containsKey(s))
@@ -192,11 +198,68 @@ public class Converter {
                         }
                     }
                 }
-                t = t.nextChain;
+                tc = tc.nextChain;
             }
         }
 
-        Logger.log("Übersetzungsdateien geladen.");
+        // load all other files because of implicit access to other types (see above and x.djava HashMap)
+        packageTranslationFiles.forEach((s, b) -> {
+            if (!b) loadPackageTranslationFile(s, rootTranslation);
+        });
+
+        // collect all "import static" statements
+        TextChain[] staticImports = fileChains.values().stream()
+                .flatMap(t -> t.findAllInChain(importNames).stream())
+                // check static keyword
+                .filter(t -> {
+                    while (t.nextChain.isWhitespace())
+                        t = t.nextChain;
+                    return t.nextChain.find(staticNames) == t.nextChain;
+                })
+                // move to package name
+                .map(t -> t.find(packages, new String[]{";"}))
+                // if no valid package name was found
+                .filter(Objects::nonNull)
+                .toArray(TextChain[]::new);
+
+        // add needed static imports to root translation        TODO per-file translation? (is it really worth the hassle?)
+        // for the following context search, encapsulated package translations are good
+        for (TextChain tc : staticImports) {
+            String lastKey = "";
+            Translation context = rootTranslation;
+            boolean packageIteration = true, translationFound = true;
+
+            while (tc != null && context != null) {
+                if (tc.germanWord.equals(";")) {
+                    if (translationFound)
+                        rootTranslation.getStaticTranslations().put(lastKey, context);
+                    break;
+                } else if (tc.germanWord.equals("*")) {
+                    // add all static items to root translation
+                    context.getStaticTranslations().forEach(rootTranslation.getStaticTranslations()::put);
+                } else if (!tc.germanWord.equals(".") && !tc.isWhitespace()) {
+                    if (packageIteration) {
+                        Translation t = context.getPackageTranslations() != null ? context.getPackageTranslations().get(tc.getGermanWord()) : null;
+                        if (t != null)
+                            context = t;
+                        else {
+                            packageIteration = false;
+                            // get class/... translation from root
+                            lastKey = tc.getGermanWord();
+                            context = rootTranslation.getStaticTranslations().get(tc.getGermanWord());
+                        }
+                    } else {
+                        Translation t = context.getStaticTranslations().get(tc.getGermanWord());
+                        if (t != null) {
+                            lastKey = tc.getGermanWord();
+                            context = t;
+                        } else
+                            translationFound = false;
+                    }
+                }
+                tc = tc.nextChain;
+            }
+        }
     }
 
     /**
@@ -255,6 +318,11 @@ public class Converter {
                 Translation value = new Translation(splitLine[0]);
 
                 Arrays.stream(splitLine[1].split(",")).forEach(key -> context.put(key, value));
+
+                if (value.getTranslationText().equals("import"))
+                    importNames = splitLine[1].split(",");
+                else if (value.getTranslationText().equals("static"))
+                    staticNames = splitLine[1].split(",");
 
                 lastTranslation = value;
             } else {

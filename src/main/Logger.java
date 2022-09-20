@@ -12,7 +12,7 @@ import static main.Main.LANGUAGE_NAME;
 public class Logger {
 
     static boolean suppressWarnings = false;  // no user setting yet
-    static boolean debugMessages = true;
+    static boolean debugMessages = false;
 
     private static final Scanner scanner = new Scanner(System.in);
 
@@ -20,6 +20,10 @@ public class Logger {
         if (Flag.VERBOSE.set) {
             System.out.printf(s+"\n", args);
         }
+    }
+
+    public static void info(String s, Object... args) {
+        System.out.printf(s+"\n", args);
     }
 
     public static void warning(String s, Object... args) {
@@ -37,6 +41,9 @@ public class Logger {
         return scanner.nextLine();
     }
 
+    public static boolean isDebug() {
+        return debugMessages;
+    }
     public static void debug(String s, Object... args) {
         if (debugMessages) {
             System.out.printf(s+"\n", args);

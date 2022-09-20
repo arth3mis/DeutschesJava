@@ -15,6 +15,7 @@ import java.util.*;
 public class Main {
 
     public static final int VERSION = 28;
+    // TODO sublime syntax file generation
 
     public static final String LANGUAGE_NAME = "DJava";
     public static final String EXTENSION_NAME = "djava";
@@ -181,9 +182,9 @@ public class Main {
             }
         }
 
-        // delete class files? (only when compilation and running were successful)
+        // delete class files? (only when compilation and running (or JUST_RUN running) were successful)
         if (Flag.DELETE_CLASS.set
-                && compile && run && runSuccess) {
+                && (compile && run && runSuccess || Flag.JUST_RUN.set && runSuccess)) {
             // do not allow deletion for windows batch runs, because class files are needed asynchronous
             if (Flag.SPECIAL_RUN.set && OS.isWindows()) {
                 Logger.warning("Klassen-Dateien werden aufgrund der Option '%s' nicht gelöscht",
@@ -217,7 +218,7 @@ public class Main {
     }
 
     private static void saveCustomPaths() {
-        File saveFile = new File(Filer.getAppConfigFolder(), "pfade.txt");
+        File saveFile = new File(Filer.getAppConfigFolder(), pathSaveFileName);
         if (!saveFile.exists()) {
             try {
                 if (!saveFile.getParentFile().mkdirs() && !saveFile.delete() && !saveFile.createNewFile())
@@ -301,14 +302,31 @@ public class Main {
         // (relative paths also work, but absolute is now standard for comparison reasons)
         List<File> files = userFileNames.stream()
                 .map(File::new)
-                .filter(File::isFile)
                 .map(File::getAbsoluteFile)
                 .toList();
+
+        // assume .djava for files without extension
+        // (if all extensions are allowed, assumption is kind of defeating the purpose)
+        if (!Flag.IGNORE_EXT.set) {
+            files = files.stream()
+                    .map(file -> {
+                        if (Filer.checkExtension(file, "")) {
+                            File f = Filer.refactorExtension(file, EXTENSION_NAME);
+                            if (f.isFile())
+                                return f;
+                        }
+                        return file;
+                    })
+                    .toList();
+        }
 
         // remove duplicates (and make mutable list at the same time)
         // absolute paths are necessary here, because distinct() uses equals,
         // which compares file paths lexicographically
-        files = new ArrayList<>(files.stream().distinct().toList());
+        files = new ArrayList<>(files.stream()
+                .filter(File::isFile)
+                .distinct()
+                .toList());
 
         // find all files in directory tree? (non-djava files are handled afterwards)
         if (Flag.INCLUDE_ALL.set) {
@@ -337,7 +355,7 @@ public class Main {
         if (!Flag.IGNORE_EXT.set) {
             int oldSize = files.size();
             if (files.removeIf(file -> !Filer.checkExtension(file, EXTENSION_NAME)))
-                Logger.log("%d Dateien entfernt, die nicht auf '.%s' enden.",
+                Logger.warning("%d Dateien entfernt, die nicht auf '.%s' enden.",
                         oldSize - files.size(), EXTENSION_NAME);
         }
 
@@ -361,7 +379,7 @@ public class Main {
             // first valid file is not the first user-given one?
             if (!userFileNames.isEmpty()
                     && !djavaFiles[0].getAbsolutePath().equals(new File(userFileNames.get(0)).getAbsolutePath())) {
-                Logger.warning("Hauptklasse: %s", Filer.getCurrentDir().toPath()
+                Logger.log("Hauptdatei: %s", Filer.getCurrentDir().toPath()
                         .relativize(djavaFiles[0].toPath())
                         .toString());
             }
@@ -374,6 +392,9 @@ public class Main {
     private static void startSettings() {
         enum Choices { k,K, r,R, x,X, wrong }
         String choice = "";
+        // print save path once
+        Logger.info("Speicherpfad: %s", new File(Filer.getAppConfigFolder(), pathSaveFileName).getAbsolutePath());
+        // IO loop
         while (!choice.equalsIgnoreCase("x")) {
             choice = Logger.request("""
                     
@@ -415,24 +436,6 @@ public class Main {
         Converter c = new Converter(djavaFiles);
         c.translateToJavaFiles();
         return c.getFiles();
-
-        // todo temp (and very scuffed god damn)
-        /*List<File> jf = new ArrayList<>(List.of(Filer.refactorExtension(djavaFiles, JAVA_EXTENSION)));
-        List<File> unJf = new ArrayList<>();
-        for (int i = 0; i < djavaFiles.length; i++) {
-            File f = jf.get(i);
-            try {
-                if (!f.delete() && !f.createNewFile()) throw new IOException();
-                FileWriter w = new FileWriter(f);
-                w.write(Files.readString(djavaFiles[i].toPath()));
-                w.close();
-            } catch (IOException e) {
-                unJf.add(f);
-            }
-        }
-        for (File r : unJf)
-            jf.remove(r);
-        return jf.toArray(new File[0]);*/
     }
 
     private static boolean compile(File[] javaFiles) {

@@ -16,7 +16,7 @@
 
 # Anker für Pakete
 _java;           djava
-_javax;           djavax
+_javax;          djavax
 
 main;           haupt
 
@@ -80,8 +80,8 @@ goto;           gehzu
 
 # Speichertypen
 boolean;        boolesch
-byte;           binärfolge
-char;           zeichen , buch , kerl
+byte;           bifo                        # binärfolge
+char;           buch , zeichen , kerl       # buchstabe
 short;          kurz
 int;            ganz
 float;          fließ

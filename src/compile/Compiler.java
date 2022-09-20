@@ -13,6 +13,14 @@ import java.util.List;
 public record Compiler(String customCompiler) {
 
     public boolean start(File[] javaFiles) {
+        // file does not exist? (mostly happens with -K option)
+        // only check 1st file to give clean error in the most common scenario,
+        // later files are checked by the compiler
+        if (!javaFiles[0].isFile()) {
+            Logger.error("Kompilieren abgebrochen, Java-Datei existiert nicht");
+            return false;
+        }
+
         // custom compiler set?
         if (customCompiler != null && !customCompiler.isEmpty()) {
             return compileWithCommand(customCompiler, javaFiles);

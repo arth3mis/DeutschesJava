@@ -1,15 +1,18 @@
 package convert;
 
+import main.Logger;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 
 public class TextChain {
 
     String germanWord;
-    String translation;
+    Translation translation;
     TextChain nextChain;
     TextChain subChain;
 
@@ -18,6 +21,7 @@ public class TextChain {
     }
 
     public void print() {
+        if (!Logger.isDebug()) return;
         System.out.print("'" + (translation == null ? germanWord : translation) + "'");
         if (subChain != null) {
             System.out.print("  v  ");
@@ -31,7 +35,22 @@ public class TextChain {
     }
 
     public StringBuilder collectTranslation() {
-        return null;
+        StringBuilder sb = new StringBuilder();
+        // move through sub and next chain links
+        TextChain tc = this;
+        Stack<TextChain> parent = new Stack<>();
+        while (tc != null) {
+            sb.append(tc.getTranslation());
+            if (tc.subChain != null) {
+                parent.push(tc);
+                tc = tc.subChain;
+            } else if (tc.nextChain == null && !parent.empty()) {
+                tc = parent.pop().nextChain;
+            } else {
+                tc = tc.nextChain;
+            }
+        }
+        return sb;
     }
 
     public TextChain setAndGetNextChain(TextChain nextChain) {
@@ -42,7 +61,7 @@ public class TextChain {
         return this.subChain = subChain;
     }
 
-    public void translate(String translation) {
+    public void translate(Translation translation) {
         this.translation = translation;
     }
 
@@ -51,7 +70,7 @@ public class TextChain {
     }
 
     public String getTranslation() {
-        return translation != null ? translation : germanWord;
+        return translation != null ? translation.getTranslationText() : germanWord;
     }
 
     public TextChain getNextChain() {
@@ -62,8 +81,30 @@ public class TextChain {
         return subChain;
     }
 
+    public boolean isTranslatable() {
+        for (char c : Generator.SPLITTERS) {
+            if (germanWord.equals(String.valueOf(c)))
+                return false;
+        }
+        for (char c : Generator.SUB_OPENER) {
+            if (germanWord.equals(String.valueOf(c)))
+                return false;
+        }
+        for (char c : Generator.SUB_CLOSER) {
+            if (germanWord.equals(String.valueOf(c)))
+                return false;
+        }
+        if (germanWord.equals("\n"))
+            return false;
+        return true;
+    }
+
     public boolean isWhitespace() {
         return germanWord.replaceAll("\\s+", "").isEmpty();
+    }
+
+    public boolean isAccessOrMethodRef() {
+        return germanWord.equals(".") || germanWord.equals("::");
     }
 
     /** Traverses chains collecting all chain links that match the given words */
@@ -78,15 +119,20 @@ public class TextChain {
         return results;
     }
 
-    /** returns next chain link that contains the search term, or null */
     public TextChain find(String germanWord) {
         return find(new String[]{germanWord});
     }
 
-    // todo if no string array needed, remove multi-word match feature
     public TextChain find(String[] germanWords) {
+        return find(germanWords, new String[0]);
+    }
+
+    /** returns next chain link that contains the search terms, or null if none found or a cancel term found before a search term */
+    public TextChain find(String[] germanWords, String[] cancelTerms) {
         if (Arrays.asList(germanWords).contains(this.germanWord))
             return this;
+        if (Arrays.asList(cancelTerms).contains(this.germanWord))
+            return null;
         if (subChain != null) {
             TextChain subResult = subChain.find(germanWords);
             if (subResult != null)
@@ -130,6 +176,7 @@ public class TextChain {
                 // Examines single Line
                 for (; index < line.length(); index++) {
                     char c = line.charAt(index);
+                    char cPrev = index > 0 ? line.charAt(index - 1) : ' ';
                     char cNext = line.length() > index + 1 ? line.charAt(index + 1) : ' ';
 
                     // Filter Comments
@@ -142,7 +189,7 @@ public class TextChain {
 
                     } else if (c == '/' && cNext == '*') {
                         // Recognize Block-Comments using /*
-                        index ++;
+                        index++;
                         inBlockComment = true;
 
                         // Add previous Text
@@ -198,8 +245,12 @@ public class TextChain {
                             text = new StringBuilder();
                         }
 
+                        // Combine method references, they can't have whitespace in between
+                        if (cPrev == ':' && c == ':')
+                            chainEnd = chainEnd.setAndGetNextChain(new TextChain("::"));
                         // Add splitter
-                        chainEnd = chainEnd.setAndGetNextChain(new TextChain(String.valueOf(c)));
+                        if (c != ':' || (cPrev != ':' && cNext != ':'))
+                            chainEnd = chainEnd.setAndGetNextChain(new TextChain(String.valueOf(c)));
 
                     } else if (isSymbol(c, SUB_OPENER)) {
                         // Add previous Text
@@ -229,7 +280,6 @@ public class TextChain {
                         // Append Character
                         text.append(c);
                     }
-
                 }
 
                 if (!inBlockComment) {

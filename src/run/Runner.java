@@ -66,7 +66,7 @@ public class Runner {
             ProcessBuilder pb = JCmd.get().createProcessBuilder(runnerCommand, javaCommandArguments());
             final Process p = pb.start();
 
-            System.out.println(Main.OUTPUT_SEP);
+            System.out.println("\n" + Main.OUTPUT_SEP);
             /////////////////////////////////////////////////////////////////
 
             // user input logic
@@ -80,7 +80,7 @@ public class Runner {
                             p.outputWriter().flush();
                         }
                     } catch (IOException | NullPointerException | IllegalStateException ignored) {
-                        //Logger.error("DEBUG FEHLER: %s", ignored.getMessage());
+                        //Logger.debug("DEBUG FEHLER: %s", ignored.getMessage());
                     }
                 }
             }).start();
