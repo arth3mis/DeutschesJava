@@ -2,6 +2,7 @@ package main;
 
 import compile.Compiler;
 import convert.Converter;
+import convert.translation.TranslationFolder;
 import filesystem.Filer;
 import run.Runner;
 
@@ -14,14 +15,14 @@ import java.util.*;
 
 public class Main {
 
-    public static final int VERSION = 28;
+    public static final int VERSION = 29;
     // TODO sublime syntax file generation
+
+    public static final int YEAR = 2022;
 
     public static final String LANGUAGE_NAME = "DJava";
     public static final String EXTENSION_NAME = "djava";
     public static final String JAVA_EXTENSION = "java";
-
-    public static final String SOURCE_PATH = "src";
 
     public static final String WILDCARD = "*";
 
@@ -34,13 +35,14 @@ public class Main {
         RUN("r", "rennen"),
         JUST_COMPILE("K", "nurkompilieren"),
         JUST_RUN("R", "nurrennen"),
-        SPECIAL_RUN("s", "spezialrennen"),
+        SPECIAL_RUN("z", "spezialrennen"),
         IGNORE_EXT("x", "endungx"),
         INCLUDE_ALL("", "alle"),
         KEEP_JAVA("j", "behaltejava"),
         DELETE_CLASS("l", "löschklassen"),
         ARGS("a", ""),
         SETTINGS("e", ""),
+        SEARCH_TRANSLATION("s", "suche"),
         TEST("t", ""),// debug only
         ;
 
@@ -98,6 +100,11 @@ public class Main {
         // settings?
         else if (eval == 2) {
             startSettings();
+            return;
+        }
+        // search translation?
+        else if (eval == 3) {
+            TranslationFolder.main(runArgs);
             return;
         }
 
@@ -241,7 +248,7 @@ public class Main {
 
     /**
      * @param args program launch arguments
-     * @return 0: standard; 1: help dialog; 2: settings
+     * @return 0: standard; 1: help dialog; 2: settings; 3: search translations
      */
     private static short evaluateArgs(String[] args) {
         // empty args? help dialog
@@ -280,8 +287,8 @@ public class Main {
             } else if (runArgsPos == -1) {  // don't add run arguments
                 userFileNames.add(s);
             }
-            // save position of '-a' for run argument extraction
-            if (f == Flag.ARGS)
+            // save position of '-a|-s' for run/search argument extraction
+            if (f == Flag.ARGS || f == Flag.SEARCH_TRANSLATION)
                 runArgsPos = k;
             k++;
         }
@@ -290,6 +297,15 @@ public class Main {
         // settings?
         if (Flag.SETTINGS.set)
             return 2;
+
+        // search translations?
+        if (Flag.SEARCH_TRANSLATION.set) {
+            String combine = String.join("", Arrays.copyOfRange(args, runArgsPos + 1, args.length));
+            runArgs = new String[]{
+                    combine.substring(combine.startsWith("?") ? 1 : 0),
+                    Boolean.toString(combine.startsWith("?"))};
+            return 3;
+        }
 
         // warnings for flags/flag combos
         if (Flag.SPECIAL_RUN.set && !OS.isWindows())

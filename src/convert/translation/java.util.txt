@@ -6,29 +6,122 @@ _stream;            strom
 
 Arrays;             Reihen
 {
+    $asList;            alsListe
     $binarySearch;      binärSuche
+    $copyOf;            kopieVon
     $equals;            gleich
     $parallelPräfix;    parallelPräfix
     $parallelSort;      parallelSortieren
-    $sort;              sortiere
+    $sort;              sortier
     $stream;            strom
 }
 
 Collection;         Kollektion
 {
     add;                plus
+    addAll;             plusAlle
     stream;             strom
 }
 
+Collections;        Kollektionen
+{
+    $addAll;            plusAlle
+    $asLifoQueue;       alsZhzhSchlange             # zuletzt herein - zuerst hinaus
+    $binarySearch;      binärSuche
+    $checkedCollection; geprüfteKollektion
+    $checkedList;       geprüfteListe
+    $checkedMap;        geprüfteKarte
+    $checkedNavigableMap;geprüfteNavigierKarte
+    $checkedNavigableSet;geprüfteNavigierMenge
+    $checkedQueue;      geprüfteSchlange
+    $checkedSet;        geprüfteMenge
+    $checkedSortedMap;  geprüfteSortierteKarte
+    $checkedSortedSet;  geprüfteSortierteMenge
+    $copy;              kopie
+    $disjoint;          disjunkt
+    $emptyEnumeration;  leereAufzählung
+    $emptyIterator;     leererWiederholer
+    $emptyList;         leereListe
+    $emptyListIterator; leererListenWiederholer
+    $emptyMap;          leereKarte
+    $emptyNavigableMap; leereNavigierKarte
+    $emptyNavigableSet; leereNavigierMenge
+    $emptySet;          leereMenge
+    $emptySortedMap;    leereSortierteKarte
+    $emptySortedSet;    leereSortierteMenge
+    $EMPTY_LIST;        LEERE_LISTE
+    $EMPTY_MAP;         LEERE_KARTE
+    $EMPTY_SET;         LEERE_MENGE
+    $enumeration;       aufzählung
+    $fill;              füll
+    $frequency;         frequenz
+    $indexOfSubList;    indexVonUnterListe
+    $lastIndexOfSubList;letzterIndexVonUnterListe
+    $list;              liste
+    $max
+    $min
+    $nCopies;           nKopien
+    $newSetFromMap;     neueMengeAusKarte
+    $replaceAll;        ersetzAlle
+    $reverse;           umkehr
+    $reverseOrder;      umkehrOrdnung
+    $rotate;            rotier
+    $shuffle;           misch
+    $singleton;         einzelnes
+    $singletonMap;      einzelneKarte
+    $singletonList;     einzelneListe
+    $sort;              sortier
+    $swap;              tausch
+    $synchronizedCollection;synchronisierteKollektion
+    $synchronizedList;  synchronisierteListe
+    $synchronizedNavigableMap;synchronisierteNavigierKarte
+    $synchronizedNavigableSet;synchronisierteNavigierMenge
+    $synchronizedMap;   synchronisierteKarte
+    $synchronizedSet;   synchronisierteMenge
+    $synchronizedSortedMap;synchronisierteSortierteKarte
+    $synchronizedSortedSet;synchronisierteSortierteMenge
+    $unmodifiableCollection;unveränderlicheKollektion
+    $unmodifiableMap;   unveränderlicheKarte
+    $unmodifiableNavigableSet;unveränderlicheNavigierMenge
+    $unmodifiableNavigableMap;unveränderlicheNavigierKarte
+    $unmodifiableList;  unveränderlicheListe
+    $unmodifiableSet;   unveränderlicheMenge
+    $unmodifiableSortedMap;unveränderlicheSortierteKarte
+    $unmodifiableSortedSet;unveränderlicheSortierteMenge
+}
+
 HashMap;            HaschKarte
+
+Iterator;           Wiederholer
+{
+    forEachRemaining;   fürAlleÜbrigen
+    hasNext;            hatNächstes
+    next;               nächstes
+    remove;             entferne
+}
+
 List;               Liste
+{
+    $copyOf;            kopieVon
+    $of;                aus
+}
 
 Map;                Karte
 {
+    $copyOf;            kopieVon
+    $entry;             eintrag
+    $Entry;             Eintrag                     # interface
     $of;                aus
+    $ofEntries;         ausEinträgen
 }
 
 Scanner;            Abtaster
 {
-    next;               nächstes
+    nextLine;           nächsteZeile
+}
+
+Set;                Menge
+{
+    $copyOf;            kopieVon
+    $of;                aus
 }

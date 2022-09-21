@@ -29,6 +29,8 @@ offen klasse x {
 		Strippe s = """
 		        abc""";
 
+		endgültig ganz J = djavax.schaukel.JRahmen.BEENDEN_BEI_SCHLIESSEN;
+
 		Karte<Ganzzahl, Strippe> m = neu HaschKarte<>(Karte.aus(69, "[Gruß aus der HaschKarte!]"));
 		// enthält implizit Kollektion und Strom, wofür Übersetzungen gebraucht werden
 		m.werte().strom().fürAlle(System.raus::druckz);

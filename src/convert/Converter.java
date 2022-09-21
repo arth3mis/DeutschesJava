@@ -10,8 +10,8 @@ import java.util.*;
 
 public class Converter {
 
-    private static final String TRANSLATION_EXT = ".txt";
-    private static final String[] TRANSLATION_FILES = {         // TODO always add new txt files!
+    public static final String TRANSLATION_EXT = ".txt";
+    public static final String[] TRANSLATION_FILES = {         // TODO always add new txt files!
             "0_java.lang",
             "0_main_translation",
             "java",
@@ -22,14 +22,14 @@ public class Converter {
             "javax",
     };
 
-    private Translation rootTranslation = new Translation();
+    private final Translation rootTranslation = new Translation();
     private Translation packageContext;
     private String[] importNames, staticNames;
-    private File[] files;
-    private HashMap<File, TextChain> fileChains = new HashMap<>();
+    private final HashMap<String, Translation> staticGivers = new HashMap<>();
+    private final HashMap<String, Translation> staticSearchers = new HashMap<>();
 
-    // old version
-    private HashMap<String, String> oldTranslationHashMap;
+    private File[] files;
+    private final HashMap<File, TextChain> fileChains = new HashMap<>();
 
 
     public Converter(File[] djavaFiles) {
@@ -152,6 +152,7 @@ public class Converter {
             return;
 
         // TODO all pointless? see x.djava implicit example -> need all package translations
+        //      -> not all pointless, see static import resolving below
 
         // collect all tokens that are top-level package names
         String[] packages = rootTranslation.getPackageTranslations().keySet().toArray(new String[0]);
@@ -205,6 +206,13 @@ public class Converter {
         // load all other files because of implicit access to other types (see above and x.djava HashMap)
         packageTranslationFiles.forEach((s, b) -> {
             if (!b) loadPackageTranslationFile(s, rootTranslation);
+        });
+
+        // copy static translations to extending classes
+        staticSearchers.forEach((s, tr) -> {
+            if (staticGivers.containsKey(s)) {
+                tr.getStaticTranslations().putAll(staticGivers.get(s).getStaticTranslations());
+            }
         });
 
         // collect all "import static" statements
@@ -283,16 +291,24 @@ public class Converter {
     private void readPackageTranslationFile(BufferedReader br, Translation staticContextTranslation) throws IOException {
         String line;
         Translation lastTranslation = null;
+        Map<String, Translation> newStaticGivers = new HashMap<>();
 
         // Read lines & Return if context goes up a layer
         while ((line = br.readLine()) != null) {
-            line = line.replaceAll(" ", "");
+            line = line.replaceAll("\\s", "");
             if (line.isEmpty()) continue;
             if (line.startsWith("#")) continue;
             if (line.startsWith("}")) return;
             if (line.startsWith("{")) {
                 if (lastTranslation == null) throw new NullPointerException();
                 readPackageTranslationFile(br, lastTranslation);
+                continue;
+            }
+            if (line.startsWith(":") || line.startsWith("<")) {  // extends/implements
+                if (lastTranslation == null) throw new NullPointerException();
+                // mark for copying static translations
+                final Translation t = lastTranslation;
+                Arrays.stream(line.substring(1).split(",")).forEach(s -> staticSearchers.put(s, t));
                 continue;
             }
 
@@ -312,17 +328,20 @@ public class Converter {
             } else
                 context = rootTranslation.getStaticTranslations();
 
-            // Add translation if in File
+            // Add translation if in file
             if (line.contains(";")) {
                 String[] splitLine = line.split(";");
                 Translation value = new Translation(splitLine[0]);
 
                 Arrays.stream(splitLine[1].split(",")).forEach(key -> context.put(key, value));
 
+                // save translations for "import" and "static"
                 if (value.getTranslationText().equals("import"))
                     importNames = splitLine[1].split(",");
                 else if (value.getTranslationText().equals("static"))
                     staticNames = splitLine[1].split(",");
+                // save for copying static translations
+                newStaticGivers.put(value.getTranslationText(), value);
 
                 lastTranslation = value;
             } else {
@@ -330,5 +349,10 @@ public class Converter {
                 context.put(line, lastTranslation);
             }
         }
+
+        // add only contexts that have static translation
+        newStaticGivers.entrySet().parallelStream()
+                .filter(e -> !e.getValue().getStaticTranslations().isEmpty())
+                .forEach(e -> staticGivers.put(e.getKey(), e.getValue()));
     }
 }

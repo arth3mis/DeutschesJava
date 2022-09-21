@@ -1,15 +1,19 @@
 # DOKUMENTATION
-# "-"  = -er, -e, -es
-# "--" = -, -er, -e, -es
-# "^"  = a-, A-
-# "+"  = -, -en / -n (wenn -e)
-# Verbotene Kombinationen:
-#  + mit -/--/^
-# Namensräume:
-# "{}" = Umschließung eines Namensraumes, der den darüberliegenden Begriff als "Elternteil" hat
-# "*"  = Verweis auf denselben Sub-Raum wie Begriff, der nach * steht (NOCH NICHT IMPLEMENTIERT)
+# Syntax: "en_begriff; de_1 , de_2"
 # Begriffe ohne ";" sind auf Deutsch und Englisch gleich
 # "_" = Paket
+# ":"  = (in neuer Zeile) extends, statische Übersetzungen müssen von Superklasse kopiert werden
+# "<"  = (in neuer Zeile) implements, statische Übersetzungen müssen von Interface kopiert werden
+# Namensräume:
+# "{}" = Umschließung eines Namensraumes, der den darüberliegenden Begriff als "Elternteil" hat
+# "*"  = (NOCH NICHT IMPLEMENTIERT) Verweis auf denselben Sub-Raum wie Begriff, der nach * steht
+
+# Ideen:
+# Methoden: kurzer Imperativ, wenn es gut klingt (get=gib, set=setz, füll, versicher...), sonst Imperativ (teste...)/Adjektiv (rund...)/Nomen (copy=kopie)
+# add=plus, as=als, is=ist, has=hat
+# code=zahl, wenn es passt, sonst Kodierung? oder ?
+#
+# Interfaces: -bare (z.B. Wiederholbare)
 
 # [JDK-install-path]\lib\src.zip\java.base   da sind alle packages in 1:1 ordnerstruktur mit dateien drin
 
@@ -130,20 +134,6 @@ valueOf;        wertVon
 # Häufig/generell auftretende Begriffe
 #
 
-# Object-Methoden
-equals;         gleich
-hashCode;       haschZahl
-notify;         benachrichtige
-notifyAll;      benachrichtigeAlle
-toString;       zuStrippe
-wait;           warte
-
-# Klassen-Instanz
-getClass;       gibKlasse
-{
-    getName;                gibName
-    getResourceAsStream;    gibRessourceAlsStrom
-}
 #.class
 #    *getClass
 #    # (= erhält denselben Namensraum wie vorheriger Begriff)

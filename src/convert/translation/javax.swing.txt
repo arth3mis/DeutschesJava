@@ -1,11 +1,17 @@
 # Übersetzung für das "javax.swing" Programmpaket
 
-JFrame;JRahmen
-    DO_NOTHING_ON_CLOSE;NICHTS_TUN_BEI_SCHLIESSEN
-    HIDE_ON_CLOSE;VERSTECKEN_BEI_SCHLIESSEN
-    DISPOSE_ON_CLOSE;LOSWERDEN_BEI_SCHLIESSEN
-    EXIT_ON_CLOSE;BEENDEN_BEI_SCHLIESSEN
+JFrame;                         JRahmen
+    < WindowConstants, Accessible, RootPaneContainer, HasGetTransferHandler
+{
+    setDefaultCloseOperation;       setzStandardSchließVerfahren
+    setSize;                        setzGröße
+    setVisible;                     setzSichtbar
+}
 
-    setDefaultCloseOperation;setzeStandardSchließVerfahren
-    setSize;setzeGröße
-    setVisible;setzeSichtbar
+WindowConstants;                FensterKonstanten
+{
+    $DISPOSE_ON_CLOSE;               LOSWERDEN_BEI_SCHLIESSEN
+    $DO_NOTHING_ON_CLOSE;            NICHTS_TUN_BEI_SCHLIESSEN
+    $EXIT_ON_CLOSE;                  BEENDEN_BEI_SCHLIESSEN
+    $HIDE_ON_CLOSE;                  VERSTECKEN_BEI_SCHLIESSEN
+}

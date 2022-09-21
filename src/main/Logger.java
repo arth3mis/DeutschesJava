@@ -6,8 +6,7 @@ import java.util.Scanner;
 
 import main.Main.Flag;
 
-import static main.Main.EXTENSION_NAME;
-import static main.Main.LANGUAGE_NAME;
+import static main.Main.*;
 
 public class Logger {
 
@@ -55,10 +54,14 @@ public class Logger {
                 "",
                 "Verwendung: java -jar %s.jar [Optionen...] %s_Hauptdatei [%s_Dateien...] [%s Argumente...]"            .formatted(LANGUAGE_NAME, LANGUAGE_NAME, LANGUAGE_NAME, fFlag(Flag.ARGS, "|")),
                 "            java -jar %s.jar %s"                                                                       .formatted(LANGUAGE_NAME, fFlag(Flag.SETTINGS, "|")),
+                "            java -jar %s.jar %s [?]Suchbegriff"                                                        .formatted(LANGUAGE_NAME, fFlag(Flag.SEARCH_TRANSLATION, "|")),
                 "           (%s.jar kann auch anders heißen)"                                                           .formatted(LANGUAGE_NAME),
                 "Die 'Argumente...' werden an das %s-Programm weitergeleitet, wenn es ausgeführt wird."                 .formatted(LANGUAGE_NAME),
-                "Wird '%s' verwendet, sind Einstellungen einsehbar und änderbar."                                       .formatted(fFlag(Flag.SETTINGS, "|")),
                 "Ohne Argumente wird die Hilfe in der Konsole und in einem grafischen Dialog angezeigt.",
+                "",
+                "Alternative Verwendungen:",
+                "    %s   Einstellungen einsehen und ändern"                                                            .formatted(fFlag(Flag.SETTINGS, "  ", true)),
+                "    %s   Suche nach Übersetzung ('?': ignoriere Groß-/Kleinschreibung)"                                .formatted(fFlag(Flag.SEARCH_TRANSLATION, "  ", true)),
                 "",
                 "Die Optionen umfassen Folgendes:",
                 "    %s   Zeigt Hilfe in der Konsole an"                                                                .formatted(fFlag(Flag.HELP, "  ", true)),
@@ -82,9 +85,11 @@ public class Logger {
         };
         String helpText = String.join("\n", helpTextBuild);
 
-        System.out.println(helpText);
+        String title = "%s - Deutsches Java von AJ - V%d (© Arthur Freye && Jannis Müller %d)".formatted(LANGUAGE_NAME, VERSION, YEAR);
+
+        System.out.println(title + "\n" + helpText);
         if (helpDialog)
-            showHelpDialog(helpText);
+            showHelpDialog(helpText, title);
     }
 
     public static String fFlag(Flag f, String sep) {
@@ -102,7 +107,7 @@ public class Logger {
         return ret;
     }
 
-    private static void showHelpDialog(String out) {
+    private static void showHelpDialog(String out, String title) {
         // avoid errors on headless systems
         if (GraphicsEnvironment.isHeadless())
             return;
@@ -111,6 +116,6 @@ public class Logger {
         out = "<html>" + out.replaceAll("\\n", "<br>").replaceAll(" ", "&nbsp;");
         JLabel l = new JLabel(out);
         l.setFont(new Font("Monospaced", Font.BOLD, 12));
-        JOptionPane.showMessageDialog(null, l, "Hilfe", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(null, l, title, JOptionPane.INFORMATION_MESSAGE);
     }
 }

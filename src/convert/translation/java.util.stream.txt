@@ -1,8 +1,20 @@
 # Übersetzung für das "java.util.stream" Paket
 
-Stream;             Strom
+BaseStream;         BasisStrom
 {
-    $Builder;           Bauer                   # ist ein Interface
+    isParallel;         istParallel
+    iterator;           wiederholer
+    onClose;            beimSchließen
+    parallel
+    sequential;         sequenziell
+    spliterator;        wiederteiler
+    unordered;          ungeordnet
+}
+
+Stream;             Strom
+    < BaseStream
+{
+    $Builder;           Bauer                   # interface
     {
         accept;         akzeptier
         add;            plus
@@ -14,7 +26,7 @@ Stream;             Strom
     $generate;          generier
     $iterate;           wiederhol
     $of;                aus
-    $ofNullable;        ausNullbar
+    $ofNullable;        ausNullbaren
 
     allMatch;           allesPasst
     anyMatch;           etwasPasst

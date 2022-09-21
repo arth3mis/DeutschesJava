@@ -1,16 +1,11 @@
 package convert.translation;
 
-import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
+import convert.Converter;
 
-import static java.lang.Math.*;
-import static java.util.stream.Stream.Builder;
+import javax.swing.*;
+import java.io.*;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * path reference class to detect txt files when inside a jar archive.
@@ -18,11 +13,21 @@ import static java.util.stream.Stream.Builder;
  */
 public class TranslationFolder {
 
+    /** searches txt files. <ul><li>args[0]: search term<li>args[1]: ignore case</ul> */
     public static void main(String[] args) {
         // insert search term here
-        String searchTerm = "strippe";
+        String searchTerm = "current";
+
+
+
         boolean ignoreCase = true;
-        String replaceTerm = null;  // todo rewrite txt
+
+        if (args.length >= 2) {
+            searchTerm = args[0];
+            ignoreCase = Boolean.parseBoolean(args[1]);
+        }
+
+        String replaceTerm = null;  // todo implement rewrite txt from 'lines' list
         boolean confirmEachReplace = true;
 
         // confirm replace option
@@ -31,24 +36,55 @@ public class TranslationFolder {
                 System.exit(0);
         }
 
-        Pattern rgx = Pattern.compile("("+searchTerm+")", Pattern.CASE_INSENSITIVE);
+        Pattern rgx = Pattern.compile("("+searchTerm+")", ignoreCase ? Pattern.CASE_INSENSITIVE : 0);
 
         // find all occurences in txt files
         File fo = new File("src/convert/translation");
-        File[] txts = fo.listFiles((dir, name) -> name.endsWith(".txt"));
-        if (txts == null) return;
-        for (File f : txts) {
+        File[] txts = fo.listFiles((dir, name) -> name.endsWith(Converter.TRANSLATION_EXT));
+        BufferedReader[] brs;
+        // in jar?
+        if (txts == null || txts.length == 0) {
+            txts = Arrays.stream(Converter.TRANSLATION_FILES)
+                    .map(s -> s += Converter.TRANSLATION_EXT)
+                    .map(File::new)
+                    .toArray(File[]::new);
+            brs = Arrays.stream(txts)
+                    .map(File::getName)
+                    .map(TranslationFolder.class::getResourceAsStream)
+                    .filter(Objects::nonNull)
+                    .map(InputStreamReader::new)
+                    .map(BufferedReader::new)
+                    .toArray(BufferedReader[]::new);
+        }
+        // in IDE?
+        else {
+                brs = Arrays.stream(txts)
+                        .map(f -> {
+                            try {
+                                return new FileReader(f);
+                            } catch (FileNotFoundException e) {
+                                return null;
+                            }
+                        })
+                        .filter(Objects::nonNull)
+                        .map(BufferedReader::new)
+                        .toArray(BufferedReader[]::new);
+        }
+
+        for (int i = 0; i < brs.length; i++) {
             boolean found = false;
             List<String> lines = new ArrayList<>();
-            try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+            Stack<String> context = new Stack<>();  // todo print all ->name<-{ search_hit; ... }, in english is probably better
+            try {
                 int ln = 0;
                 String s;
-                while ((s = br.readLine()) != null) {
+                while ((s = brs[i].readLine()) != null) {
                     lines.add(s);
                     ln++;
-                    if (rgx.matcher(s).find()) {
+                    if (!s.startsWith("#") && rgx.matcher(s).find()) {
                         if (!found) {
-                            System.out.printf("\n\n%s %s\n\n", f.getName(), "-".repeat(70 - f.getName().length()));
+                            String file = txts[i].getName().replace("0_", "");
+                            System.out.printf("\n\n%s %s\n\n", file, "-".repeat(70 - file.length()));
                             found = true;
                         }
                         System.out.printf("Z.%3d: '%s'\n", ln, rgx.matcher(s).replaceAll("[$1]"));

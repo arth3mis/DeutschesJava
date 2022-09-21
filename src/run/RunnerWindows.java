@@ -1,5 +1,6 @@
 package run;
 
+import filesystem.Filer;
 import filesystem.JCmd;
 import main.Logger;
 import main.Main;
@@ -17,7 +18,7 @@ class RunnerWindows extends Runner {
     @Override
     public boolean start() {
         // file does not exist? (mostly happens with -R option)
-        if (!mainClassFile.isFile()) {
+        if (!mainClassFile.isFile() && !Filer.refactorExtension(mainClassFile, "class").isFile()) {
             Logger.error("Rennen abgebrochen, Klassen-Datei existiert nicht");
             return false;
         }
@@ -30,7 +31,7 @@ class RunnerWindows extends Runner {
         String command =
                 "start cmd.exe /c " // original: "start cmd.exe @cmd /k " (the /k is better for debugging, but no idea about @cmd)
                         + "\""
-                        + JCmd.get().formatCommand(runnerCommand)
+                        + JCmd.get().formatCommand(runnerCommand) + " "
                         + String.join(" ", javaCommandArguments().stream().map(JCmd.get()::escape).toList())
                         + "&&echo.".repeat(programEndNewLines)
                         + "&&echo " + Main.OUTPUT_SEP

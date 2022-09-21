@@ -1,5 +1,76 @@
 # Übersetzung für das "java.lang" Paket
 
+AutoClosable;                       AutoSchließbare
+{
+    close;                              schließ
+}
+
+Boolean;                            Boolesch
+    < Serializable, Comparable, Constable
+{
+    $compare;                           vergleich
+    $FALSE;                             NEIN
+    $getBoolean;                        gibBoolesch
+    $hashCode;                          haschZahl
+    $logicalAnd;                        logischesUnd
+    $logicalOr;                         logischesOder
+    $logicalXor;                        logischesXoder
+    $parseBoolean;                      fassBoolesch
+    $toString;                          zuStrippe
+    $TRUE;                              JA
+    $TYPE;                              TYP
+    $valueOf;                           wertVon
+}
+
+Byte;                               Binärfolge
+Character;                          Buchstabe
+
+CharSequence;                       BuchSequenz
+{
+    charAt;                             buchBei
+    length;                             länge
+}
+
+Class;                              Klasse
+{
+    getName;                            gibName
+    getResourceAsStream;                gibRessourceAlsStrom
+    toGenericString;                    zuGenerischerStrippe
+}
+
+Comparable;                         Vergleichbare
+{
+    compareTo;                          vergleichMit
+}
+
+Integer;                            Ganzzahl
+
+Iterable;                           Wiederholbare
+{
+    forEach;                            fürAlle
+    iterator;                           wiederholer
+    spliterator;                        wiederteiler
+}
+
+Object;                             Objekt
+{
+    clone;                              klon
+    equals;                             gleich
+    finalize;                           finalisier
+    getClass;                           gibKlasse
+    hashCode;                           haschZahl
+    notify;                             benachrichtige , melde
+    notifyAll;                          benachrichtigeAlle, meldeAlle
+    toString;                           zuStrippe
+    wait;                               warte
+}
+
+Objects;                            Objekte
+{
+    $equals;                            gleich
+    $hash;                              zahl
+}
+
 Math;                               Mathe
 {
     $acos
@@ -21,14 +92,17 @@ Math;                               Mathe
     $tan
 }
 
-Object;                             Objekt
-    # Methoden: siehe main tr.
+Runnable;                           Rennbare
+{
+    run;                                renn
+}
 
-Boolean;                            Boolesch
-Byte;                               Binärfolge
-Character;                          Buchstabe
-Integer;                            Ganzzahl
 String;                             Strippe
+    < CharSequence, Comparable, Serializable, Constable
+{
+
+}
+
 StringBuilder;                      StrippenBauer
 
 System
@@ -39,15 +113,38 @@ System
         printf;                             druckf
     $in;                                rein
     $currentTimeMillis;                 aktuelleZeitMillis
-    $exit;                              ichmussraus
+    $exit;                              ichmussraus , beende
 }
 
 Thread;                             Faden
+    < Runnable
 {
+    $currentThread;                     aktuellerFaden
+    $MAX_PRIORITY;                      MAX_PRIORITÄT
+    $MIN_PRIORITY;                      MIN_PRIORITÄT
+    $NORM_PRIORITY;                     NORM_PRIORITÄT
     $sleep;                             schlaf
+    $State;                             Status                  # enum
+    {
+        $NEW;                               NEU
+        $RUNNING;                           RENNEND
+        $BLOCKED;                           BLOCKIERT
+        $WAITING;                           WARTEND
+        $TIMED_WAITING;                     ZEIT_WARTEND
+        $TERMINATED;                        BEENDET
+    }
+}
+
+Throwable;                          Werfbar
+{
+    getCause;                           gibGrund
+    getLocalizedMessage;                gibLokalisierteMeldung
+    getMessage;                         gibMeldung
 }
 
 Exception;                          Ausnahme
+    : Throwable
 InterruptedException;               UnterbrocheneAusnahme
+    : Exception
 NullPointerException;               NullZeigerAusnahme
 NumberFormatException;              ZahlFormatAusnahme
