@@ -74,7 +74,7 @@ public class Runner {
             new Thread(() -> {
                 while (p.isAlive()) {
                     try {
-                        if (scanner.hasNext()) {
+                        if (scanner.hasNextLine()) {  // todo test if this works better than hasNext (is better in post-scan scenario (see todo below) but not completely tested)
                             String input = scanner.nextLine() + "\n";
                             p.outputWriter().write(input);
                             p.outputWriter().flush();
@@ -96,7 +96,7 @@ public class Runner {
             System.out.printf("Programm beendet mit Endwert %d\n\n", exitValue);
 
             // user input necessary to kill scanner thread
-            System.out.println("[ENTER] Fertig");
+            System.out.println("[ENTER] Fertig");  // todo if scanner asked a line before, it needs more input than ENTER
             scanner.close();
             try {
                 scanner.nextLine();

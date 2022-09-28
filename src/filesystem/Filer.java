@@ -1,11 +1,17 @@
 package filesystem;
 
+import main.Logger;
 import main.Main;
 import main.OS;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class Filer {
 
@@ -31,13 +37,85 @@ public final class Filer {
         return new File(file.getParentFile(), newName);  // parent == null is handled by constructor
     }
 
-    public static boolean deleteFiles(File[] files) {
+    public static boolean deleteFiles(File @Nullable [] files) {
+        if (files == null) return true;
         boolean allSuccess = true;
         for (File f : files) {
-            if (!f.delete())
-                allSuccess = false;
+            allSuccess &= f.delete();
         }
         return allSuccess;
+    }
+
+    public static boolean deleteInnerClassFiles(File[] files) {
+        boolean allSuccess = true;
+        for (File f : files) {
+            String s = f.getName().substring(0, f.getName().lastIndexOf('.'));
+            File[] subs = f.getParentFile().listFiles((dir, name) ->
+                    name.startsWith(s) && name.endsWith(".class"));
+            if (subs != null)
+                allSuccess &= deleteFiles(subs);
+        }
+        return allSuccess;
+    }
+
+    private static final Map<Character, String> UMLAUTS = Map.of(
+            'ä', "_ae_",
+            'Ä', "_AE_",
+            'ö', "_oe_",
+            'Ö', "_OE_",
+            'ü', "_ue_",
+            'Ü', "_UE_",
+            'ß', "_ss_",
+            'ẞ', "_SS_"
+    );
+
+    public static boolean canJvmEncodeGerman() {
+        CharsetEncoder encoder = Charset.defaultCharset().newEncoder();
+        return UMLAUTS.keySet().stream().allMatch(encoder::canEncode);
+    }
+
+    public static boolean rewriteFiles(File[] files) {
+        boolean b = true;
+        for (File f : files)
+            b &= rewriteFile(f);
+        return b;
+    }
+
+    /**
+     * rewrites file to contain only ASCII characters
+     * @return success
+     */
+    public static boolean rewriteFile(File file) {
+        // read file
+        String content;
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            content = br.lines().collect(Collectors.joining("\n"));
+        } catch (IOException e) {
+            return false;
+        }
+
+        CharsetEncoder encoder = Charset.defaultCharset().newEncoder();
+
+        // no rewrite needed?
+        if (encoder.canEncode(content))
+            return true;
+
+        // replace all found umlaut elements
+        String result = content.chars()
+                .mapToObj(i -> UMLAUTS.containsKey((char)i) ? UMLAUTS.get((char)i) : String.valueOf((char)i))
+                .collect(Collectors.joining());
+
+        // encoding still fails?
+        if (!encoder.canEncode(result))
+            return false;
+
+        // write result to file
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
+            bw.write(result);
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -52,7 +130,16 @@ public final class Filer {
      * Mac: [user.home]/Library/Application Support/LANGUAGE_NAME;
      * Linux: [user.home]/.config/LANGUAGE_NAME;
      */
-    public static File getAppConfigFolder() {
+    public static File getDJavaConfigFolder() {
+        return new File(getAppDataFolder(), Main.LANGUAGE_NAME);
+    }
+
+    /**
+     * Windows: %APPDATA%;
+     * Mac: [user.home]/Library/Application Support;
+     * Linux: [user.home]/.config;
+     */
+    public static File getAppDataFolder() {
         String path = System.getProperty("user.home");
         // empty path? link to user.dir
         if (path == null)
@@ -66,6 +153,6 @@ public final class Filer {
             case MAC -> path += File.separator + "Library" + File.separator + "Application Support";
             case LINUX -> path += File.separator + ".config";
         }
-        return new File(path, Main.LANGUAGE_NAME);
+        return new File(path);
     }
 }

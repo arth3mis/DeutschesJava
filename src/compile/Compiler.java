@@ -1,5 +1,6 @@
 package compile;
 
+import filesystem.Filer;
 import filesystem.JCmd;
 import main.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -7,8 +8,10 @@ import org.jetbrains.annotations.NotNull;
 import javax.tools.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 public record Compiler(String customCompiler) {
 
@@ -31,9 +34,9 @@ public record Compiler(String customCompiler) {
         if (compiler != null) {
             Logger.log("Kompilierung mit System-Kompilierer starten...");
             try {
-                // stuff...
+                // use UTF-8 charset to correctly process [ÄÖÜß]
                 StandardJavaFileManager fileManager =
-                        compiler.getStandardFileManager(null, null, null);
+                        compiler.getStandardFileManager(null, null, StandardCharsets.UTF_8);
                 File pathRef = javaFiles[0].getAbsoluteFile().getParentFile();
                 fileManager.setLocation(StandardLocation.CLASS_OUTPUT, List.of(pathRef));
                 Iterable<? extends JavaFileObject> compilationUnits1 = fileManager.getJavaFileObjects(javaFiles);
@@ -60,9 +63,21 @@ public record Compiler(String customCompiler) {
     private boolean compileWithCommand(String compiler, File @NotNull [] javaFiles) {
         Logger.log("Kompilierung mit %s starten...", compiler);
 
+        // possible encoding problems? -> fixed by passing encoding arg to javac
+//        if (!Filer.canJvmEncodeGerman()) {
+//            // try to rewrite all 'äöüß' characters
+//            if (Filer.rewriteFiles(javaFiles))
+//                Logger.warning("Java-Dateien wurden ASCII-konform überschrieben.");
+//            else
+//                Logger.error("Java-Dateien konnten nicht alle ASCII-konform überschrieben werden.");
+//        }
+
         try {
             ProcessBuilder pb = JCmd.get().createProcessBuilder(
-                    compiler, Arrays.stream(javaFiles).map(File::getPath).toList());
+                    compiler, Stream.concat(
+                            // for systems like windows cmd where UTF-8 is not standard
+                            Stream.of("-encoding", "UTF-8"),
+                            Arrays.stream(javaFiles).map(File::getPath)).toList());
             Process p = pb.start();
 
             // redirect output from process

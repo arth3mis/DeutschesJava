@@ -3,12 +3,13 @@
  * guten tag
  */
 
-zufuhr djava.werkz.*;
-zufuhr djava.werkz.strom.Strom;
+zufuhr djava . werkz. Abtaster;
+zufuhr djava.werkz.HaschKarte;
+zufuhr djava.werkz.Karte;
 zufuhr statisch djava.sprach.Mathe.PI;
 zufuhr statisch djava.sprach.Mathe.rund;
 
-offen klasse x {
+offen klasse x_space_test {
 	offen statisch leer haupt(Strippe[] argumente) {
 		ganz g = 1;
 		kurz k = -1;
@@ -52,7 +53,7 @@ offen klasse x {
 
 	doppel a, b;
 
-	offen x(doppel a, doppel b) {
+	offen x_space_test(doppel a, doppel b) {
 		dies.a = a;
         dies.b = b;
     }

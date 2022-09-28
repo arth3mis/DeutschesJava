@@ -53,7 +53,7 @@ public class Logger {
         String[] helpTextBuild = {
                 "",
                 "Verwendung: java -jar %s.jar [Optionen...] %s_Hauptdatei [%s_Dateien...] [%s Argumente...]"            .formatted(LANGUAGE_NAME, LANGUAGE_NAME, LANGUAGE_NAME, fFlag(Flag.ARGS, "|")),
-                "            java -jar %s.jar %s"                                                                       .formatted(LANGUAGE_NAME, fFlag(Flag.SETTINGS, "|")),
+                "            java -jar %s.jar %s|%s"                                                                    .formatted(LANGUAGE_NAME, fFlag(Flag.SETTINGS, "|"), fFlag(Flag.GENERATE_SYNTAX, "|")),
                 "            java -jar %s.jar %s [?]Suchbegriff"                                                        .formatted(LANGUAGE_NAME, fFlag(Flag.SEARCH_TRANSLATION, "|")),
                 "           (%s.jar kann auch anders heißen)"                                                           .formatted(LANGUAGE_NAME),
                 "Die 'Argumente...' werden an das %s-Programm weitergeleitet, wenn es ausgeführt wird."                 .formatted(LANGUAGE_NAME),
@@ -61,6 +61,7 @@ public class Logger {
                 "",
                 "Alternative Verwendungen:",
                 "    %s   Einstellungen einsehen und ändern"                                                            .formatted(fFlag(Flag.SETTINGS, "  ", true)),
+                "    %s   Generiere Syntax-Hervorhebung und Auto-Vervollständigungen (Sublime Text)"                    .formatted(fFlag(Flag.GENERATE_SYNTAX, "  ", true)),
                 "    %s   Suche nach Übersetzung ('?': ignoriere Groß-/Kleinschreibung)"                                .formatted(fFlag(Flag.SEARCH_TRANSLATION, "  ", true)),
                 "",
                 "Die Optionen umfassen Folgendes:",

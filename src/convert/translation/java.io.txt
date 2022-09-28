@@ -1,0 +1,11 @@
+# Übersetzung für das "java.io" Paket
+
+Reader;                             Leser
+    < Readable, Closeable
+{
+    $nullReader;                        nullLeser
+}
+
+Serializable;                       Serienbare
+{
+}  # ist leer

@@ -3,13 +3,14 @@ package convert;
 import main.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
+import java.util.*;
 
 public class Translation {
 
-    private String translationText;
-    private HashMap<String, Translation> staticTranslations = new HashMap<>();
-    private HashMap<String, Translation> packageTranslations;
+    private final String translationText;
+    public String priorityKey = null;
+    private Map<String, Translation> staticTranslations = new HashMap<>();
+    private Map<String, Translation> packageTranslations;
 
 
     Translation() {
@@ -37,17 +38,68 @@ public class Translation {
         return translationText;
     }
 
-    public @NotNull HashMap<String, Translation> getStaticTranslations() {
+    public @NotNull Map<String, Translation> getStaticTranslations() {
         return staticTranslations;
     }
-    public HashMap<String, Translation> getPackageTranslations() {
+    public Map<String, Translation> getPackageTranslations() {
         return packageTranslations;
     }
 
-    public void setStaticTranslations(@NotNull HashMap<String, Translation> staticTranslations) {
+    public void setStaticTranslations(@NotNull Map<String, Translation> staticTranslations) {
         this.staticTranslations = staticTranslations;
+    }
+    public void setPackageTranslations(@NotNull Map<String, Translation> packageTranslations) {
+        this.packageTranslations = packageTranslations;
     }
     public void initPackageTranslations() {
         packageTranslations = new HashMap<>();
+    }
+
+
+    public static class Reverse {
+        // contains statics and packages
+        public final Map<String, Reverse> translations = new HashMap<>();
+        String text;
+        public final Set<String> extraTexts = new HashSet<>();
+
+        private Reverse(String text) {
+            this.text = text;
+        }
+
+        public String getText() {
+            return text;
+        }
+        public int count() {
+            return 1 + extraTexts.size();
+        }
+
+        static Reverse create(Translation translation, String de) {
+            Reverse rt = new Reverse(de);
+
+            // combine statics and packages
+            Set<Map.Entry<String, Translation>> set = new HashSet<>(translation.getStaticTranslations().entrySet());
+            if (translation.getPackageTranslations() != null)
+                set.addAll(translation.getPackageTranslations().entrySet());
+
+            // loop through every de->en, put as en->de into translations
+            for (var e : set) {
+                Translation en = e.getValue();
+                // known english word & german alternative?
+                if (rt.translations.containsKey(en.getTranslationText())) {
+                    // set as priority (= text)?
+                    if (e.getKey().equals(en.priorityKey)) {
+                        Reverse r = rt.translations.get(en.getTranslationText());
+                        r.extraTexts.add(r.text);
+                        r.text = e.getKey();
+                    } else
+                        rt.translations.get(en.getTranslationText()).extraTexts.add(e.getKey());
+                }
+                // new english word?
+                else {
+                    rt.translations.put(en.getTranslationText(), create(en, e.getKey()));
+                }
+            }
+            return rt;
+        }
     }
 }

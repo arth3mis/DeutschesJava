@@ -1,7 +1,5 @@
 package convert.translation;
 
-import convert.Converter;
-
 import javax.swing.*;
 import java.io.*;
 import java.util.*;
@@ -12,6 +10,21 @@ import java.util.regex.Pattern;
  * Must be located in the same folder as the translation txt files
  */
 public class TranslationFolder {
+
+    public static final String TRANSLATION_EXT = ".txt";
+    public static final String[] TRANSLATION_FILES = {         // TODO always add new txt files!
+            "0_main_translation",
+            "java.io",
+            "java.lang",
+            "java",
+            "java.util.function",
+            "java.util.random",
+            "java.util.stream",
+            "java.util",
+            "javax.swing",
+            "javax",
+    };
+
 
     /** searches txt files. <ul><li>args[0]: search term<li>args[1]: ignore case</ul> */
     public static void main(String[] args) {
@@ -40,12 +53,12 @@ public class TranslationFolder {
 
         // find all occurences in txt files
         File fo = new File("src/convert/translation");
-        File[] txts = fo.listFiles((dir, name) -> name.endsWith(Converter.TRANSLATION_EXT));
+        File[] txts = fo.listFiles((dir, name) -> name.endsWith(TRANSLATION_EXT));
         BufferedReader[] brs;
         // in jar?
         if (txts == null || txts.length == 0) {
-            txts = Arrays.stream(Converter.TRANSLATION_FILES)
-                    .map(s -> s += Converter.TRANSLATION_EXT)
+            txts = Arrays.stream(TRANSLATION_FILES)
+                    .map(s -> s += TRANSLATION_EXT)
                     .map(File::new)
                     .toArray(File[]::new);
             brs = Arrays.stream(txts)

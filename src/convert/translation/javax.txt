@@ -2,7 +2,7 @@
 
 # Sub-Pakete
 _tools;             werkzeuge
-_swing;             schaukel
+_swing;             schwing
 _accessibility;     zugänglichkeit
 _crypto;            krypto
 _imageio;           bildrr          # rr = rein-raus

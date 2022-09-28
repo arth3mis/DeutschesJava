@@ -2,21 +2,22 @@ package main;
 
 import compile.Compiler;
 import convert.Converter;
+import convert.sublime.SublimeFolder;
 import convert.translation.TranslationFolder;
 import filesystem.Filer;
 import run.Runner;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
 public class Main {
 
-    public static final int VERSION = 29;
-    // TODO sublime syntax file generation
+    public static final int VERSION = 30;
+    // todo "search djava for english words and list them" feature (-p --prüfen maybe?)
+    // todo (fun side thing) check for internet connection and ask github/freye.in whether a newer version is available
 
     public static final int YEAR = 2022;
 
@@ -42,6 +43,7 @@ public class Main {
         DELETE_CLASS("l", "löschklassen"),
         ARGS("a", ""),
         SETTINGS("e", ""),
+        GENERATE_SYNTAX("g", ""),
         SEARCH_TRANSLATION("s", "suche"),
         TEST("t", ""),// debug only
         ;
@@ -82,6 +84,8 @@ public class Main {
     public static void main(String[] args) {
         assert Arrays.stream(Flag.values()).mapToInt(f -> f.S.length()).max().orElse(0) == Flag.shortArgLength;
 
+        Logger.debug(Charset.defaultCharset().name());
+
         loadCustomPaths();
 
         short eval = evaluateArgs(args);
@@ -89,7 +93,7 @@ public class Main {
         // display info in verbose mode
         Logger.log("%s", OUTPUT_SEP);
         Logger.log("%s (.%s) Version %d", LANGUAGE_NAME, EXTENSION_NAME, VERSION);
-        Logger.log("Einstellungs-Datei: %s", new File(Filer.getAppConfigFolder(), pathSaveFileName).toString());
+        Logger.log("Einstellungs-Datei: %s", new File(Filer.getDJavaConfigFolder(), pathSaveFileName).toString());
         Logger.log("%s\n", OUTPUT_SEP);
 
         // display help dialog?
@@ -105,6 +109,11 @@ public class Main {
         // search translation?
         else if (eval == 3) {
             TranslationFolder.main(runArgs);
+            return;
+        }
+        // generate syntax file?
+        else if (eval == 4) {
+            SublimeFolder.generateSublime();
             return;
         }
 
@@ -198,7 +207,8 @@ public class Main {
                         Logger.fFlag(Flag.SPECIAL_RUN, "|"));
             } else {
                 Logger.log("Klassen-Dateien löschen...");
-                if (!Filer.deleteFiles(Filer.refactorExtension(classFiles, "class")))
+                if (!Filer.deleteFiles(Filer.refactorExtension(classFiles, "class")) ||
+                        !Filer.deleteInnerClassFiles(Filer.refactorExtension(classFiles, "class")))
                     Logger.warning("Nicht alle Klassen-Dateien konnten gelöscht werden.");
                 else
                     Logger.log("Alle Klassen-Dateien gelöscht.");
@@ -207,7 +217,7 @@ public class Main {
     }
 
     private static void loadCustomPaths() {
-        File saveFile = new File(Filer.getAppConfigFolder(), pathSaveFileName);
+        File saveFile = new File(Filer.getDJavaConfigFolder(), pathSaveFileName);
         if (!saveFile.exists())
             return;
         // extract paths
@@ -225,7 +235,7 @@ public class Main {
     }
 
     private static void saveCustomPaths() {
-        File saveFile = new File(Filer.getAppConfigFolder(), pathSaveFileName);
+        File saveFile = new File(Filer.getDJavaConfigFolder(), pathSaveFileName);
         if (!saveFile.exists()) {
             try {
                 if (!saveFile.getParentFile().mkdirs() && !saveFile.delete() && !saveFile.createNewFile())
@@ -248,7 +258,13 @@ public class Main {
 
     /**
      * @param args program launch arguments
-     * @return 0: standard; 1: help dialog; 2: settings; 3: search translations
+     * @return flag value based on user choice <ul>
+     *      <li> 0: standard
+     *      <li> 1: help dialog
+     *      <li> 2: settings
+     *      <li> 3: search translations
+     *      <li> 4: generate syntax
+     *      </ul>
      */
     private static short evaluateArgs(String[] args) {
         // empty args? help dialog
@@ -307,6 +323,10 @@ public class Main {
             return 3;
         }
 
+        // generate syntax file?
+        if (Flag.GENERATE_SYNTAX.set)
+            return 4;
+
         // warnings for flags/flag combos
         if (Flag.SPECIAL_RUN.set && !OS.isWindows())
             Logger.warning("Die Option '%s' ist für %s nicht verfügbar.",
@@ -348,9 +368,9 @@ public class Main {
         if (Flag.INCLUDE_ALL.set) {
             Logger.log("Suche alle %s-Dateien in Ordner und Unterordnern...", LANGUAGE_NAME);
 
-            try {
+            try (var fw = Files.walk(Filer.getCurrentDir().toPath())) {
                 // walk tree, create file, make absolute (already is, but be certain), exclude directories
-                List<File> includeFiles = Files.walk(Filer.getCurrentDir().toPath())
+                List<File> includeFiles = fw
                         .map(Path::toFile)
                         .map(File::getAbsoluteFile)
                         .filter(File::isFile)
@@ -409,7 +429,7 @@ public class Main {
         enum Choices { k,K, r,R, x,X, wrong }
         String choice = "";
         // print save path once
-        Logger.info("Speicherpfad: %s", new File(Filer.getAppConfigFolder(), pathSaveFileName).getAbsolutePath());
+        Logger.info("Speicherpfad: %s", new File(Filer.getDJavaConfigFolder(), pathSaveFileName).getAbsolutePath());
         // IO loop
         while (!choice.equalsIgnoreCase("x")) {
             choice = Logger.request("""

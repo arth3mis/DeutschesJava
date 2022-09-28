@@ -1,0 +1,32 @@
+# Übersetzung für das "java.util.random" Paket
+
+RandomGenerator;                ZufallsGenerator
+{
+    $getDefault;                    gibStandard
+    $of;                            aus
+
+    # interfaces
+    $StreamableGenerator;           StrombarerGenerator
+        : RandomGenerator
+    {
+        rngs;                           zzgn                    # Zufallszahlengeneratoren
+    }
+    $SplittableGenerator;           SpaltbarerGenerator
+        : StreamableGenerator
+    {
+        split;                          spalt
+    }
+    # ...
+
+    doubles;                        doppelte
+    ints;                           ganze
+    longs;                          lange
+    isDeprecated;                   istVeraltet
+    nextBoolean;                    nächstesBoolesch
+    nextBytes;                      nächsteBifos
+    nextExponential;                nächstesExponentielles
+    nextFloat;                      nächstesFließ
+    nextGaussian;                   nächstesGauss
+    nextInt;                        nächstesGanz
+    nextLong;                       nächstesLang
+}

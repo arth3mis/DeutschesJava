@@ -1,0 +1,6 @@
+<snippet>
+	<content><![CDATA[#output#]]></content>
+	<tabTrigger>#input#</tabTrigger>
+	<description>#desc#</description>
+	<scope>source.djava</scope>
+</snippet>

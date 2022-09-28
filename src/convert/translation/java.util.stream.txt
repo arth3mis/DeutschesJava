@@ -7,14 +7,71 @@ BaseStream;         BasisStrom
     onClose;            beimSchließen
     parallel
     sequential;         sequenziell
-    spliterator;        wiederteiler
+    spliterator;        spalterator
     unordered;          ungeordnet
 }
 
+
+DoubleStream;       DoppelStrom
+    : BaseStream, ++streams, ++streamsExtra
+{
+    mapToInt;           abbAufGanz
+    mapToLong;          abbAufLang
+}
+
+IntStream;          GanzStrom
+    : BaseStream, ++streams, ++streamsExtra
+{
+    $range;             bereich
+    $rangeClosed;       bereichZu
+
+    asDoubleStream;     alsDoppelStrom
+    asLongStream;       alsLangStrom
+    mapToDouble;        abbAufDoppel
+    mapToLong;          abbAufLang
+}
+
+LongStream;         LangStrom
+    : BaseStream, ++streams, ++streamsExtra
+{
+    $range;             bereich
+    $rangeClosed;       bereichZu
+
+    asDoubleStream;     alsDoppelStrom
+    mapToDouble;        abbAufDoppel
+    mapToInt;           abbAufGanz
+}
+
+++streamsExtra
+{
+    average;            durchschnitt
+    boxed;              verpackt
+    mapToObj;           abbAufObj
+    sum;                summe
+}
+
+
 Stream;             Strom
-    < BaseStream
+    : BaseStream, ++streams
+{
+    $ofNullable;        ausNullbaren
+
+    flatMapToInt;       flachAbbAufGanz
+    flatMapToDouble;    flachAbbAufDoppel
+    flatMapToLong;      flachAbbAufLang
+    mapMultiToInt;      abbMultiAufGanz
+    mapMultiToDouble;   abbMultiAufDoppel
+    mapMultiToLong;     abbMultiAufLang
+    mapToInt;           abbAufGanz
+    mapToDouble;        abbAufDoppel
+    mapToLong;          abbAufLang
+    toList;             zuListe
+}
+
+++streams
 {
     $Builder;           Bauer                   # interface
+        : Consumer
     {
         accept;         akzeptier
         add;            plus
@@ -26,7 +83,6 @@ Stream;             Strom
     $generate;          generier
     $iterate;           wiederhol
     $of;                aus
-    $ofNullable;        ausNullbaren
 
     allMatch;           allesPasst
     anyMatch;           etwasPasst
@@ -38,20 +94,11 @@ Stream;             Strom
     findAny;            findeEtwas
     findFirst;          findeErstes
     flatMap;            flachAbb
-    flatMapToInt;       flachAbbAufGanz
-    flatMapToDouble;    flachAbbAufDoppel
-    flatMapToLong;      flachAbbAufLang
     forEach;            fürAlle
     forEachOrdered;     fürAlleGeordnet
     limit
     map;                abb                     # abbilden
     mapMulti;           abbMulti
-    mapMultiToInt;      abbMultiAufGanz
-    mapMultiToDouble;   abbMultiAufDoppel
-    mapMultiToLong;     abbMultiAufLang
-    mapToInt;           abbAufGanz
-    mapToDouble;        abbAufDoppel
-    mapToLong;          abbAufLang
     max
     min
     noneMatch;          nichtsPasst
@@ -61,5 +108,4 @@ Stream;             Strom
     sorted;             sortiert
     takeWhile;          nimmWährend
     toArray;            zuReihe
-    toList;             zuListe
 }

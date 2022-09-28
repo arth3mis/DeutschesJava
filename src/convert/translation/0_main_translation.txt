@@ -1,19 +1,41 @@
 # DOKUMENTATION
-# Syntax: "en_begriff; de_1 , de_2"
+# Syntax: "en_begriff; de_1 , de_2" (de_1 wird priorisiert)
 # Begriffe ohne ";" sind auf Deutsch und Englisch gleich
+# "$" = statische Methode & alle Felder, Sub-Klassen und -Interfaces in einem Interface! TODO
 # "_" = Paket
 # ":"  = (in neuer Zeile) extends, statische Übersetzungen müssen von Superklasse kopiert werden
-# "<"  = (in neuer Zeile) implements, statische Übersetzungen müssen von Interface kopiert werden
+# "<"  = (in neuer Zeile) implements, Variablen/Klassen/Interfaces müssen von Interface kopiert werden.
+#        Weil eine weitere Trennung neben static/package zu aufwändig wäre, kopiere alle statics (wird halt zu viel übersetzt)
 # Namensräume:
 # "{}" = Umschließung eines Namensraumes, der den darüberliegenden Begriff als "Elternteil" hat
 # "*"  = (NOCH NICHT IMPLEMENTIERT) Verweis auf denselben Sub-Raum wie Begriff, der nach * steht
 
 # Ideen:
 # Methoden: kurzer Imperativ, wenn es gut klingt (get=gib, set=setz, füll, versicher...), sonst Imperativ (teste...)/Adjektiv (rund...)/Nomen (copy=kopie)
-# add=plus, as=als, is=ist, has=hat
-# code=zahl, wenn es passt, sonst Kodierung? oder ?
-#
 # Interfaces: -bare (z.B. Wiederholbare)
+
+# <extraCompletions>
+#   ? Syntax: "en=de[, en=de] ? Kommentar"
+#   ? Die ECs werden zu den Sublime-Completions ergänzt, um Übersetzung leichter zu machen.
+#   ? Wenn ein englisches Nomen anders übersetzt wird als das gleich lautende Verb, schreib das (englische!) Nomen groß.
+# add=plus, append=anhäng
+# sqrt=qwrz, random=zufall, round=rund, floor=abrund, ceil=aufrund
+# as=als, is=ist, has=hat, of=aus, of=von
+# code=zahl  ? wenn es passt, sonst Kodierung?
+# seed=saat
+# count=anzahl  ? als Verb zähl?
+# parse=mach  ? fass
+# Handler=händler  ? betreuer
+# cast=guss  ? als Verb gieß?
+# noSuch=keinSoN,keinSoNe
+# outOfBounds=ausDerReihe
+# initialize=eröffnen
+# change=wandel  ? als Verb änder?
+# link=verweis  ? als Verb verbind(e)?
+# accept=gönn  ? schluck/akzeptier?
+# split=spalt
+# </extraCompletions>
+# void=leer !!! KEIN ANDERES (außer statische) keyword darf mit 'leer' übersetzt werden!
 
 # [JDK-install-path]\lib\src.zip\java.base   da sind alle packages in 1:1 ordnerstruktur mit dateien drin
 
@@ -22,18 +44,29 @@
 _java;           djava
 _javax;          djavax
 
+
+# Häufige/Wichtige Begriffe
+#
 main;           haupt
+
+# Array
+length;         länge
+
+# Enum
+values;         werte
+valueOf;        wertVon
 
 
 # Deklarationen
 class;          klasse
-enum;           numm , aufzählung
-interface;      schnittstelle , ganzzahlgesicht , zwischengesicht
+enum;           numm , aufzähl
+interface;      schnittstelle , zwischengesicht         # ganzzahlgesicht
 record;         rekord
 var
 void;           leer
 extends;        erweitert
 implements;     benutzt
+permits;        erlaubt
 import;         zufuhr , einfuhr
 package;        paket , päckchen
 
@@ -58,6 +91,7 @@ break;          brich
 case;           fall
 catch;          fang
 continue;       weiter
+#default=standard (s. Modifikatoren)
 do;             tu
 else;           sonst
 finally;        endlich
@@ -106,35 +140,12 @@ public;         offen , öffentlich
 protected;      geschützt
 private;        privat , privatisiert
 abstract;       abstrakt
-final;          endgültig
+final;          endgültig , letzte , final
 sealed;         versiegelt
 static;         statisch
-# fp=fließpunkt
-strictfp;       strengfp
+strictfp;       strengfp                        # fließpunkt
 default;        standard
 native;         gebürtig
 synchronized;   synchronisiert
 transient;      kurzlebig
 volatile;       sprunghaft
-
-
-
-
-
-# Häufige Begriffe nach Zugriffsoperator
-# v.a. Arrays/Strings
-length;         länge
-# v.a. Enums
-values;         werte
-valueOf;        wertVon
-
-
-
-
-# Häufig/generell auftretende Begriffe
-#
-
-#.class
-#    *getClass
-#    # (= erhält denselben Namensraum wie vorheriger Begriff)
-# !!! feature noch ungenutzt, weil bisher keine $-Methoden betroffen sind

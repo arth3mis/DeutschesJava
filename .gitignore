@@ -8,6 +8,8 @@
 /*.bat
 /*.java
 /*.class
+/djava*.*
+/DJava
 
 /.idea/shelf/**
 

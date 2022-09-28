@@ -1,10 +1,163 @@
 # Übersetzung für das "java.util.function" Paket
 
-Consumer;       Konsument
-Function;       Funktion
-Predicate;      Prädikat
-IntConsumer;    GanzKonsument
-IntFunction;    GanzFunktion
-IntPredicate;   GanzPrädikat
-IntSupplier;    GanzVersorger
-Supplier;       Versorger
+++cons
+{
+    accept;                 gönn , schluck , akzeptier
+}
+
+Consumer;               Konsument
+    = ++cons
+{
+    andThen;                undDann
+}
+IntConsumer;            GanzKonsument
+    = Consumer
+LongConsumer;           LangKonsument
+    = Consumer
+DoubleConsumer;         DoppelKonsument
+    = Consumer
+BiConsumer;             BiKonsument
+    = Consumer
+ObjIntConsumer;         ObjGanzKonsument
+    = ++cons
+ObjLongConsumer;        ObjLangKonsument
+    = ++cons
+ObjDoubleConsumer;      ObjDoubleKonsument
+    = ++cons
+
+
+
+
+
+
+++func
+{
+    apply;                  anwend
+}
+++funcExtra
+{
+    $identity;              identität
+
+    andThen;                undDann
+    compose;                bilde
+}
+++doubleApply
+{
+    applyAsDouble;          anwendAlsDoppel
+}
+++intApply
+{
+    applyAsInt;             anwendAlsGanz
+}
+++longApply
+{
+    applyAsLong;            anwendAlsLang
+}
+
+Function;               Funktion
+    = ++func, ++funcExtra
+IntFunction;            GanzFunktion
+    = ++func
+LongFunction;           LangFunktion
+    = ++func
+DoubleFunction;         DoppelFunktion
+    = ++func
+ToIntFunction;          ZuGanzFunktion
+    = ++intApply
+ToLongFunction;         ZuLangFunktion
+    = ++longApply
+ToDoubleFunction;       ZuDoppelFunktion
+    = ++doubleApply
+
+UnaryOperator;          UnärOperator
+    : Function
+IntUnaryOperator;       GanzUnärOperator
+    = ++intApply, ++funcExtra
+LongUnaryOperator;      LangUnärOperator
+    = ++longApply, ++funcExtra
+DoubleUnaryOperator;    DoppelUnärOperator
+    = ++doubleApply, ++funcExtra
+
+BiFunction;             BiFunktion
+    = ++func
+{
+    andThen;                undDann
+}
+ToIntBiFunction;        ZuGanzBiFunktion
+    = ++intApply
+ToLongBiFunction;       ZuLangBiFunktion
+    = ++longApply
+ToDoubleBiFunction;     ZuDoppelBiFunktion
+    = ++doubleApply
+
+BinaryOperator;         BinärOperator
+    : BiFunction
+{
+    $maxBy;                 maxNach
+    $minBy;                 minNach
+}
+IntBinaryOperator;      GanzBinärOperator
+    = ++intApply
+LongBinaryOperator;     LangBinärOperator
+    = ++longApply
+DoubleBinaryOperator;   DoppelBinärOperator
+    = ++doubleApply
+
+IntToLongFunction;      GanzZuLangFunktion
+    = ++longApply
+IntToDoubleFunction;    GanzZuDoppelFunktion
+    = ++doubleApply
+LongToIntFunction;      LangZuGanzFunktion
+    = ++intApply
+LongToDoubleFunction;   LangZuDoppelFunktion
+    = ++doubleApply
+DoubleToIntFunction;    DoppelZuGanzFunktion
+    = ++intApply
+DoubleToLongFunction;   DoppelZuLangFunktion
+    = ++longApply
+
+
+++pred
+{
+    and;                    und
+    negate;                 negiere , verneine , leugne
+    or;                     oder
+    test;                   teste
+}
+
+Predicate;              Prädikat
+    = ++pred
+{
+    $isEqual;               istGleich
+    $not;                   nicht
+}
+BiPredicate;            BiPrädikat
+    = ++pred
+DoublePredicate;        DoppelPrädikat
+    = ++pred
+IntPredicate;           GanzPrädikat
+    = ++pred
+LongPredicate;          LangPrädikat
+    = ++pred
+
+
+Supplier;               Versorger
+{
+    get;                    gib
+}
+BooleanSupplier;        BooleschVersorger
+{
+    getAsBoolean;           gibAlsBoolesch
+}
+DoubleSupplier;         DoppelVersorger
+{
+    getAsDouble;            gibAlsDoppel
+}
+IntSupplier;            GanzVersorger
+{
+    getAsInt;               gibAlsGanz
+}
+LongSupplier;           LangVersorger
+{
+    getAsLong;              gibAlsLang
+}

@@ -1,0 +1,405 @@
+# Übersetzung für das "java.lang" Paket
+
+Appendable;                         Anhängbare
+{
+    append;                             anhäng
+}
+
+AutoCloseable;                      AutoSchließbare
+{
+    close;                              schließ
+}
+
+Boolean;                            Boolesch
+    < Serializable, Comparable, Constable
+{
+    booleanValue;                       booleschWert
+    $compare;                           vergleich
+    $FALSE;                             NEIN
+    $getBoolean;                        gibBoolesch
+    $hashCode;                          haschZahl
+    $logicalAnd;                        logischesUnd
+    $logicalOr;                         logischesOder
+    $logicalXor;                        logischesXoder
+    $parseBoolean;                      machBoolesch
+    $toString;                          zuStrippe
+    $TRUE;                              JA
+    $TYPE;                              TYP
+    $valueOf;                           wertVon
+}
+
+Byte;                               Binärfolge
+{
+    $TYPE;                              TYP
+    #...
+}
+
+Character;                          Buchstabe
+{
+    $TYPE;                              TYP
+    #...
+}
+
+CharSequence;                       BuchSequenz
+{
+    charAt;                             buchBei
+    length;                             länge
+}
+
+Class;                              Klasse
+    < Serializable, GenericDeclaration, Type, AnnotatedElement, TypeDescriptor.OfField, Constable
+{
+    $forName;                           fürName
+    getName;                            gibName
+    getResource;                        gibRessource
+    getResourceAsStream;                gibRessourceAlsStrom
+    toGenericString;                    zuGenerischerStrippe
+}
+
+ClassLoader;                        KlassenLader
+{
+
+}
+
+ClassValue;                         KlassenWert
+{
+
+}
+
+Cloneable;                          Klonbare
+{
+}   # ist leer
+
+
+Comparable;                         Vergleichbare
+{
+    compareTo;                          vergleichMit
+}
+
+Compiler;                           Kompilierer
+{
+
+}
+
+Double;                             Doppel
+{
+
+}
+
+Enum;                               Numm , Aufzähl
+{
+
+}
+
+Float;                              Fließ
+{
+
+}
+
+InheritableThreadLocal;             ErbbarerFadenLokal
+    : ThreadLocal
+{
+
+}
+
+Integer;                            Ganzzahl
+{
+    $BYTES;                             BIFOS
+    $MAX_VALUE;                         MAX_WERT
+    $MIN_VALUE;                         MIN_WERT
+    $SIZE;                              GRÖSSE
+    $TYPE;                              TYP
+}
+
+Iterable;                           Wiederholbare
+{
+    forEach;                            fürAlle
+    iterator;                           wiederholer
+    spliterator;                        spalterator
+}
+
+Long;                               Lang
+{
+
+}
+
+Math;                               Mathe
+{
+    $abs;                               betr
+    $absExact;                          betrGenau
+    $acos
+    $addExact;                          plusGenau
+    $asin
+    $atan
+    $atan2
+    $cbrt;                              kwrz
+    $ceil;                              aufrund
+    $copySign;                          kopierZeichen
+    $cos
+    $cosh
+    $decrementExact;                    verringerGenau
+    $E
+    $exp
+    $expm1
+    $floor;                             abrund
+    $floorDiv;                          abrundGeteilt
+    $floorMod;                          abrundMod
+    $fma;                               vmp                     # vereinigtes multiplizier-addieren
+    $getExponent;                       gibExponent
+    $hypot
+    $IEEEremainder;                     IEEErest
+    $incrementExact;                    erhöheGenau
+    $log
+    $log10
+    $log1p
+    $max
+    $multiplyExact;                     malGenau
+    $multiplyFull;                      malVoll
+    $multiplyHigh;                      malHoch
+    $negateExact;                       negierGenau
+    $nextAfter;                         nächstesNach
+    $nextDown;                          nächstesRunter
+    $nextUp;                            nächstesHoch
+    $PI
+    $pow;                               hoch
+    $powerOfTwoD;                       zweierPotenzD
+    $powerOfTwoF;                       zweierPotenzF
+    $random;                            zufall
+    $rint;                              ranz
+    $round;                             rund
+    $scalb;                             skalp                   # spaß, aber mir ist nichts besseres eingefallen
+    $signum;                            vorzeichen
+    $sin
+    $sinh
+    $sqrt;                              qwrz
+    $subtractExact;                     minusGenau
+    $tan
+    $tanh
+    $toDegrees;                         zuGrad
+    $toIntExact;                        zuGanzGenau
+    $toRadians;                         zuBogenmaß
+    $ulp;                               els                     # einheit an letzter stelle
+}
+
+Number;                             Nummer
+{
+
+}
+
+Object;                             Objekt
+{
+    clone;                              klon
+    equals;                             gleich
+    finalize;                           finalisier
+    getClass;                           gibKlasse
+    hashCode;                           haschZahl
+    notify;                             benachrichtige , melde
+    notifyAll;                          benachrichtigeAlle , meldeAlle
+    toString;                           zuStrippe
+    wait;                               warte
+}
+
+Objects;                            Objekte
+{
+    $equals;                            gleich
+    $hash;                              hasch
+    #...
+}
+
+Package;                            Paket , Päckchen
+{
+
+}
+
+Process;                            Prozess
+{
+
+}
+
+ProcessBuilder;                     ProzessBauer
+{
+
+}
+
+Readable;                           Lesbare
+{
+
+}
+
+Runnable;                           Rennbare
+{
+    run;                                renn
+}
+
+Runtime;                            Laufzeit
+{
+
+}
+
+RuntimePermission;                  LaufzeitErlaubnis
+{
+
+}
+
+SecurityManager;                    SicherheitsVerwalter
+{
+
+}
+
+Short;                              Kurz
+{
+
+}
+
+StackTraceElement;                  StapelSpurElement
+{
+
+}
+
+StrictMath;                         StrengMathe
+{
+
+}
+
+String;                             Strippe
+    < CharSequence, Comparable, Serializable, Constable
+{
+
+}
+
+StringBuffer;                       StrippenPuffer
+{
+
+}
+
+AbstractStringBuilder;              AbstrakterStrippenBauer
+    < Appendable, CharSequence
+{
+    compareTo;                          vergleichMit
+    # ...
+}
+StringBuilder;                      StrippenBauer , StrippenZieher
+    : AbstractStringBuilder
+    < Serializable, Comparable, CharSequence
+{
+    #... (?)
+}
+
+System
+{
+    $out;                               raus
+        print;                              druck
+        println;                            druckz
+        printf;                             druckf
+    $in;                                rein
+    $currentTimeMillis;                 aktuelleZeitMillis
+    $exit;                              ichmussraus , beende
+}
+
+Thread;                             Faden
+    < Runnable
+{
+    $currentThread;                     aktuellerFaden
+    $MAX_PRIORITY;                      MAX_PRIORITÄT
+    $MIN_PRIORITY;                      MIN_PRIORITÄT
+    $NORM_PRIORITY;                     NORM_PRIORITÄT
+    $sleep;                             schlaf
+    $State;                             Status                  # enum
+    {
+        $NEW;                               NEU
+        $RUNNING;                           RENNEND
+        $BLOCKED;                           BLOCKIERT
+        $WAITING;                           WARTEND
+        $TIMED_WAITING;                     ZEIT_WARTEND
+        $TERMINATED;                        BEENDET
+    }
+    $UncaughtExceptionHandler;          UngefangeneAusnahmeHändler      # interfacew
+    {
+        uncaughtException;                  UngefangeneAusnahme
+    }
+}
+
+ThreadGroup;                        FadenGruppe
+{
+
+}
+
+ThreadLocal;                        FadenLokal
+{
+
+}
+
+Throwable;                          Werfbar
+{
+    getCause;                           gibGrund
+    getLocalizedMessage;                gibLokalisierteMeldung
+    getMessage;                         gibMeldung
+}
+
+Void;                               Leer
+{
+    $TYPE;                              TYP
+}
+
+# Ausnahmen
+ArithmeticException;                RechnenAusnahme
+ArrayIndexOutOfBoundsException;     ReihenIndexAusDerReiheAusnahme
+ArrayStoreException;                ReihenSpeicherAusnahme
+ClassCastException;                 KlassenGussAusnahme
+ClassNotFoundException;             KlasseNichtGefundenAusnahme
+CloneNotSupportedException;         KlonenNichtUnterstütztAusnahme
+EnumConstantNotPresentException;    NummKonstanteNichtPräsentAusnahme
+Exception;                          Ausnahme
+    : Throwable
+IllegalAccessException;             IllegalerZugriffAusnahme
+IllegalArgumentException;           IllegalesArgumentAusnahme
+IllegalMonitorStateException;       IllegalerMonitorStatusAusnahme
+IllegalStateException;              IllegalerStatusAusnahme
+IllegalThreadStateException;        IllegalerFadenStatusAusnahme
+IndexOutOfBoundsException;          IndexAusDerReiheAusnahme
+InstantiationException;             InstanziierungsAusnahme
+InterruptedException;               UnterbrochenAusnahme
+NegativeArraySizeException;         NegativeReihenGrößeAusnahme
+NoSuchFieldException;               KeinSoNFeldAusnahme
+NoSuchMethodException;              KeineSoNeMethodeAusnahme
+NullPointerException;               NullZeigerAusnahme
+NumberFormatException;              ZahlFormatAusnahme
+ReflectiveOperationException;       ReflektiveOperationAusnahme
+RuntimeException;                   LaufzeitAusnahme
+SecurityException;                  SicherheitsAusnahme
+StringIndexOutOfBoundsException;    StrippenIndexAusDerReiheAusnahme
+TypeNotPresentException;            TypNichtPräsentAusnahme
+UnsupportedOperationException;      UngestützteOperationAusnahme
+
+# Fehler
+AbstractMethodError;                AbstrakteMethodeFehler
+AssertionError;                     VersicherungsFehler
+BootstrapMethodError;               UrladerMethodeFehler
+ClassCircularityError;              KlassenKreiselFehler
+ClassFormatError;                   KlassenFormatFehler
+Error;                              Fehler
+    : Throwable
+ExceptionInInitializerError;        AusnahmeInEröffnungFehler
+IllegalAccessError;                 IllegalerZugriffFehler
+IncompatibleClassChangeError;       InkompatiblerKlassenWandelFehler
+InstantiationError;                 InstanziierungsFehler
+InternalError;                      InternerFehler
+LinkageError;                       VerlinkungsFehler
+NoClassDefFoundError;               KeineKlassenDefGefundenFehler
+NoSuchFieldError;                   KeinSoNFeldFehler
+NoSuchMethodError;                  KeineSoNeMethodeFehler
+OutOfMemoryError;                   VollerSpeicherFehler
+StackOverflowError;                 StapelÜberlaufFehler
+ThreadDeath;                        FadenTod
+UnknownError;                       UnbekannterFehler
+UnsatisfiedLinkError;               UnsatterVerweisFehler
+UnsupportedClassVersionError;       UngestützteKlassenVersionFehler
+VerifyError;                        VerifizierFehler
+VirtualMachineError;                VirtuelleMaschineFehler
+
+# Anmerkungen (@interface)
+Deprecated;                         Veraltet
+FunctionalInterface;                FunktionaleSchnittstelle
+Override;                           Überschreib
+SafeVarargs;                        SichereVarargumente
+SuppressWarnings;                   UnterdrückWarnungen
