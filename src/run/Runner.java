@@ -41,10 +41,11 @@ public class Runner {
     }
 
     /**
-     * @return -classpath (path) (main_class) [args]
+     * @return -Dfile.encoding=UTF-8 -classpath (path) (main_class) [args]
      */
     protected List<String> javaCommandArguments() {
         List<String> c = new ArrayList<>();
+        c.add("-Dfile.encoding=UTF-8");
         c.add("-classpath");
         c.add(mainClassFile.getParent() == null ? "." : mainClassFile.getParent());
         c.add(mainClassFile.getName());

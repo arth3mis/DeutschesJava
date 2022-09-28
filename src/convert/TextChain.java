@@ -81,26 +81,8 @@ public class TextChain {
         return subChain;
     }
 
-    public boolean isTranslatable() {
-        for (char c : Generator.SPLITTERS) {
-            if (germanWord.equals(String.valueOf(c)))
-                return false;
-        }
-        for (char c : Generator.SUB_OPENER) {
-            if (germanWord.equals(String.valueOf(c)))
-                return false;
-        }
-        for (char c : Generator.SUB_CLOSER) {
-            if (germanWord.equals(String.valueOf(c)))
-                return false;
-        }
-        if (germanWord.equals("\n"))
-            return false;
-        return true;
-    }
-
     public boolean isWhitespace() {
-        return germanWord.replaceAll("\\s+", "").isEmpty();
+        return germanWord.replaceAll("\\s", "").isEmpty();
     }
 
     public boolean isAccessOrMethodRef() {

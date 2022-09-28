@@ -73,6 +73,8 @@ public class Converter {
         Logger.log("Umwandlung abgeschlossen.");
     }
 
+    private void pass() {}
+
     private void translateToJavaFile(TextChain tc) {
         // go through every chain link
         Stack<TextChain> parent = new Stack<>();
@@ -80,7 +82,9 @@ public class Converter {
         boolean searchStatic = false, searchPackage = false;
 
         while (tc != null) {
-            if (tc.isAccessOrMethodRef()) {
+            if (tc.isWhitespace()) {
+                pass();
+            } else if (tc.isAccessOrMethodRef()) {
                 searchStatic = true;
             } else if (tc.translation == null) {
                 // check package translations
@@ -115,7 +119,8 @@ public class Converter {
                         lastWord = t;
                     }
                 }
-            } else {  // translation exists
+                searchStatic = false;
+            } else {  // translation already exists (should not be the case since package crawl was deprecated)
                 lastWord = tc.translation;
             }
             if (tc.subChain != null) {

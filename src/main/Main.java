@@ -53,7 +53,11 @@ public class Main {
 
         public static final int shortArgLength = 1;
         public static final int longArgMaxLength =
-                Arrays.stream(Flag.values()).map(f -> f.L).max(Comparator.comparingInt(String::length)).get().length();
+                Arrays.stream(Flag.values())
+                        .map(f -> f.L)
+                        .max(Comparator.comparingInt(String::length))
+                        .orElseThrow()
+                        .length();
 
         public final String S;
         public final String L;

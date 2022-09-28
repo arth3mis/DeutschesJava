@@ -9,7 +9,7 @@ zufuhr djava.werkz.Karte;
 zufuhr statisch djava.sprach.Mathe.PI;
 zufuhr statisch djava.sprach.Mathe.rund;
 
-offen klasse x_space_test {
+offen klasse x {
 	offen statisch leer haupt(Strippe[] argumente) {
 		ganz g = 1;
 		kurz k = -1;
@@ -30,7 +30,7 @@ offen klasse x_space_test {
 
 		endgültig ganz J = djavax.schwing.JRahmen.BEENDEN_BEI_SCHLIESSEN;
 
-		Strom.leer();  // darf nicht zu void werden!
+		djava.werkz.strom.Strom.leer();  // darf nicht zu void werden!
 
 		Karte<Ganzzahl, Strippe> m = neu HaschKarte<>(Karte.aus(69, "[Gruß aus der HaschKarte!]"));
 		// enthält implizit Kollektion und Strom, wofür Übersetzungen gebraucht werden
@@ -53,7 +53,7 @@ offen klasse x_space_test {
 
 	doppel a, b;
 
-	offen x_space_test(doppel a, doppel b) {
+	offen x(doppel a, doppel b) {
 		dies.a = a;
         dies.b = b;
     }
