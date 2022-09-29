@@ -245,7 +245,7 @@ public class Converter {
                 .toMap(s -> s, s -> Collections.frequency(conflicts, s)));
 
         while (staticSearchers.values().stream().anyMatch(Objects::nonNull)) {
-            for (Map.Entry<String, List<Translation>> e : staticSearchers.entrySet()) {
+            for (var e : staticSearchers.entrySet()) {
                 // skip if giver is also still a searcher (or value has been processed)
                 if (blocked.get(e.getKey()) != null || e.getValue() == null)
                     continue;
@@ -253,6 +253,7 @@ public class Converter {
                 if (staticGivers.containsKey(e.getKey())) {
                     e.getValue().forEach(tr -> {
                         var st = staticGivers.get(e.getKey()).getStaticTranslations();
+                        // note: containing itself is possible, see inner interfaces (like RandomGenerator.StreamableGenerator.StreamableGenerator.StreamableGenerator)
                         if (!st.isEmpty()) {
                             tr.getStaticTranslations().putAll(st);
                             // add to staticGivers for 2nd degree inheritance

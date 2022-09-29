@@ -1,7 +1,7 @@
 # DOKUMENTATION
 # Syntax: "en_begriff; de_1 , de_2" (de_1 wird priorisiert)
 # Begriffe ohne ";" sind auf Deutsch und Englisch gleich
-# "$" = statische Methode & alle Felder, Sub-Klassen und -Interfaces in einem Interface! TODO
+# "$" = statische Methode & alle Felder, Sub-Klassen und -Interfaces in einem Interface! TODO ergänzen
 # "_" = Paket
 # ":"  = (in neuer Zeile) extends, statische Übersetzungen müssen von Superklasse kopiert werden
 # "<"  = (in neuer Zeile) implements, Variablen/Klassen/Interfaces müssen von Interface kopiert werden.

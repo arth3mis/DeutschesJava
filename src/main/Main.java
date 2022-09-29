@@ -220,6 +220,11 @@ public class Main {
         }
     }
 
+    private static void checkForNewVersion() {
+        // todo make save file "versionen.txt" w/ last save time (+suppress option asked when new version is found), check after 1 day
+        //  if suppress chosen, inform how to undo (delete versionen.txt)
+    }
+
     private static void loadCustomPaths() {
         File saveFile = new File(Filer.getDJavaConfigFolder(), pathSaveFileName);
         if (!saveFile.exists())

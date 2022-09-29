@@ -3,6 +3,7 @@ package convert.translation;
 import javax.swing.*;
 import java.io.*;
 import java.util.*;
+import java.util.random.RandomGenerator;
 import java.util.regex.Pattern;
 
 /**
@@ -31,7 +32,8 @@ public class TranslationFolder {
         // insert search term here
         String searchTerm = "current";
 
-
+        RandomGenerator.StreamableGenerator.StreamableGenerator.StreamableGenerator.StreamableGenerator sg;
+        Random.StreamableGenerator a;
 
         boolean ignoreCase = true;
 

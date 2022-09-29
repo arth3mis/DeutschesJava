@@ -100,8 +100,8 @@ ${3:[[void]]} ${4:methode}($5) ${1:[[throws]] $2 }{
         if (b) {
             Logger.info("\nErfolgreich erstellt.");
             if (warnIfSuccess) {
-                Logger.warning("Der Sublime Nutzer-Pakete Ordner konnte nicht gefunden werden.");
-                Logger.warning("Bitte suche, wo sich die Ordner 'Sublime Text/Packages/User' befinden, und verschiebe den %s-Ordner dort hinein.", Main.LANGUAGE_NAME);
+                Logger.warning("\nWarnung: Der Sublime Nutzer-Pakete Ordner konnte nicht gefunden werden.");
+                Logger.warning("Bitte suche, wo sich die Ordner '.../Sublime Text/Packages/User' befinden, und verschiebe den Ordner '%s' dort hinein.", Main.LANGUAGE_NAME);
             }
         } else
             Logger.error("Fehler: Dateien für Sublime Text konnten nicht alle generiert werden.");

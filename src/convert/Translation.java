@@ -62,6 +62,9 @@ public class Translation {
         String text;
         public final Set<String> extraTexts = new HashSet<>();
 
+        // used to search if Reverse object for a translation has already been created
+        private static final Map<Translation, Reverse> dictionary = new HashMap<>();
+
         private Reverse(String text) {
             this.text = text;
         }
@@ -74,7 +77,12 @@ public class Translation {
         }
 
         static Reverse create(Translation translation, String de) {
+            // check previous reversions
+            if (dictionary.containsKey(translation))
+                return dictionary.get(translation);
+            // create new and save for later
             Reverse rt = new Reverse(de);
+            dictionary.put(translation, rt);
 
             // combine statics and packages
             Set<Map.Entry<String, Translation>> set = new HashSet<>(translation.getStaticTranslations().entrySet());
