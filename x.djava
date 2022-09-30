@@ -4,6 +4,7 @@
  */
 
 zufuhr djava.werkz.*;
+zufuhr djava.werkz.funktion.*;
 zufuhr djava.werkz.strom.Strom;
 zufuhr djava.werkz.zufall.ZufallsGenerator;
 zufuhr statisch djava.sprach.Mathe.PI;
@@ -27,6 +28,8 @@ offen klasse x {
         ZufallsGenerator.StrombarerGenerator.StrombarerGenerator.StrombarerGenerator.StrombarerGenerator sg;
 
 		endgültig ganz J = djavax.schwing.JRahmen.BEENDEN_BEI_SCHLIESSEN;
+
+		Konsument<Strippe> ks = System.raus::druckz;
 
 		Strom.leer();  // darf nicht zu void werden!
 

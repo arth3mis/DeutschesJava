@@ -30,6 +30,7 @@ class JCmdWindows extends JCmd {
             if (commands.get(i).contains(" ")) {
                 // save command and change to variable name
                 pb.environment().put(envVarPrefix + i, commands.get(i));
+//                Logger.debug("'%s' -> '%s'", commands.get(i), formatEnvVar(envVarPrefix + i));
                 commands.set(i, formatEnvVar(envVarPrefix + i));
                 n++;
             }

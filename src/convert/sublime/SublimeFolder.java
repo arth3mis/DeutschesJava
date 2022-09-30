@@ -47,6 +47,7 @@ public class SublimeFolder {
     private static final String[][] SNIPPET_FILES = {
             {"print", "[[^print]]", "[[System.out.print]]($1);", "[[print]]"},
             {"println", "dz", "[[System.out.println]]($1);", "[[println]]"},
+            {"println-ref", "dzr", "[[System.out::println]]", "[[println]] Referenz"},
             {"main-class", "hk", """
 [[public]] [[class]] $1 {
 \t[[public]] [[static]] [[void]] [[main]]([[String]][] argumente) {
@@ -65,7 +66,6 @@ ${3:[[void]]} ${4:methode}($5) ${1:[[throws]] $2 }{
                     "[[public]] [[static]] [[final]] $0", "[[public]] [[static]] [[final]]"},
             {"public-static-final-string", "[[^public]][[^static]][[^final]][[^String]]",
                     "[[public]] [[static]] [[final]] [[String]] $0", "[[public]] [[static]] [[final]] [[String]]"},
-            // todo ddz -> sout($TM_CURRENT_LINE);
     };
 
     private static final int SUBLIME_HIGHEST_NUM_VERSION = 3;

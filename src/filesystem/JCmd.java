@@ -8,9 +8,11 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class JCmd {
 
@@ -111,27 +113,30 @@ public class JCmd {
 
     /**
      * @param s input
-     * @return s with replaced environment variable, based on OS
+     * @return s with replaced environment variables, based on OS
      */
     public String replaceEnvVars(String s) {
         // https://stackoverflow.com/questions/4752817/expand-environment-variables-in-text
         Map<String, String> envMap = System.getenv();
         String pattern = null;
         switch (OS.getOS()) {
-            case WINDOWS -> pattern = "%([A-Za-z0-9_]+)%";
-            case LINUX, MAC -> pattern = "\\$([A-Za-z0-9_]+)|\\$\\{([A-Za-z0-9_]+)}";
+            case WINDOWS -> pattern = "%(\\w+)%";
+            case LINUX, MAC -> pattern = "\\$(\\w+)|\\$\\{(\\w+)}";
         }
         if (pattern != null) {
-            Pattern expr = Pattern.compile(pattern);
-            Matcher matcher = expr.matcher(s);
-            while (matcher.find()) {
-                String envValue = envMap.get(matcher.group(1));
+            Matcher m = Pattern.compile(pattern).matcher(s);
+            while (m.find()) {
+                // check environment for key (ignoring case)
+                String envValue = envMap.entrySet().stream()
+                        .filter(e -> e.getKey().equalsIgnoreCase(m.group(1)))
+                        .map(Map.Entry::getValue)
+                        .findFirst().orElse(null);
+                // reset to variable if not found
                 if (envValue == null) {
-                    envValue = "";
-                } else {
-                    envValue = envValue.replace("\\", "\\\\");
+                    envValue = escape(m.group());
                 }
-                Pattern subExpr = Pattern.compile(Pattern.quote(matcher.group(0)));
+                envValue = envValue.replace("\\", "\\\\");
+                Pattern subExpr = Pattern.compile(Pattern.quote(m.group(0)));
                 s = subExpr.matcher(s).replaceAll(envValue);
             }
         }
