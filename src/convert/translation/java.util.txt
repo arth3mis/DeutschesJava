@@ -1,8 +1,14 @@
 # Übersetzung für das "java.util" Paket
 
 # Sub-Pakete
+_concurrent;                gleichzeitig
 _function;                  funktion
+_jar;                       djar
+_random;                    zufall
+_regex;                     regaus
+_spi;                       dls                 # Dienstleister-Schnittstelle
 _stream;                    strom
+_zip
 
 Arrays;                     Reihen
 {

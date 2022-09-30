@@ -32,8 +32,7 @@ public class TranslationFolder {
         // insert search term here
         String searchTerm = "current";
 
-        RandomGenerator.StreamableGenerator.StreamableGenerator.StreamableGenerator.StreamableGenerator sg;
-        Random.StreamableGenerator a;
+
 
         boolean ignoreCase = true;
 

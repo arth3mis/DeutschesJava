@@ -65,8 +65,11 @@ ${3:[[void]]} ${4:methode}($5) ${1:[[throws]] $2 }{
                     "[[public]] [[static]] [[final]] $0", "[[public]] [[static]] [[final]]"},
             {"public-static-final-string", "[[^public]][[^static]][[^final]][[^String]]",
                     "[[public]] [[static]] [[final]] [[String]] $0", "[[public]] [[static]] [[final]] [[String]]"},
+            // todo ddz -> sout($TM_CURRENT_LINE);
     };
 
+    private static final int SUBLIME_HIGHEST_NUM_VERSION = 3;
+    private static final int SUBLIME_LOWEST_NUM_VERSION = 2;
     private static final String[] SUBLIME_PATH = {
             "Sublime Text",
             "Packages",
@@ -101,7 +104,7 @@ ${3:[[void]]} ${4:methode}($5) ${1:[[throws]] $2 }{
             Logger.info("\nErfolgreich erstellt.");
             if (warnIfSuccess) {
                 Logger.warning("\nWarnung: Der Sublime Nutzer-Pakete Ordner konnte nicht gefunden werden.");
-                Logger.warning("Bitte suche, wo sich die Ordner '.../Sublime Text/Packages/User' befinden, und verschiebe den Ordner '%s' dort hinein.", Main.LANGUAGE_NAME);
+                Logger.warning("Bitte suche, wo sich der Ordner '.../Sublime Text[ 3]/Packages/User' befindet, und verschiebe den Ordner '%s' dort hinein.", Main.LANGUAGE_NAME);
             }
         } else
             Logger.error("Fehler: Dateien für Sublime Text konnten nicht alle generiert werden.");
@@ -243,10 +246,19 @@ ${3:[[void]]} ${4:methode}($5) ${1:[[throws]] $2 }{
 
     private static File getSublimeUserFolder() {
         File dataFolder = Filer.getAppDataFolder();
-        for (String s : SUBLIME_PATH) {
-            dataFolder = new File(dataFolder, s);
-            if (!dataFolder.isDirectory())
+        for (int i = 0; i < SUBLIME_PATH.length; i++) {
+            dataFolder = new File(dataFolder, SUBLIME_PATH[i]);
+            if (!dataFolder.isDirectory()) {
+                // check for "Sublime Text [n]"
+                if (i == 0) {
+                    for (int v = SUBLIME_HIGHEST_NUM_VERSION; v >= SUBLIME_LOWEST_NUM_VERSION; v--) {
+                        dataFolder = new File(dataFolder.getParentFile(), SUBLIME_PATH[0] + " " + v);
+                        if (dataFolder.isDirectory()) break;
+                    }
+                    if (dataFolder.isDirectory()) continue;
+                }
                 return null;
+            }
         }
         return dataFolder;
     }

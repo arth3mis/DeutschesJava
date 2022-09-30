@@ -5,6 +5,7 @@
 
 zufuhr djava.werkz.*;
 zufuhr djava.werkz.strom.Strom;
+zufuhr djava.werkz.zufall.ZufallsGenerator;
 zufuhr statisch djava.sprach.Mathe.PI;
 zufuhr statisch djava.sprach.Mathe.rund;
 
@@ -23,9 +24,7 @@ offen klasse x {
 		instanz.rennen(99);
 		instanz.länge();
 
-        // wird vom umwandler als ""|"|\n|    abc"|""|; erkannt
-		Strippe s = """
-		        abc""";
+        ZufallsGenerator.StrombarerGenerator.StrombarerGenerator.StrombarerGenerator.StrombarerGenerator sg;
 
 		endgültig ganz J = djavax.schwing.JRahmen.BEENDEN_BEI_SCHLIESSEN;
 

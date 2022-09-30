@@ -8,18 +8,25 @@ import filesystem.Filer;
 import run.Runner;
 
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Main {
 
-    public static final int VERSION = 30;
+    public static final int VERSION = 31;
     // todo "search djava for english words and list them" feature (-p --prüfen maybe?)
     // todo (fun side thing) check for internet connection and ask github/freye.in whether a newer version is available
 
     public static final int YEAR = 2022;
+    public static final String linkGitHub = "https://github.com/arth3mis/DeutschesJava";
+    public static final String thisFileOnGitHub = "https://github.com/arth3mis/DeutschesJava/blob/master/src/main/Main.java";
 
     public static final String LANGUAGE_NAME = "DJava";
     public static final String EXTENSION_NAME = "djava";
@@ -74,10 +81,15 @@ public class Main {
     public static boolean mainFileIntact = true;
     private static String customCompiler = "";
     private static String customRunner = "";
+    public static boolean disableCheckVersions = false;
+    public static long lastVersionCheckTime = 0;
 
     public static final String pathSaveFileName = "pfade.txt";
     public static final String compilerSave = "K=";
     public static final String runnerSave = "R=";
+    public static final String versionsSaveFileName = "versionen.txt";
+    public static final String disableCheckSave = "X=";
+    public static final String lastTimeSave = "T=";
 
     private static File[] djavaFiles;
     private static String[] runArgs;
@@ -92,12 +104,14 @@ public class Main {
 
         loadCustomPaths();
 
+        checkForNewVersion();
+
         short eval = evaluateArgs(args);
 
         // display info in verbose mode
         Logger.log("%s", OUTPUT_SEP);
         Logger.log("%s (.%s) Version %d", LANGUAGE_NAME, EXTENSION_NAME, VERSION);
-        Logger.log("Einstellungs-Datei: %s", new File(Filer.getDJavaConfigFolder(), pathSaveFileName).toString());
+        Logger.log("Einstellungs-Ordner: %s", Filer.getDJavaConfigFolder());
         Logger.log("%s\n", OUTPUT_SEP);
 
         // display help dialog?
@@ -221,47 +235,133 @@ public class Main {
     }
 
     private static void checkForNewVersion() {
-        // todo make save file "versionen.txt" w/ last save time (+suppress option asked when new version is found), check after 1 day
-        //  if suppress chosen, inform how to undo (delete versionen.txt)
+        // 24h=86_400_000; 6h=21_600_000;
+        final long CHECK_INTERVAL_MS = 21_600_000;
+        long currentCheck = System.currentTimeMillis();
+
+        // check after passed time interval
+        if (currentCheck - lastVersionCheckTime > CHECK_INTERVAL_MS) {
+            // save check time
+            lastVersionCheckTime = currentCheck;
+            saveCustomPaths();
+
+            // suppressed checks?
+            if (disableCheckVersions) {
+                Logger.info("Zum Aktivieren der automatischen Aktualisierungs-Prüfungen: nutze Option '%s'\n", Logger.fFlag(Flag.SETTINGS, "|"));
+                return;
+            }
+
+            // try to reach GitHub
+            try {
+                URL url = new URL(thisFileOnGitHub);
+
+                // get page content
+                HttpURLConnection huc = (HttpURLConnection) url.openConnection();
+                HttpURLConnection.setFollowRedirects(false);
+                huc.setConnectTimeout(500);
+                huc.setRequestMethod("GET");
+                huc.connect();
+
+                BufferedReader br = new BufferedReader(new InputStreamReader(huc.getInputStream()));
+                String result = br.lines().collect(Collectors.joining("\n"));
+
+                Pattern target = Pattern.compile("VERSION.+>(\\d+)<.+;");
+                Matcher m = target.matcher(result);
+                if (m.find()) {
+                    int newestVersion = Integer.parseInt(m.group(1));
+
+                    if (newestVersion > VERSION) {
+                        Logger.info("Eine neue Version (%d) des Programms ist verfügbar!", newestVersion);
+                        Logger.info("Hier herunterladen: %s", linkGitHub);
+                        Logger.info("Zum Deaktivieren dieser Nachricht: nutze Option '%s'", Logger.fFlag(Flag.SETTINGS, "|"));
+                        Logger.info("%s\n", OUTPUT_SEP);
+                    }
+                }
+
+                // alt 1
+//                Scanner sc = new Scanner(url.openStream());
+//                StringBuilder sb = new StringBuilder();
+//                while (sc.hasNext()) {
+//                    sb.append(sc.next());
+//                }
+//                String result = sb.toString();
+
+                // alt 2
+//                URLConnection conn = url.openConnection();
+//                InputStream in = conn.getInputStream();
+//                String encoding = conn.getContentEncoding();  // ** WRONG: should use "con.getContentType()" instead but it returns something like "text/html; charset=UTF-8" so this value must be parsed to extract the actual encoding
+//                encoding = encoding == null ? "UTF-8" : encoding;
+//                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                byte[] buf = new byte[8192];
+//                int len = 0;
+//                while ((len = in.read(buf)) != -1) {
+//                    baos.write(buf, 0, len);
+//                }
+//                String body = baos.toString(encoding);
+            } catch (IOException | NumberFormatException ignored) {
+            }
+        }
     }
 
     private static void loadCustomPaths() {
-        File saveFile = new File(Filer.getDJavaConfigFolder(), pathSaveFileName);
-        if (!saveFile.exists())
-            return;
-        // extract paths
-        try {
-            String content = Files.readString(saveFile.toPath());
-            int index;
-            if ((index = content.indexOf(compilerSave)) >= 0)
-                customCompiler = content.substring(index + compilerSave.length(), content.indexOf("\n", index))
-                        .replace("\"", "");
-            if ((index = content.indexOf(runnerSave)) >= 0)
-                customRunner = content.substring(index + runnerSave.length(), content.indexOf("\n", index))
-                        .replace("\"", "");
-        } catch (IOException ignored) {
+        File saveFolder = Filer.getDJavaConfigFolder();
+
+        File saveFile = new File(saveFolder, pathSaveFileName);
+        if (saveFile.exists()) {
+            // extract paths
+            try {
+                String content = Files.readString(saveFile.toPath());
+                int index;
+                if ((index = content.indexOf(compilerSave)) >= 0)
+                    customCompiler = content.substring(index + compilerSave.length(), content.indexOf("\n", index))
+                            .replace("\"", "");
+                if ((index = content.indexOf(runnerSave)) >= 0)
+                    customRunner = content.substring(index + runnerSave.length(), content.indexOf("\n", index))
+                            .replace("\"", "");
+            } catch (IOException ignored) {
+            }
+        }
+
+        saveFile = new File(saveFolder, versionsSaveFileName);
+        if (saveFile.exists()) {
+            // extract paths
+            try {
+                String content = Files.readString(saveFile.toPath());
+                int index;
+                if ((index = content.indexOf(disableCheckSave)) >= 0)
+                    disableCheckVersions = Boolean.parseBoolean(content.substring(index + disableCheckSave.length(), content.indexOf("\n", index)));
+                if ((index = content.indexOf(lastTimeSave)) >= 0)
+                    lastVersionCheckTime = Long.parseLong(content.substring(index + lastTimeSave.length(), content.indexOf("\n", index)));
+            } catch (IOException ignored) {
+            }
         }
     }
 
     private static void saveCustomPaths() {
-        File saveFile = new File(Filer.getDJavaConfigFolder(), pathSaveFileName);
-        if (!saveFile.exists()) {
+        File saveFolder = Filer.getDJavaConfigFolder();
+        if (!saveFolder.isDirectory() && !saveFolder.mkdirs()) {
+            Logger.error("Einstellungs-Ordner kann nicht erstellt werden.");
+            return;
+        }
+
+        Map<File, String> filesAndContents = Map.of(
+                new File(saveFolder, pathSaveFileName),
+                compilerSave + "\"" + customCompiler + "\"\n" + runnerSave + "\"" + customRunner + "\"\n",
+
+                new File(saveFolder, versionsSaveFileName),
+                disableCheckSave + disableCheckVersions + "\n" + lastTimeSave + lastVersionCheckTime + "\n"
+        );
+
+        for (var fc : filesAndContents.entrySet()) {
             try {
-                if (!saveFile.getParentFile().mkdirs() && !saveFile.delete() && !saveFile.createNewFile())
-                    throw new IOException("Datei/Elternordner konnten nicht gelöscht/neu erstellt werden.");
+                if (fc.getKey().isFile() && !fc.getKey().delete() || !fc.getKey().createNewFile())
+                    throw new IOException("Datei konnte nicht neu erstellt werden.");
+                FileWriter w = new FileWriter(fc.getKey());
+                w.write(fc.getValue());
+                w.close();
             } catch (IOException e) {
                 Logger.error("Einstellungen können nicht gespeichert werden: %s", e.getMessage());
             }
-        }
-        // save paths
-        String content =
-                compilerSave + "\"" + customCompiler + "\"\n" +
-                runnerSave + "\"" + customRunner + "\"\n";
-        try {
-            FileWriter w = new FileWriter(saveFile);
-            w.write(content);
-            w.close();
-        } catch (IOException ignored) {
         }
     }
 
@@ -435,10 +535,10 @@ public class Main {
     }
 
     private static void startSettings() {
-        enum Choices { k,K, r,R, x,X, wrong }
+        enum Choices { k,K, r,R, v,V, x,X, wrong }
         String choice = "";
         // print save path once
-        Logger.info("Speicherpfad: %s", new File(Filer.getDJavaConfigFolder(), pathSaveFileName).getAbsolutePath());
+        Logger.info("Speicherpfad: %s", Filer.getDJavaConfigFolder().getAbsolutePath());
         // IO loop
         while (!choice.equalsIgnoreCase("x")) {
             choice = Logger.request("""
@@ -447,11 +547,14 @@ public class Main {
                     -- Einstellungen --
                     [k] Kompilierer-Befehl (javac) setzen (aktuell: %s)
                     [r] Renner-Befehl (java) setzen (aktuell: %s)
+                    [v] Regelmäßiges Überprüfen auf neuere Version: %s
                     [x] Beenden
                     
                     Auswahl""",
                     customCompiler.isEmpty() ? "-" : customCompiler,
-                    customRunner.isEmpty() ? "-" : customRunner);
+                    customRunner.isEmpty() ? "-" : customRunner,
+                    disableCheckVersions ? "Nein" : "Ja"
+            );
             Choices ch;
             try {
                 ch = Choices.valueOf(choice);
@@ -461,6 +564,10 @@ public class Main {
             switch (ch) {
                 case k, K -> setCommand(0, "Kompilierer");
                 case r, R -> setCommand(1, "Renner");
+                case v, V -> {
+                    disableCheckVersions = !disableCheckVersions;
+                    saveCustomPaths();
+                }
                 case x, X -> Logger.log("Einstellungen beendet.");
                 default -> Logger.error("Falsche Eingabe!");
             }
