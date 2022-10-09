@@ -13,29 +13,29 @@
 # Ideen:
 # Methoden: kurzer Imperativ, wenn es gut klingt (get=gib, set=setz, füll, versicher...), sonst Imperativ (teste...)/Adjektiv (rund...)/Nomen (copy=kopie)
 # Interfaces: -bare (z.B. Wiederholbare)
+# void=leer !!! KEIN ANDERES (außer statische) keyword darf mit 'leer' übersetzt werden!
 
 # <extraCompletions>
 #   ? Syntax: "en=de[, en=de] ? Kommentar"
 #   ? Die ECs werden zu den Sublime-Completions ergänzt, um Übersetzung leichter zu machen.
-#   ? Wenn ein englisches Nomen anders übersetzt wird als das gleich lautende Verb, schreib das (englische!) Nomen groß.
-# add=plus, append=anhäng
-# sqrt=qwrz, random=zufall, round=rund, floor=abrund, ceil=aufrund
 # as=als, is=ist, has=hat, of=aus, of=von
-# code=zahl  ? wenn es passt, sonst Kodierung?
-# seed=saat
-# count=anzahl  ? als Verb zähl?
-# parse=mach  ? fass
-# Handler=händler  ? betreuer
-# cast=guss  ? als Verb gieß?
-# noSuch=keinSoN,keinSoNe
-# outOfBounds=ausDerReihe
-# initialize=eröffnen
-# change=wandel  ? als Verb änder?
-# link=verweis  ? als Verb verbind(e)?
+# sqrt=qwrz, random=zufall, round=rund, floor=abrund, ceil=aufrund
 # accept=gönn  ? schluck/akzeptier?
+# add=plus, append=anhäng
+# cast=guss  ? als Verb gieß?
+# change=wandel  ? als Verb änder?
+# code=zahl  ? wenn es passt, sonst Kodierung?
+# count=anzahl  ? als Verb zähl?
+# handler=händler  ? betreuer
+# init=eröffne, initialize=eröffne, Initializer=Eröffner
+# Link=verweis  ? als Verb verbind(e)?
+# KoSuch=KeinSoN,KeinSoNe
+# OutOfBounds=AusDerReihe
+# parse=mach  ? fass
+# seed=saat
 # split=spalt
+# StackTrace=StapelSpur
 # </extraCompletions>
-# void=leer !!! KEIN ANDERES (außer statische) keyword darf mit 'leer' übersetzt werden!
 
 # [JDK-install-path]\lib\src.zip\java.base   da sind alle packages in 1:1 ordnerstruktur mit dateien drin
 

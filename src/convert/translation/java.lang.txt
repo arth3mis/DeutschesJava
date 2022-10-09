@@ -1,5 +1,12 @@
 # Übersetzung für das "java.lang" Paket
 
+AbstractStringBuilder;              AbstrakterStrippenBauer
+    < Appendable, CharSequence
+{
+    compareTo;                          vergleichMit
+    # ...
+}
+
 Appendable;                         Anhängbare
 {
     append;                             anhäng
@@ -78,7 +85,11 @@ Comparable;                         Vergleichbare
 
 Compiler;                           Kompilierer
 {
-
+    compileClass                        kompilierKlasse
+    compileClasses                      kompilierKlassen
+    command                             kommando
+    enable                              anschalt
+    disable                             abschalt
 }
 
 Double;                             Doppel
@@ -272,12 +283,6 @@ StringBuffer;                       StrippenPuffer
 
 }
 
-AbstractStringBuilder;              AbstrakterStrippenBauer
-    < Appendable, CharSequence
-{
-    compareTo;                          vergleichMit
-    # ...
-}
 StringBuilder;                      StrippenBauer , StrippenZieher
     : AbstractStringBuilder
     < Serializable, Comparable, CharSequence
@@ -329,11 +334,18 @@ ThreadLocal;                        FadenLokal
 
 }
 
-Throwable;                          Werfbar
+Throwable;                          Werfbare
 {
+    addSuppressed;                      plusUnterdrückte
+    fillInStackTrace;                   füllStapelSpur
     getCause;                           gibGrund
     getLocalizedMessage;                gibLokalisierteMeldung
     getMessage;                         gibMeldung
+    getStackTrace;                      gibStapelSpur
+    getSuppressed;                      gibUnterdrückte
+    initCause;                          eröffneGrund
+    printStackTrace;                    druckStapelSpur
+    setStackTrace;                      setzStapelSpur
 }
 
 Void;                               Leer
@@ -341,7 +353,7 @@ Void;                               Leer
     $TYPE;                              TYP
 }
 
-# Ausnahmen
+# Ausnahmen (alle erweitern indirekt Throwable, welches keine statics hat)
 ArithmeticException;                RechnenAusnahme
 ArrayIndexOutOfBoundsException;     ReihenIndexAusDerReiheAusnahme
 ArrayStoreException;                ReihenSpeicherAusnahme
@@ -371,7 +383,7 @@ StringIndexOutOfBoundsException;    StrippenIndexAusDerReiheAusnahme
 TypeNotPresentException;            TypNichtPräsentAusnahme
 UnsupportedOperationException;      UngestützteOperationAusnahme
 
-# Fehler
+# Fehler (alle erweitern indirekt Throwable, welches keine statics hat)
 AbstractMethodError;                AbstrakteMethodeFehler
 AssertionError;                     VersicherungsFehler
 BootstrapMethodError;               UrladerMethodeFehler
@@ -379,7 +391,7 @@ ClassCircularityError;              KlassenKreiselFehler
 ClassFormatError;                   KlassenFormatFehler
 Error;                              Fehler
     : Throwable
-ExceptionInInitializerError;        AusnahmeInEröffnungFehler
+ExceptionInInitializerError;        AusnahmeInEröffnerFehler
 IllegalAccessError;                 IllegalerZugriffFehler
 IncompatibleClassChangeError;       InkompatiblerKlassenWandelFehler
 InstantiationError;                 InstanziierungsFehler
@@ -399,7 +411,14 @@ VirtualMachineError;                VirtuelleMaschineFehler
 
 # Anmerkungen (@interface)
 Deprecated;                         Veraltet
+{
+    since;                              seit
+    forRemoval;                         zuEntfernen
+}
 FunctionalInterface;                FunktionaleSchnittstelle
 Override;                           Überschreib
 SafeVarargs;                        SichereVarargumente
 SuppressWarnings;                   UnterdrückWarnungen
+{
+    value;                              wert
+}

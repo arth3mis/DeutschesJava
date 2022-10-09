@@ -22,7 +22,6 @@ public class Main {
 
     public static final int VERSION = 31;
     // todo "search djava for english words and list them" feature (-p --prüfen maybe?)
-    // todo (fun side thing) check for internet connection and ask github/freye.in whether a newer version is available
 
     public static final int YEAR = 2022;
     public static final String linkGitHub = "https://github.com/arth3mis/DeutschesJava";
