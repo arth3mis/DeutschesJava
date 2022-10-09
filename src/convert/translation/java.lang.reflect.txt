@@ -1,0 +1,26 @@
+# Übersetzung für das "java.lang.reflect" Paket
+
+Array;                          Reihe
+{
+    get;                            gib
+    getBoolean                      gibBoolesch
+    getByte                         gibBifo
+    getChar                         gibBuch
+    getDouble                       gibDoppel
+    getFloat                        gibFließ
+    getInt                          gibGanz
+    getLength                       gibLänge
+    getLong                         gibLang
+    getShort                        gibKurz
+    set                             setz
+    setBoolean                      setzBoolesch
+    setByte                         setzBifo
+    setChar                         setzBuch
+    setDouble                       setzDoppel
+    setFloat                        setzFließ
+    setInt                          setzGanz
+    setLong                         setzLang
+    setShort                        setzKurz
+    newInstance;                    neuInstanz
+    set;                            setz
+}

@@ -145,7 +145,7 @@ Math;                               Mathe
     $atan2
     $cbrt;                              kwrz
     $ceil;                              aufrund
-    $copySign;                          kopierZeichen
+    $copySign;                          kopierVZ
     $cos
     $cosh
     $decrementExact;                    verringerGenau

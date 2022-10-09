@@ -29,12 +29,14 @@
 # handler=händler  ? betreuer
 # init=eröffne, initialize=eröffne, Initializer=Eröffner
 # Link=verweis  ? als Verb verbind(e)?
-# KoSuch=KeinSoN,KeinSoNe
+# NoSuch=KeinSoN,KeinSoNe
 # OutOfBounds=AusDerReihe
 # parse=mach  ? fass
 # seed=saat
 # split=spalt
+# Sign=VZ
 # StackTrace=StapelSpur
+# Unsigned=OhneVZ
 # </extraCompletions>
 
 # [JDK-install-path]\lib\src.zip\java.base   da sind alle packages in 1:1 ordnerstruktur mit dateien drin

@@ -2,6 +2,7 @@ package convert.translation;
 
 import javax.swing.*;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.random.RandomGenerator;
 import java.util.regex.Pattern;
@@ -16,6 +17,7 @@ public class TranslationFolder {
     public static final String[] TRANSLATION_FILES = {         // TODO always add new txt files!
             "0_main_translation",
             "java.io",
+            "java.lang.reflect",
             "java.lang",
             "java",
             "java.util.function",

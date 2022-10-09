@@ -14,12 +14,24 @@ Arrays;                     Reihen
 {
     $asList;                    alsListe
     $binarySearch;              binärSuche
+    $compare;                   vergleich
+    $compareUnsigned;           vergleichOhneVZ
     $copyOf;                    kopieVon
+    $copyOfRange;               kopieVonBereich
+    $deepEquals;                tiefGleich
+    $deepHashCode;              tiefHaschZahl
+    $deepToString;              tiefZuStrippe
     $equals;                    gleich
+    $fill;                      füll
+    $hashCode;                  haschZahl
+    $mismatch;                  unterschied
     $parallelPräfix;            parallelPräfix
     $parallelSort;              parallelSortieren
+    $setAll;                    setzAlle
     $sort;                      sortier
+    $spliterator;               spalterator
     $stream;                    strom
+    $toString;                  zuStrippe
 }
 
 Collection;                 Kollektion

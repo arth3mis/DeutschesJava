@@ -47,7 +47,9 @@ public class SublimeFolder {
     private static final String[][] SNIPPET_FILES = {
             {"print", "[[^print]]", "[[System.out.print]]($1);", "[[print]]"},
             {"println", "dz", "[[System.out.println]]($1);", "[[println]]"},
-            {"println-ref", "dzr", "[[System.out::println]]", "[[println]] Referenz"},
+            {"println-array", "dr",
+                    "[[System.out.println]]([[Arrays.toString]]($1));", "[[println]] [[Arrays]]-Inhalte"},
+            {"println-ref", "dzr", "[[System.out::println]]", "[[println]] Methoden-Referenz"},
             {"main-class", "hk", """
 [[public]] [[class]] $1 {
 \t[[public]] [[static]] [[void]] [[main]]([[String]][] argumente) {
@@ -193,7 +195,7 @@ ${3:[[void]]} ${4:methode}($5) ${1:[[throws]] $2 }{
 
             // precede all "$" signs with a "\" (otherwise the matcher replaces them)
             contents[MS.get("output")] = contents[MS.get("output")]
-                    .replaceAll("\\$", "\\\\\\$");  // well, that escapelated quickly
+                    .replaceAll("(?<!\\\\)\\$", "\\\\\\$");  // well, that escapelated quickly
 
             m.reset();
             String result = m.replaceAll(matchResult -> contents[MS.get(matchResult.group(1))]);
